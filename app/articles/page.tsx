@@ -1,57 +1,66 @@
-import React from 'react';
+import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import Image from "next/image";
+import Link from "next/link";
+import React from "react";
 
-const articleData = {
-  "content": `
-    <article class="max-w-4xl mx-auto px-4 py-8 font-serif">
-      <h1 class="text-3xl md:text-4xl font-bold mb-6 pb-4 border-b border-gray-200">Тоё Ито и Музей Архитектуры в Имабари</h1>
-      
-      <div class="text-lg leading-relaxed mb-8">
-        <p class="mb-4"><strong>Тоё Ито</strong> — один из самых влиятельных современных японских архитекторов...</p>
-        <p>Одним из наиболее значимых проектов является <strong>Музей Архитектуры Тоё Ито</strong>...</p>
-      </div>
-      
-      <figure class="my-8">
-        <img src="https://images.unsplash.com/photo-1513584684374-8bab748fbf90" 
-             alt="Музей Архитектуры Тоё Ито" 
-             class="w-full h-auto rounded-lg shadow-lg" />
-        <figcaption class="text-center italic text-gray-600 mt-2">Музей Архитектуры Тоё Ито в Имабари</figcaption>
-      </figure>
-      
-      <section class="my-8">
-        <h2 class="text-2xl font-bold mb-4 pb-2 border-b border-gray-100">Концепция и расположение</h2>
-        <p class="mb-4">Музей, открытый в 2011 году, является <strong>первым в Японии музеем, посвящённым творчеству отдельного архитектора</strong>...</p>
-      </section>
-      
-      <section class="my-8">
-        <h2 class="text-2xl font-bold mb-4 pb-2 border-b border-gray-100">Два здания-близнеца</h2>
-        
-        <div class="my-6">
-          <h3 class="text-xl font-semibold mb-3">1. «Стальная хижина» (Steel Hut)</h3>
-          <div class="flex flex-col md:flex-row gap-6">
-            <figure class="md:w-1/3">
-              <img src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00" 
-                   alt="Стальная хижина" 
-                   class="w-full h-48 object-cover rounded-lg" />
-              <figcaption class="text-sm italic text-gray-500 mt-1">Интерьер Стальной хижины</figcaption>
-            </figure>
-            <div class="md:w-2/3">
-              <p class="mb-3"><strong>Стиль и форма:</strong> Это основное выставочное пространство...</p>
-              <p class="mb-3"><strong>Конструкция:</strong> Оно облицовано матовыми стальными листами...</p>
-            </div>
-          </div>
-        </div>
-      </section>
-    </article>
-  `
-};
-
-const ArticleComponent = () => {
+const Article = () => {
   return (
-    <div 
-      dangerouslySetInnerHTML={{ __html: articleData.content }}
-      className="prose prose-lg max-w-none"
-    />
+    <section className="container mx-auto relative px-4 sm:px-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="lg:col-span-6">
+          <h1 className="text-2xl sm:text-3xl md:text-[40px] font-bold text-left mb-5">
+            Статьи
+          </h1>
+          <Separator className="bg-[#333333] mb-6 md:mb-10" />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+        {[1, 2, 3].map((item) => (
+          <Card key={item} className="overflow-hidden">
+            {/* Изображение - меняется пропорция на мобиле */}
+            <div className="relative aspect-video md:aspect-[2/5] overflow-hidden md:max-h-[320px] w-full">
+              <Image
+                src="https://images.unsplash.com/photo-1523413651479-597eb2da0ad6"
+                alt="card image"
+                fill
+                className="object-cover w-full"
+                sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              />
+
+              {/* Бейдж */}
+              <Badge
+                variant="secondary"
+                className="absolute bottom-3 right-3 text-[16px] px-7"
+              >
+                Личности
+              </Badge>
+            </div>
+
+            {/* Контент карточки */}
+            <div className="p-4 md:p-6">
+              <h2 className="text-lg sm:text-xl md:text-[32px] font-medium leading-tight underline mb-3">
+                Тадао Андо: Геометрия, Свет и Поэзия Бетона
+              </h2>
+
+              <p className="text-sm md:text-[16px] text-[#6D6D6D] leading-relaxed line-clamp-3 md:line-clamp-4">
+                Тадао Андо (род. 1941) — японский архитектор-самоучка, лауреат
+                Притцкеровской премии 1995 года, чье творчество относится к
+                минимализму и критическому регионализму. Андо известен своей
+                почти религиозной работой с бетоном, который в его руках
+                приобретает идеальную, шелковистую гладкость.
+              </p>
+            </div>
+            <Link href={`/articles/${item}`} key={item} className="ml-auto block font-medium text-[18px]">
+              Читать далее
+            </Link>
+          </Card>
+        ))}
+      </div>
+    </section>
   );
 };
 
-export default ArticleComponent;
+export default Article;

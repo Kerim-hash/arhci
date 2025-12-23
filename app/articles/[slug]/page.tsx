@@ -2,7 +2,7 @@ import React from 'react';
 
 const articleData = {
   "content": `
-    <article class="max-w-4xl mx-auto px-4 py-8 font-serif">
+    <article class="max-w-4xl mx-auto px-4 py-8">
       <h1 class="text-3xl md:text-4xl font-bold mb-6 pb-4 border-b border-gray-200">Тоё Ито и Музей Архитектуры в Имабари</h1>
       
       <div class="text-lg leading-relaxed mb-8">
@@ -49,7 +49,6 @@ const ArticleComponent = () => {
   return (
     <div 
       dangerouslySetInnerHTML={{ __html: articleData.content }}
-      className="prose prose-lg max-w-none"
     />
   );
 };

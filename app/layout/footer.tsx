@@ -7,7 +7,7 @@ const Footer = () => {
   return (
     <>
       <Separator className="mt-30 bg-[#333]" />
-      <footer className="container mx-auto relative p-10 ">
+      <footer className="container mx-auto relative p-5 md:p-10 ">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           <div className="lg:col-span-6">
             <p className="text-[20px] mb-10">Logotype</p>
@@ -27,7 +27,7 @@ const Footer = () => {
               <Link href="/architects" className="text-[16px] text-[#6D6D6D]">
                 Архитекторы
               </Link>
-              <Link href="/" className="text-[16px] text-[#6D6D6D]">
+              <Link href="/competitions" className="text-[16px] text-[#6D6D6D]">
                 Конкурсы
               </Link>
             </div>

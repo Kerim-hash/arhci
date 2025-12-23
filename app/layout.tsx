@@ -29,11 +29,11 @@ export default function RootLayout({
   return (
     <html lang="en" className={inter.variable}>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#FBFBFB]`}
       >
         <Header />
 
-        <div className="mt-20 md:mt-27.5 ">{children}</div>
+        <div className="mt-23 md:mt-27.5 ">{children}</div>
         <Footer />
       </body>
     </html>
