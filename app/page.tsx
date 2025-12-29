@@ -38,13 +38,13 @@ export default function Page() {
 
           {/* Карточки статей */}
           <div className="space-y-4 md:space-y-6">
-            {[1, 2, 3].map((item) => (
+            {[1, 2, 3].map((item, index) => (
               <Link href={`/articles/${item}`} key={item}>
                 <Card key={item} className="overflow-hidden">
                   {/* Изображение - меняется пропорция на мобиле */}
                   <div className="relative aspect-video md:aspect-[2/5] overflow-hidden md:max-h-[320px] w-full">
                     <Image
-                      src="https://images.unsplash.com/photo-1523413651479-597eb2da0ad6"
+                      src={`/article-${index}.png`}
                       alt="card image"
                       fill
                       className="object-cover w-full"

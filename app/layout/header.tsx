@@ -19,7 +19,7 @@ const Header: FC = () => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsMenuOpen(false);
   }, [pathname]);
-  
+
   const navLinks = [
     { label: "Главная", link: "" },
     { label: "Статьи", link: "articles" },
@@ -60,8 +60,8 @@ const Header: FC = () => {
   return (
     <header
       className={clsx(
-       'py-4 fixed top-0 left-0 w-full z-50 transition-colors duration-300',
-        isScrolled ? 'bg-white shadow-md' : 'bg-transparent'
+        "py-4 fixed top-0 left-0 w-full z-50 transition-colors duration-300",
+        isScrolled ? "bg-white shadow-md" : "bg-transparent"
       )}
     >
       <div className="mx-auto container grid grid-cols-12 items-center py-4 px-5">
@@ -95,10 +95,22 @@ const Header: FC = () => {
         </div>
 
         {/* SEARCH – 15% (desktop only) */}
-        <div className="hidden lg:flex col-span-2 justify-end">
+        <div className="f hidden lg:flex items-center col-span-2 justify-end">
           <Button variant="ghost" size="icon" aria-label="Search">
             <Search className="h-5 w-5" />
           </Button>
+          <Link
+            href={"/create-acticle"}
+            className="w-8 h-8 rounded-full overflow-hidden ml-4"
+          >
+            <Image
+              src="/article.jpg"
+              alt="article"
+              width={32}
+              height={32}
+              className="rounded-full"
+            />
+          </Link>
         </div>
 
         {/* BURGER – mobile only */}
@@ -134,11 +146,7 @@ const Header: FC = () => {
 
           <nav className="flex flex-col gap-4 mt-6">
             {navLinks.map(({ label, link }) => (
-              <Link
-                key={link}
-                href={`/${link}`}
-                className="text-[#333]"
-              >
+              <Link key={link} href={`/${link}`} className="text-[#333]">
                 {label}
               </Link>
             ))}
