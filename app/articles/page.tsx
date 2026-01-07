@@ -18,12 +18,12 @@ const Article = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-        {[1, 2, 3].map((item) => (
+        {[1, 2, 3].map((item, index) => (
           <Card key={item} className="overflow-hidden">
             {/* Изображение - меняется пропорция на мобиле */}
             <div className="relative aspect-video md:aspect-[2/5] overflow-hidden md:max-h-[320px] w-full">
               <Image
-                src="https://images.unsplash.com/photo-1523413651479-597eb2da0ad6"
+                src={`/article-${index}.png`}
                 alt="card image"
                 fill
                 className="object-cover w-full"
@@ -53,7 +53,11 @@ const Article = () => {
                 приобретает идеальную, шелковистую гладкость.
               </p>
             </div>
-            <Link href={`/articles/${item}`} key={item} className="ml-auto block font-medium text-[18px]">
+            <Link
+              href={`/articles/${item}`}
+              key={item}
+              className="ml-auto block font-medium text-[18px]"
+            >
               Читать далее
             </Link>
           </Card>
