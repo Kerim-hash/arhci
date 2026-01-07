@@ -10,7 +10,16 @@ const Footer = () => {
       <footer className="container mx-auto relative p-5 md:p-10 ">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           <div className="lg:col-span-6">
-            <p className="text-[20px] mb-10">Logotype</p>
+            <p className="text-[20px] mb-10">
+              {" "}
+              <Image
+                src="/logo.svg"
+                width={155}
+                height={23}
+                alt="Logotype"
+                priority
+              />
+            </p>
             <p className="text-[14px] text-[#6D6D6D] max-w-xl">
               Профессиональное сообщество для обмена идеями, поиска партнёров и
               освоения передовых технологий. Здесь вы найдёте инструменты,
@@ -44,7 +53,10 @@ const Footer = () => {
                 />{" "}
                 Facebook
               </Link>
-              <Link href="/architects" className="text-[16px] text-[#6D6D6D] flex gap-2">
+              <Link
+                href="/architects"
+                className="text-[16px] text-[#6D6D6D] flex gap-2"
+              >
                 <Image
                   src="/instagram.svg"
                   width={24}

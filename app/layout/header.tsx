@@ -68,14 +68,13 @@ const Header: FC = () => {
         {/* LOGO – 15% */}
         <div className="col-span-6 lg:col-span-2 flex items-center">
           <Link href="/">
-            {/* <Image
-              src="/logo.png"
+            <Image
+              src="/logo.svg"
               width={155}
               height={23}
               alt="Logotype"
               priority
-            /> */}
-            Logotype
+            />
           </Link>
         </div>
 
