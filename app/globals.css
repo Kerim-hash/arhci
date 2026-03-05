@@ -133,3 +133,376 @@ html {
 .bn-editor {
   background: #fbfbfb !important;
 }
+
+/* styles/WordArticle.module.css */
+.word-article {
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
+    sans-serif;
+  line-height: 1.6;
+  color: #333;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.word-article h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 2rem 0 1rem;
+  line-height: 1.3;
+}
+
+.word-article h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 1.75rem 0 1rem;
+  line-height: 1.3;
+}
+
+.word-article h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 1.5rem 0 0.75rem;
+}
+
+.word-article h4 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 1.25rem 0 0.5rem;
+}
+
+.word-article p {
+  margin: 1rem 0;
+  line-height: 1.7;
+}
+
+.word-article a {
+  color: #2563eb;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.word-article a:hover {
+  color: #1d4ed8;
+}
+
+.word-article ul,
+.word-article ol {
+  margin: 1rem 0;
+  padding-left: 2rem;
+}
+
+.word-article ul {
+  list-style-type: disc;
+}
+
+.word-article ol {
+  list-style-type: decimal;
+}
+
+.word-article li {
+  margin: 0.5rem 0;
+  line-height: 1.6;
+}
+
+.word-article blockquote {
+  border-left: 4px solid #e5e7eb;
+  padding: 0.75rem 0 0.75rem 1.5rem;
+  margin: 1.5rem 0;
+  font-style: italic;
+  color: #4b5563;
+  background-color: #f9fafb;
+  border-radius: 0 0.5rem 0.5rem 0;
+}
+
+.word-article table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  font-size: 0.95rem;
+}
+
+.word-article th {
+  background-color: #f3f4f6;
+  font-weight: 600;
+  padding: 0.75rem;
+  border: 1px solid #e5e7eb;
+  text-align: left;
+}
+
+.word-article td {
+  padding: 0.75rem;
+  border: 1px solid #e5e7eb;
+}
+
+.word-article tr:nth-child(even) {
+  background-color: #f9fafb;
+}
+
+.word-article tr:hover {
+  background-color: #f3f4f6;
+}
+
+.word-article img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 2rem auto;
+  border-radius: 0.5rem;
+}
+
+.word-article figure {
+  margin: 2rem 0;
+  text-align: center;
+}
+
+.word-article figcaption {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: #6b7280;
+  text-align: center;
+}
+
+.word-article pre {
+  background-color: #1f2937;
+  color: #e5e7eb;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  margin: 1.5rem 0;
+  font-family: "Courier New", Courier, monospace;
+  font-size: 0.9rem;
+}
+
+.word-article code {
+  background-color: #f3f4f6;
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.25rem;
+  font-family: "Courier New", Courier, monospace;
+  font-size: 0.9rem;
+  color: #dc2626;
+}
+
+.word-article pre code {
+  background-color: transparent;
+  padding: 0;
+  color: inherit;
+}
+
+.word-article hr {
+  border: none;
+  border-top: 2px solid #e5e7eb;
+  margin: 2rem 0;
+}
+
+.word-article .word-table-container {
+  overflow-x: auto;
+  margin: 1.5rem 0;
+}
+
+/* Стили для специфичных Word классов */
+.word-article .MsoNormal {
+  margin: 0;
+  line-height: 1.6;
+}
+
+.word-article .MsoListParagraph {
+  margin-left: 2rem;
+  text-indent: -0.5rem;
+}
+
+.word-article .MsoHeader {
+  font-size: 0.9rem;
+  color: #6b7280;
+}
+
+.word-article .MsoFooter {
+  font-size: 0.9rem;
+  color: #6b7280;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .word-article {
+    font-size: 0.95rem;
+  }
+
+  .word-article h1 {
+    font-size: 1.5rem;
+  }
+
+  .word-article h2 {
+    font-size: 1.25rem;
+  }
+
+  .word-article h3 {
+    font-size: 1.1rem;
+  }
+
+  .word-article table {
+    font-size: 0.85rem;
+  }
+
+  .word-article td,
+  .word-article th {
+    padding: 0.5rem;
+  }
+}
+
+.western-paragraph {
+  margin-bottom: 1.25rem;
+  text-align: left;
+  line-height: 1.7;
+  font-size: 1rem;
+}
+
+/* Стили для заголовков */
+.western-heading {
+  color: #9f6bdb;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 2.5rem 0 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #e9d5ff;
+}
+
+/* Стили для изображений */
+.word-image {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 2rem auto;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+/* Контейнер для изображений-заглушек */
+.image-placeholder {
+  margin: 2rem 0;
+}
+
+/* Стили для ссылок */
+.word-link {
+  color: #2563eb;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.word-link:hover {
+  color: #1d4ed8;
+}
+
+/* Выделенные блоки */
+.highlight-box {
+  background-color: #f8f5ff;
+  border-left: 4px solid #9f6bdb;
+  padding: 1.25rem 1.5rem;
+  margin: 1.5rem 0;
+  border-radius: 0 12px 12px 0;
+}
+
+.important-block {
+  background: linear-gradient(to right, #f8f5ff, transparent);
+}
+
+/* Контейнер для таблиц */
+.table-container {
+  overflow-x: auto;
+  margin: 1.5rem 0;
+  border-radius: 8px;
+  border: 1px solid #eaeaea;
+}
+
+.table-container table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.table-container th {
+  background-color: #f3f4f6;
+  font-weight: 600;
+  padding: 0.75rem;
+  border: 1px solid #e5e7eb;
+  text-align: left;
+}
+
+.table-container td {
+  padding: 0.75rem;
+  border: 1px solid #e5e7eb;
+}
+
+.table-container tr:nth-child(even) {
+  background-color: #f9fafb;
+}
+
+/* Стили для списков */
+ul,
+ol {
+  margin: 1rem 0;
+  padding-left: 2rem;
+}
+
+li {
+  margin: 0.5rem 0;
+  line-height: 1.6;
+}
+
+/* Стили для цитат */
+blockquote {
+  border-left: 4px solid #e5e7eb;
+  padding: 0.75rem 0 0.75rem 1.5rem;
+  margin: 1.5rem 0;
+  font-style: italic;
+  color: #4b5563;
+  background-color: #f9fafb;
+  border-radius: 0 8px 8px 0;
+}
+
+/* Мета-информация */
+.document-meta {
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 2px solid #eaeaea;
+  font-size: 0.875rem;
+  color: #6b7280;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  body {
+    padding: 1rem;
+  }
+
+  .western-heading {
+    font-size: 1.25rem;
+    margin: 1.5rem 0 0.75rem;
+  }
+
+  .western-paragraph {
+    font-size: 0.95rem;
+  }
+
+  .table-container {
+    font-size: 0.85rem;
+  }
+}
+
+/* Стили для печати */
+@media print {
+  body {
+    padding: 0;
+  }
+
+  .document-meta {
+    display: none;
+  }
+
+  .word-image {
+    box-shadow: none;
+  }
+}

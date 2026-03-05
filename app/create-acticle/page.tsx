@@ -1,5 +1,6 @@
 import Image from "next/image";
 import ClientEditor from "./ClientEditor";
+import CreateArticleForm from "@/components/CreateArticleForm";
 
 export default function Page() {
   return (
@@ -16,7 +17,7 @@ export default function Page() {
         Daniar Asanov
       </div>
 
-      <ClientEditor />
+      <CreateArticleForm />
     </section>
   );
 }
