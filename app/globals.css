@@ -506,3 +506,35 @@ blockquote {
     box-shadow: none;
   }
 }
+
+
+/* app/globals.css */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Для Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #c1c1c1 #f1f1f1;
+}
+
+
+/* Или если хотите определенный цвет, например синий */
+[data-state="active"] img {
+  filter: brightness(0) saturate(100%) invert(95%) sepia(6%) saturate(200%) hue-rotate(0deg) brightness(103%) contrast(90%);
+}

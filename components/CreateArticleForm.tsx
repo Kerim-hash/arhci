@@ -94,15 +94,15 @@ const CreateArticleForm: React.FC = () => {
   };
 
   // Обработка чекбокса
-  const handleCheckboxChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-  ): void => {
-    const { name, checked } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: checked,
-    }));
-  };
+  // const handleCheckboxChange = (
+  //   e: React.ChangeEvent<HTMLInputElement>,
+  // ): void => {
+  //   const { name, checked } = e.target;
+  //   setFormData((prev) => ({
+  //     ...prev,
+  //     [name]: checked,
+  //   }));
+  // };
 
   // Отправка формы
   const handleSubmit = async (
@@ -116,15 +116,15 @@ const CreateArticleForm: React.FC = () => {
       return;
     }
 
-    if (!formData.short_description) {
-      setError("Пожалуйста, введите краткое описание");
-      return;
-    }
+    // if (!formData.short_description) {
+    //   setError("Пожалуйста, введите краткое описание");
+    //   return;
+    // }
 
-    if (!formData.preview_image) {
-      setError("Пожалуйста, загрузите превью изображение");
-      return;
-    }
+    // if (!formData.preview_image) {
+    //   setError("Пожалуйста, загрузите превью изображение");
+    //   return;
+    // }
 
     if (!formData.word_file) {
       setError("Пожалуйста, загрузите Word файл");
@@ -137,8 +137,8 @@ const CreateArticleForm: React.FC = () => {
 
     const submitData = new FormData();
     submitData.append("title", formData.title);
-    submitData.append("preview_image", formData.preview_image);
-    submitData.append("short_description", formData.short_description);
+    // submitData.append("preview_image", formData.preview_image);
+    // submitData.append("short_description", formData.short_description);
     submitData.append("word_file", formData.word_file);
     submitData.append("is_published", String(formData.is_published));
 
@@ -150,7 +150,7 @@ const CreateArticleForm: React.FC = () => {
         {
           headers: {
             "Content-Type": "multipart/form-data",
-            "Accept": "application/json",
+            Accept: "application/json",
           },
         },
       );
@@ -180,11 +180,7 @@ const CreateArticleForm: React.FC = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold mb-6 text-gray-800">
-        Создание новой статьи
-      </h2>
-
+    <div className="max-w-2xl mx-auto">
       {error && (
         <div
           className="mb-4 p-3 bg-red-100 text-red-700 rounded border border-red-200"
@@ -208,9 +204,9 @@ const CreateArticleForm: React.FC = () => {
         <div>
           <label
             htmlFor="title"
-            className="block text-gray-700 font-medium mb-2"
+            className="block text-[#333] font-normal mb-2"
           >
-            Заголовок <span className="text-red-500">*</span>
+            Заголовок статьи
           </label>
           <input
             type="text"
@@ -218,8 +214,8 @@ const CreateArticleForm: React.FC = () => {
             name="title"
             value={formData.title}
             onChange={handleInputChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="Введите заголовок статьи"
+            className="w-full px-4 py-2 border border-gray-300 rounded-[1px]"
+            placeholder="Напишите заголовок статьи"
             required
             aria-required="true"
             disabled={loading}
@@ -227,7 +223,7 @@ const CreateArticleForm: React.FC = () => {
         </div>
 
         {/* Поле Short Description */}
-        <div>
+        {/* <div>
           <label
             htmlFor="short_description"
             className="block text-gray-700 font-medium mb-2"
@@ -240,15 +236,14 @@ const CreateArticleForm: React.FC = () => {
             value={formData.short_description}
             onChange={handleInputChange}
             rows={4}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+           className="w-full px-4 py-2 border border-gray-300 rounded-[1px]"
             placeholder="Введите краткое описание статьи"
             required
             aria-required="true"
             disabled={loading}
           />
-        </div>
-
-        {/* Поле Preview Image */}
+        </div> */}
+{/* 
         <div>
           <label className="block text-gray-700 font-medium mb-2">
             Превью изображение <span className="text-red-500">*</span>
@@ -320,18 +315,14 @@ const CreateArticleForm: React.FC = () => {
               </div>
             )}
           </div>
-        </div>
+        </div> */}
 
         {/* Поле Word File */}
         <div>
-          <label className="block text-gray-700 font-medium mb-2">
-            Word файл <span className="text-red-500">*</span>
-          </label>
-
           <div
             {...getRootPropsDocx()}
             className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors
-              ${isDragActiveDocx ? "border-blue-500 bg-blue-50" : "border-gray-300 hover:border-blue-400"}
+              ${isDragActiveDocx ? "border-[#333] bg-blue-50" : "border-gray-300 hover:border-[#333]"}
               ${formData.word_file ? "bg-green-50 border-green-500" : ""}
               ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
             role="button"
@@ -386,7 +377,7 @@ const CreateArticleForm: React.FC = () => {
                 <p className="text-gray-600">
                   {isDragActiveDocx
                     ? "Перетащите DOCX файл сюда"
-                    : "Перетащите DOCX файл или кликните для выбора"}
+                    : "Перетащите файлы сюда или нажмите, чтобы загрузить"}
                 </p>
                 <p className="text-sm text-gray-400 mt-2">Только DOCX формат</p>
               </div>
@@ -395,7 +386,7 @@ const CreateArticleForm: React.FC = () => {
         </div>
 
         {/* Поле Is Published (чекбокс) */}
-        <div className="flex items-center">
+        {/* <div className="flex items-center">
           <input
             type="checkbox"
             id="is_published"
@@ -411,13 +402,14 @@ const CreateArticleForm: React.FC = () => {
           >
             Опубликовать сразу
           </label>
-        </div>
+        </div> */}
 
         {/* Кнопка отправки */}
         <Button
           type="submit"
           disabled={loading}
-          className="w-full py-3 px-4 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+          variant="outline"
+          className="w-full "
           aria-label="Создать статью"
         >
           {loading ? (

@@ -7,11 +7,17 @@ import { usePathname, useRouter } from "next/navigation";
 import clsx from "clsx";
 import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/use-auth";
+import { toast } from "sonner";
+import { useSelector } from "react-redux";
+import { selectUser } from "../auth/model/authSlice";
 
 const Header: FC = () => {
+  const user = useSelector(selectUser);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const { isAuthenticated } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
 
@@ -23,12 +29,10 @@ const Header: FC = () => {
   const navLinks = [
     { label: "Главная", link: "" },
     { label: "Статьи", link: "articles" },
-    { label: "Архитекторы", link: "architects" },
-    { label: "Бюро", link: "bureaus" },
+    { label: "Специалисты", link: "specialists" },
     { label: "Проекты", link: "projects" },
-    { label: "Конкурсы", link: "competitions" },
+    { label: "Работа", link: "work" },
     { label: "Новости", link: "news" },
-    { label: "Студентам", link: "students" },
   ];
 
   useEffect(() => {
@@ -61,18 +65,19 @@ const Header: FC = () => {
     <header
       className={clsx(
         "py-4 fixed top-0 left-0 w-full z-50 transition-colors duration-300",
-        isScrolled ? "bg-white shadow-md" : "bg-transparent"
+        isScrolled ? "bg-white shadow-md" : "bg-transparent",
       )}
     >
       <div className="mx-auto container grid grid-cols-12 items-center py-4 px-5">
         {/* LOGO – 15% */}
-        <div className="col-span-6 lg:col-span-2 flex items-center">
+        <div className="col-span-6 lg:col-span-2 flex items-center h-[26px]">
           <Link href="/">
             <Image
-              src="/logo.svg"
-              width={155}
-              height={23}
+              src="/logo.png"
+              width={78}
+              height={26}
               alt="Logotype"
+              className="h-[26px]"
               priority
             />
           </Link>
@@ -95,19 +100,43 @@ const Header: FC = () => {
 
         {/* SEARCH – 15% (desktop only) */}
         <div className="f hidden lg:flex items-center col-span-2 justify-end">
-          <Button variant="ghost" size="icon" aria-label="Search">
-            <Search className="h-5 w-5" />
+          <Button
+            variant="ghost"
+            className="w-6 h-6"
+            size="icon"
+            aria-label="Search"
+            asChild
+          >
+            <Image
+              src="/search.svg"
+              alt="article"
+              width={24}
+              height={24}
+              className="rounded-full object-scale-down"
+            />
           </Button>
           <Link
             href={"/create-acticle"}
-            className="w-8 h-8 rounded-full overflow-hidden ml-4"
+            className="w-6 h-6 rounded-full overflow-hidden ml-4"
           >
             <Image
-              src="/article.jpg"
+              src="/pencil.svg"
               alt="article"
-              width={32}
-              height={32}
+              width={24}
+              height={24}
               className="rounded-full"
+            />
+          </Link>
+          <Link
+            href={"/profile"}
+            className="w-12 h-12 flex justify-center items-center rounded-full overflow-hidden ml-4"
+          >
+            <Image
+              src={user?.image || "/user.svg"}
+              alt="article"
+              width={48}
+              height={48}
+              className="rounded-full object-none "
             />
           </Link>
         </div>
@@ -132,7 +161,7 @@ const Header: FC = () => {
         ref={menuRef}
         className={clsx(
           "fixed top-0 right-0 h-screen w-3/4 max-w-xs bg-white shadow-lg z-50 transition-transform",
-          isMenuOpen ? "translate-x-0" : "translate-x-full"
+          isMenuOpen ? "translate-x-0" : "translate-x-full",
         )}
       >
         <div className="flex flex-col h-full p-6">
