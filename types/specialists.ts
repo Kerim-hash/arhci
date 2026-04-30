@@ -6,9 +6,9 @@ export type SpecialistCategory =
   | "visualizers";
 
 export interface Specialist {
-  experience: any;
-  specialization: any;
-  position: string;
+  experience?: any;
+  specialization?: any;
+  position?: string;
   id: number;
   slug: string;
   name: string;

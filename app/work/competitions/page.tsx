@@ -1,9 +1,8 @@
 // app/competitions/page.tsx
 "use client";
 
-import { useEffect, useState } from "react";
-import { useAppDispatch, useAppSelector } from "@/app/store/hooks";
-import { fetchCompetitions } from "@/app/store/features/competitionsSlice";
+import { useState } from "react";
+import { useApiCompetitionsListQuery } from "@/services/generatedApi";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -18,63 +17,25 @@ import {
 } from "@/components/ui/select";
 
 const sortOptions = [
-  { value: "newest", label: "Сначала новые" },
-  { value: "oldest", label: "Сначала старые" },
-  { value: "deadline", label: "Скоро закрытие" },
-  { value: "popular", label: "По популярности" },
-  { value: "prize", label: "По призовому фонду" },
+  { value: "-created_at", label: "Сначала новые" },
+  { value: "created_at", label: "Сначала старые" },
+  { value: "submission_deadline", label: "Скоро закрытие" },
+  { value: "-views", label: "По популярности" },
+  { value: "-participants_count", label: "По призовому фонду" },
 ];
 
 export default function CompetitionsPage() {
-  const dispatch = useAppDispatch();
-  const { competitions, loading } = useAppSelector((state) => state.competitions);
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortBy, setSortBy] = useState("newest");
-  const [showActive, setShowActive] = useState(false);
+  const [sortBy, setSortBy] = useState("-created_at");
+  const [page, setPage] = useState(1);
 
-  useEffect(() => {
-    dispatch(fetchCompetitions());
-  }, [dispatch]);
+  const { data, isLoading } = useApiCompetitionsListQuery({
+    search: searchTerm || undefined,
+    ordering: sortBy,
+    page,
+  });
 
-  const filteredAndSortedCompetitions = () => {
-    let filtered = [...competitions];
-
-    if (searchTerm) {
-      filtered = filtered.filter(
-        (comp) =>
-          comp.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          comp.shortDescription.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-
-    if (showActive) {
-      filtered = filtered.filter((comp) => comp.isActive);
-    }
-
-    switch (sortBy) {
-      case "newest":
-        filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-        break;
-      case "oldest":
-        filtered.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
-        break;
-      case "deadline":
-        filtered.sort((a, b) =>
-          new Date(a.dates.submissionDeadline).getTime() - new Date(b.dates.submissionDeadline).getTime()
-        );
-        break;
-      case "popular":
-        filtered.sort((a, b) => b.views - a.views);
-        break;
-      case "prize":
-        filtered.sort((a, b) => b.participantsCount - a.participantsCount);
-        break;
-    }
-
-    return filtered;
-  };
-
-  const results = filteredAndSortedCompetitions();
+  const results = data?.results || [];
 
   return (
     <section className="container mx-auto relative px-4 sm:px-6 py-8">
@@ -113,25 +74,17 @@ export default function CompetitionsPage() {
               ))}
             </SelectContent>
           </Select>
-
-          <Button
-            variant={showActive ? "default" : "outline"}
-            onClick={() => setShowActive(!showActive)}
-          >
-            <Filter className="w-4 h-4 mr-2" />
-            Активные
-          </Button>
         </div>
       </div>
 
       {/* Результаты */}
       <div className="mb-4">
         <p className="text-sm text-[#666666]">
-          Найдено: {results.length} конкурсов
+          Найдено: {data?.count || 0} конкурсов
         </p>
       </div>
 
-      {loading ? (
+      {isLoading ? (
         <div className="text-center py-12">
           <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent" />
           <p className="text-[#666666] mt-4">Загрузка конкурсов...</p>
@@ -139,7 +92,7 @@ export default function CompetitionsPage() {
       ) : results.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {results.map((competition) => (
-            <CompetitionCard key={competition.id} competition={competition} />
+            <CompetitionCard key={competition.id} competition={competition as any} />
           ))}
         </div>
       ) : (

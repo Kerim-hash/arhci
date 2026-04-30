@@ -1,10 +1,8 @@
-// app/specialists/engineers/page.tsx (App Router)
-// ИЛИ
-// pages/specialists/engineers/index.tsx (Pages Router)
+// app/specialists/engineers/page.tsx
 
 "use client";
 
-import { useAppSelector } from "@/app/store/hooks";
+import { useApiSpecialistsListQuery } from "@/services/generatedApi";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,74 +13,35 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { Search, SlidersHorizontal } from "lucide-react";
 import SpecialistCard from "../components/SpecialistCard";
 
 // Опции сортировки
 const sortOptions = [
-  { value: "rating-desc", label: "По рейтингу (высший)" },
-  { value: "rating-asc", label: "По рейтингу (низший)" },
-  { value: "views-desc", label: "По просмотрам" },
-  { value: "likes-desc", label: "По оценкам" },
-  { value: "name-asc", label: "По имени (А-Я)" },
-  { value: "name-desc", label: "По имени (Я-А)" },
+  { value: "-rating", label: "По рейтингу (высший)" },
+  { value: "rating", label: "По рейтингу (низший)" },
+  { value: "-views", label: "По просмотрам" },
+  { value: "-likes", label: "По оценкам" },
+  { value: "name", label: "По имени (А-Я)" },
+  { value: "-name", label: "По имени (Я-А)" },
 ];
 
 export default function EngineersPage() {
-  const { specialists } = useAppSelector((state) => state.specialists);
-  const allEngineers = specialists.filter((s) => s.category === "engineers");
-
-  // Состояния
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortBy, setSortBy] = useState("rating-desc");
+  const [sortBy, setSortBy] = useState("-rating");
 
-  // Функция для сброса поиска
+  const { data } = useApiSpecialistsListQuery({
+    category: "engineers",
+    search: searchTerm || undefined,
+    ordering: sortBy,
+  });
+  const filteredAndSortedEngineers = data?.results || [];
+
   const resetSearch = () => {
     setSearchTerm("");
-    setSortBy("rating-desc");
+    setSortBy("-rating");
   };
-
-  // Фильтрация и сортировка инженеров
-  const filteredAndSortedEngineers = useMemo(() => {
-    let filtered = [...allEngineers];
-
-    // Поиск по имени, фирме и описанию
-    if (searchTerm) {
-      filtered = filtered.filter(
-        (engineer) =>
-          engineer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          engineer.firm.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          engineer.description.toLowerCase().includes(searchTerm.toLowerCase()),
-      );
-    }
-
-    // Сортировка
-    switch (sortBy) {
-      case "rating-desc":
-        filtered.sort((a, b) => (b.rating || 0) - (a.rating || 0));
-        break;
-      case "rating-asc":
-        filtered.sort((a, b) => (a.rating || 0) - (b.rating || 0));
-        break;
-      case "views-desc":
-        filtered.sort((a, b) => (b.views || 0) - (a.views || 0));
-        break;
-      case "likes-desc":
-        filtered.sort((a, b) => (b.likes || 0) - (a.likes || 0));
-        break;
-      case "name-asc":
-        filtered.sort((a, b) => a.name.localeCompare(b.name));
-        break;
-      case "name-desc":
-        filtered.sort((a, b) => b.name.localeCompare(a.name));
-        break;
-      default:
-        break;
-    }
-
-    return filtered;
-  }, [allEngineers, searchTerm, sortBy]);
 
   return (
     <section className="container mx-auto relative px-4 sm:px-6 py-8">

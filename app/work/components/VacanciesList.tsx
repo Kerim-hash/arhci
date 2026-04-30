@@ -6,33 +6,21 @@ import { Search } from "lucide-react";
 import { VacancyCard } from "./VacancyCard";
 import { useAppDispatch, useAppSelector } from "@/app/store/hooks";
 import { setSearchQuery } from "../model/vacanciesSlice";
+import { useApiVacanciesListQuery } from "@/services/generatedApi";
 import Link from "next/link";
 
 export function VacanciesList() {
   const dispatch = useAppDispatch();
-  const { vacancies, searchQuery, filters } = useAppSelector(
-    (state) => state.vacancies,
-  );
+  const { searchQuery } = useAppSelector((state) => state.vacancies);
 
-  const filteredVacancies = vacancies.filter((vacancy) => {
-    // Поиск по заголовку и компании
-    const matchesSearch =
-      vacancy.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      vacancy.company.toLowerCase().includes(searchQuery.toLowerCase());
-
-    // Фильтр по специализации
-    const matchesSpecialization =
-      filters.specializations.length === 0 ||
-      filters.specializations.some((spec) =>
-        vacancy.title.toLowerCase().includes(spec.toLowerCase()),
-      );
-
-    // Фильтр по опыту
-    const matchesExperience =
-      !filters.experience || vacancy.experience === filters.experience;
-
-    return matchesSearch && matchesSpecialization && matchesExperience;
+  const { data, isLoading } = useApiVacanciesListQuery({
+    search: searchQuery || undefined,
   });
+  const vacancies = data?.results || [];
+
+  if (isLoading) {
+    return <div className="text-center py-8 text-gray-500">Загрузка...</div>;
+  }
 
   return (
     <div className="space-y-4">
@@ -48,7 +36,7 @@ export function VacanciesList() {
 
       {/* Список с прокруткой */}
       <div className="space-y-8 max-h-[calc(100vh-200px)] overflow-y-auto pr-2">
-        {filteredVacancies.map((vacancy, index) => (
+        {vacancies.map((vacancy: any, index: number) => (
           <Link
             href={`/work/vacancy/${vacancy.id}`}
             key={vacancy.id}
@@ -61,7 +49,7 @@ export function VacanciesList() {
           </Link>
         ))}
 
-        {filteredVacancies.length === 0 && (
+        {vacancies.length === 0 && (
           <div className="text-center py-8 text-gray-500">
             Ничего не найдено
           </div>

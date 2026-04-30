@@ -4,8 +4,8 @@ import { apiSlice } from "@/services/api";
 import { authReducer } from "./auth/model/authSlice";
 import { editProfileApi } from "./store/features/editProfileApi";
 import vacanciesReducer from "./work/model/vacanciesSlice";
-import fetchVacancy from "./store/features/ordersSlice";
-import fetchVacancyDetail from "./store/features/vacancyDetailSlice";
+import vacancyDetailReducer from "./store/features/vacancyDetailSlice";
+import ordersReducer from "./store/features/ordersSlice";
 import appReducer from "./store/features/appSlice";
 import specialistsReducer from "./store/features/specialistsSlice";
 import projectsReducer from "./store/features/projectsSlice";
@@ -19,8 +19,8 @@ export const store = configureStore({
     [authReducer.reducerPath]: authReducer.reducer,
     [editProfileApi.reducerPath]: editProfileApi.reducer,
     vacancies: vacanciesReducer,
-    vacancyDetail: fetchVacancyDetail,
-    orders: fetchVacancy,
+    vacancyDetail: vacancyDetailReducer,
+    orders: ordersReducer,
     app: appReducer,
     specialists: specialistsReducer,
     projects: projectsReducer,

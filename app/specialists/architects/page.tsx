@@ -1,10 +1,6 @@
-// app/specialists/architects/page.tsx (App Router)
-// ИЛИ
-// pages/specialists/architects/index.tsx (Pages Router)
-
 "use client";
 
-import { useAppSelector } from "@/app/store/hooks";
+import { useApiSpecialistsListQuery } from "@/services/generatedApi";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,70 +17,32 @@ import SpecialistCard from "../components/SpecialistCard";
 
 // Опции сортировки
 const sortOptions = [
-  { value: "rating-desc", label: "По рейтингу (высший)" },
-  { value: "rating-asc", label: "По рейтингу (низший)" },
-  { value: "views-desc", label: "По просмотрам" },
-  { value: "likes-desc", label: "По оценкам" },
-  { value: "name-asc", label: "По имени (А-Я)" },
-  { value: "name-desc", label: "По имени (Я-А)" },
+  { value: "-rating", label: "По рейтингу (высший)" },
+  { value: "rating", label: "По рейтингу (низший)" },
+  { value: "-views", label: "По просмотрам" },
+  { value: "-likes", label: "По оценкам" },
+  { value: "name", label: "По имени (А-Я)" },
+  { value: "-name", label: "По имени (Я-А)" },
 ];
 
 export default function ArchitectsPage() {
-  const { specialists } = useAppSelector((state) => state.specialists);
-  const allArchitects = specialists.filter((s) => s.category === "architects");
-
-  // Состояния
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortBy, setSortBy] = useState("rating-desc");
+  const [sortBy, setSortBy] = useState("-rating");
+
+  const { data, isLoading } = useApiSpecialistsListQuery({
+    category: "architects",
+    search: searchTerm || undefined,
+    ordering: sortBy,
+  });
+  const allArchitects = data?.results || [];
 
   // Функция для сброса поиска
   const resetSearch = () => {
     setSearchTerm("");
-    setSortBy("rating-desc");
+    setSortBy("-rating");
   };
 
-  // Фильтрация и сортировка архитекторов
-  const filteredAndSortedArchitects = useMemo(() => {
-    let filtered = [...allArchitects];
-
-    // Поиск по имени, фирме и описанию
-    if (searchTerm) {
-      filtered = filtered.filter(
-        (architect) =>
-          architect.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          architect.firm.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          architect.description
-            .toLowerCase()
-            .includes(searchTerm.toLowerCase()),
-      );
-    }
-
-    // Сортировка
-    switch (sortBy) {
-      case "rating-desc":
-        filtered.sort((a, b) => (b.rating || 0) - (a.rating || 0));
-        break;
-      case "rating-asc":
-        filtered.sort((a, b) => (a.rating || 0) - (b.rating || 0));
-        break;
-      case "views-desc":
-        filtered.sort((a, b) => (b.views || 0) - (a.views || 0));
-        break;
-      case "likes-desc":
-        filtered.sort((a, b) => (b.likes || 0) - (a.likes || 0));
-        break;
-      case "name-asc":
-        filtered.sort((a, b) => a.name.localeCompare(b.name));
-        break;
-      case "name-desc":
-        filtered.sort((a, b) => b.name.localeCompare(a.name));
-        break;
-      default:
-        break;
-    }
-
-    return filtered;
-  }, [allArchitects, searchTerm, sortBy]);
+  const filteredAndSortedArchitects = allArchitects;
 
   return (
     <section className="container mx-auto relative px-4 sm:px-6 py-8">

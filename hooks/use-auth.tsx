@@ -61,15 +61,19 @@ export const useAuth = () => {
     }
   };
 
-  const loginSuccess = (tokens: {
-    access_token: string;
-    refresh_token: string;
-  }) => {
+  const loginSuccess = (tokens: any) => {
     try {
-      tokenStorage.setTokens(tokens.access_token, tokens.refresh_token);
-      dispatch(setAuth(true));
-      refetch();
-      router.push("/");
+      const access = tokens.accessToken || tokens.access_token || tokens.access;
+      const refresh = tokens.refreshToken || tokens.refresh_token || tokens.refresh;
+      
+      if (access && refresh) {
+        tokenStorage.setTokens(access, refresh);
+        dispatch(setAuth(true));
+        refetch();
+        router.push("/");
+      } else {
+        console.error("No valid tokens found in response:", tokens);
+      }
     } catch (error) {
       console.error("Error in loginSuccess:", error);
     }

@@ -2,12 +2,11 @@
 import { Card } from "@/components/ui/card";
 import Image from "next/image";
 import Link from "next/link";
-import { Specialist } from "@/types/specialists";
 import { Eye, ThumbsUp } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 
 interface SpecialistCardProps {
-  specialist: Specialist;
+  specialist: any;
   simplified?: boolean; // Упрощенная версия без оценок и просмотров
 }
 
@@ -23,7 +22,7 @@ export default function SpecialistCard({
       <Card className="text-center gap-6">
         <div className="rounded-full mx-auto w-[40px] h-[40px] md:w-[60px] md:h-[60px] lg:w-[80px] lg:h-[80px] overflow-hidden border-4 border-white">
           <Image
-            src={specialist.avatar}
+            src={specialist.avatar || '/avatar3.png'}
             width={80}
             height={80}
             alt={specialist.name}
@@ -37,10 +36,10 @@ export default function SpecialistCard({
             </h3>
           </div>
           <p className="text-[#666666] text-sm sm:text-[15px] lg:text-[14px] leading-tight mt-1">
-            {specialist.firm}
+            {specialist.firm || ''}
           </p>
           <p className="text-[#999999] text-xs mt-1">
-            {specialist.categoryName}
+            {specialist.category_name || specialist.categoryName || ''}
           </p>
         </div>
         {!simplified && specialist.rating && (

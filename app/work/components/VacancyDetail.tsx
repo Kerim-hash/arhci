@@ -6,8 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { User } from "lucide-react";
 import type { VacancyDetail, SimilarVacancy } from "@/types/vacancy";
-import { useAppDispatch } from "@/app/store/hooks";
-import { respondToVacancy } from "@/app/store/features/vacancyDetailSlice";
+import { useApiVacanciesRespondCreateMutation } from "@/services/generatedApi";
 import { useState } from "react";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 
@@ -16,12 +15,12 @@ interface VacancyDetailProps {
 }
 
 export function VacancyDetailComponent({ vacancy }: VacancyDetailProps) {
-  const dispatch = useAppDispatch();
+  const [respondToVacancy] = useApiVacanciesRespondCreateMutation();
   const [isResponding, setIsResponding] = useState(false);
 
   const handleRespond = () => {
     setIsResponding(true);
-    dispatch(respondToVacancy(vacancy.id.toString())).finally(() => {
+    respondToVacancy({ id: vacancy.id }).finally(() => {
       setIsResponding(false);
     });
   };
@@ -212,11 +211,11 @@ export function VacancyDetailComponent({ vacancy }: VacancyDetailProps) {
 function SimilarVacancyCard({ vacancy }: { vacancy: SimilarVacancy }) {
   const hasSalary = vacancy.salaryFrom && vacancy.salaryTo;
   const [isResponding, setIsResponding] = useState(false);
-  const dispatch = useAppDispatch();
+  const [respondToVacancy] = useApiVacanciesRespondCreateMutation();
 
   const handleRespond = () => {
     setIsResponding(true);
-    dispatch(respondToVacancy(vacancy.id.toString())).finally(() => {
+    respondToVacancy({ id: vacancy.id }).finally(() => {
       setIsResponding(false);
     });
   };

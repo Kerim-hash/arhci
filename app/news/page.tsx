@@ -17,12 +17,11 @@ import axios from "axios";
 interface NewsType {
   id: number;
   title: string;
-  preview_image: string;
-  short_description: string;
-  word_file: string;
-  is_published: boolean;
-  created_at: string;
-  updated_at: string;
+  slug: string;
+  previewImage: string;
+  shortDescription: string;
+  views: number;
+  createdAt: string;
 }
 interface ApiResponse {
   count: number;
@@ -126,9 +125,9 @@ function NewsContent() {
           {news.map((item) => (
             <Card key={item.id} className="overflow-hidden flex flex-col">
               <div className="relative aspect-video md:aspect-[2/5] overflow-hidden md:max-h-[320px] w-full bg-gray-100">
-                {item.preview_image ? (
+                {item.previewImage ? (
                   <Image
-                    src={`${item.preview_image}`}
+                    src={`${item.previewImage}`}
                     alt={item.title}
                     fill
                     className="object-cover w-full"
@@ -158,16 +157,16 @@ function NewsContent() {
                 </h2>
 
                 <p className="text-sm md:text-[16px] text-[#6D6D6D] leading-relaxed line-clamp-3 md:line-clamp-4 mb-4">
-                  {item.short_description || "Описание отсутствует"}
+                  {item.shortDescription || "Описание отсутствует"}
                 </p>
 
                 <p className="text-xs text-gray-400 mb-2">
-                  {formatDate(item.created_at)}
+                  {formatDate(item.createdAt)}
                 </p>
               </div>
 
               <Link
-                href={`/news/${item.id}`}
+                href={`/news/${item.slug}`}
                 className="block text-right px-4 md:px-6 pb-4 md:pb-6 font-medium text-[18px] text-blue-600 hover:text-blue-800 transition-colors"
               >
                 Читать далее →

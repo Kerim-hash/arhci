@@ -2,12 +2,13 @@
 "use client";
 
 import { useEffect } from "react";
-import { notFound, useParams } from "next/navigation";
+import { useParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { useAppDispatch, useAppSelector } from "@/app/store/hooks";
-import { fetchCompetitionBySlug, incrementCompetitionViews, clearCurrentCompetition } from "@/app/store/features/competitionsSlice";
-import { Competition } from "@/types/competition";
+import {
+  useApiCompetitionsSlugRetrieveQuery,
+  useApiCompetitionsViewsCreateMutation,
+} from "@/services/generatedApi";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -17,34 +18,28 @@ import { RoleGuard } from "@/components/RoleGuard";
 export default function CompetitionDetailPage() {
   const params = useParams();
   const slug = params.slug as string;
-  
-  const dispatch = useAppDispatch();
-  const { currentCompetition, loading, error } = useAppSelector((state) => state.competitions);
+
+  const { data: currentCompetition, isLoading, error } = useApiCompetitionsSlugRetrieveQuery(
+    { slug },
+    { skip: !slug }
+  );
+  const [incrementViews] = useApiCompetitionsViewsCreateMutation();
 
   useEffect(() => {
-    if (slug) {
-      dispatch(fetchCompetitionBySlug(slug)).then((action) => {
-        const competition = action.payload as Competition | undefined;
-        if (competition?.id) {
-          dispatch(incrementCompetitionViews(competition.id));
-        }
-      });
+    if (currentCompetition?.id) {
+      incrementViews({ id: currentCompetition.id });
     }
-
-    return () => {
-      dispatch(clearCurrentCompetition());
-    };
-  }, [dispatch, slug]);
+  }, [currentCompetition, incrementViews]);
 
   if (error) {
     return (
       <section className="container mx-auto relative px-4 sm:px-6 py-8">
-        <div className="text-center py-12 text-red-500">Ошибка: {error}</div>
+        <div className="text-center py-12 text-red-500">Ошибка загрузки</div>
       </section>
     );
   }
 
-  if (loading || !currentCompetition) {
+  if (isLoading || !currentCompetition) {
     return (
       <section className="container mx-auto relative px-4 sm:px-6 py-8">
         <div className="text-center py-12">
@@ -84,18 +79,18 @@ export default function CompetitionDetailPage() {
         <div className="flex flex-wrap items-center gap-4 text-sm text-[#666666] mb-6">
           <div className="flex items-center gap-1">
             <Calendar className="w-4 h-4" />
-            <span>Дедлайн: {formatDate(currentCompetition.dates.submissionDeadline)}</span>
+            <span>Дедлайн: {currentCompetition.submission_deadline ? formatDate(currentCompetition.submission_deadline) : 'Не указан'}</span>
           </div>
           <div className="flex items-center gap-1">
             <Users className="w-4 h-4" />
-            <span>{currentCompetition.participantsCount} участников</span>
+            <span>{currentCompetition.participants_count || 0} участников</span>
           </div>
           <div className="flex items-center gap-1">
             <Eye className="w-4 h-4" />
             <span>{currentCompetition.views} просмотров</span>
           </div>
-          <Badge className={currentCompetition.isActive ? "bg-green-500" : "bg-gray-500"}>
-            {currentCompetition.isActive ? "Активный" : "Завершен"}
+          <Badge className={currentCompetition.is_active ? "bg-green-500" : "bg-gray-500"}>
+            {currentCompetition.is_active ? "Активный" : "Завершен"}
           </Badge>
         </div>
       </div>
@@ -119,21 +114,21 @@ export default function CompetitionDetailPage() {
         <div className="w-full lg:w-1/2 bg-white border rounded-lg p-4">
           <div className="flex flex-col sm:flex-row mb-4 sm:mb-6 gap-2 sm:gap-0">
             <div className="sm:flex-1 text-[#383838]">Начало регистрации:</div>
-            <div className="sm:flex-1 font-semibold">{formatDate(currentCompetition.dates.startRegistration)}</div>
+            <div className="sm:flex-1 font-semibold">{currentCompetition.start_registration ? formatDate(currentCompetition.start_registration) : '-'}</div>
           </div>
           <div className="flex flex-col sm:flex-row gap-2 sm:gap-0">
             <div className="sm:flex-1 text-[#383838]">Дедлайн регистрации:</div>
-            <div className="sm:flex-1 font-semibold">{formatDate(currentCompetition.dates.endRegistration)}</div>
+            <div className="sm:flex-1 font-semibold">{currentCompetition.end_registration ? formatDate(currentCompetition.end_registration) : '-'}</div>
           </div>
         </div>
         <div className="w-full lg:w-1/2 bg-[#F5F5F7] rounded-lg p-4">
           <div className="flex flex-col sm:flex-row mb-4 sm:mb-6 gap-2 sm:gap-0">
             <div className="sm:flex-1 text-[#383838]">Дедлайн подачи проектов:</div>
-            <div className="sm:flex-1 font-semibold">{formatDate(currentCompetition.dates.submissionDeadline)}</div>
+            <div className="sm:flex-1 font-semibold">{currentCompetition.submission_deadline ? formatDate(currentCompetition.submission_deadline) : '-'}</div>
           </div>
           <div className="flex flex-col sm:flex-row gap-2 sm:gap-0">
             <div className="sm:flex-1 text-[#383838]">Объявление результатов:</div>
-            <div className="sm:flex-1 font-semibold">{formatDate(currentCompetition.dates.resultsAnnouncement)}</div>
+            <div className="sm:flex-1 font-semibold">{currentCompetition.results_announcement ? formatDate(currentCompetition.results_announcement) : '-'}</div>
           </div>
         </div>
       </div>
@@ -144,7 +139,7 @@ export default function CompetitionDetailPage() {
           <div>
             <div className="text-[#383838] text-sm mb-1">Открыт для</div>
             <div className="flex gap-2 flex-wrap">
-              {currentCompetition.openFor.map((item) => (
+              {(currentCompetition.open_for as string[] || []).map((item: string) => (
                 <Badge key={item} variant="secondary">{item}</Badge>
               ))}
             </div>
@@ -162,7 +157,7 @@ export default function CompetitionDetailPage() {
 
           <div>
             <div className="text-[#383838] text-sm mb-1">Регистрационный взнос</div>
-            <div className="font-semibold">{currentCompetition.registrationFee}</div>
+            <div className="font-semibold">{currentCompetition.registration_fee}</div>
           </div>
 
           <div>
@@ -177,9 +172,9 @@ export default function CompetitionDetailPage() {
         </div>
       </div>
 
-      {currentCompetition.organizerLink && (
+      {currentCompetition.organizer_link && (
         <p className="italic mb-6 underline text-[16px] text-center lg:text-left">
-          <a href={currentCompetition.organizerLink} target="_blank" rel="noopener noreferrer">
+          <a href={currentCompetition.organizer_link} target="_blank" rel="noopener noreferrer">
             Страничка конкурса на сайте {currentCompetition.organizer}
           </a>
         </p>
@@ -190,7 +185,7 @@ export default function CompetitionDetailPage() {
         <div className="flex flex-col lg:flex-row gap-6 lg:gap-10 mb-8">
           <div className="w-full lg:w-auto mx-auto lg:mx-0">
             <img
-              src={currentCompetition.image}
+              src={currentCompetition.image || ''}
               alt={currentCompetition.title}
               className="w-full max-w-[328px] h-auto mx-auto lg:mx-0 rounded-lg"
             />
@@ -207,7 +202,7 @@ export default function CompetitionDetailPage() {
         <h2 className="font-semibold mt-8 text-xl mb-4">Задача конкурса</h2>
         <p className="mb-4 text-sm lg:text-base">Участникам предлагается разработать архитектурную концепцию, отражающую:</p>
         <ul className="space-y-2 list-disc pl-5 text-sm lg:text-base mb-6">
-          {currentCompetition.tasks.map((task, index) => (
+          {(currentCompetition.tasks as string[] || []).map((task: string, index: number) => (
             <li key={index}>{task}</li>
           ))}
         </ul>
@@ -215,7 +210,7 @@ export default function CompetitionDetailPage() {
         {/* Условия участия */}
         <h2 className="font-semibold mt-8 text-xl mb-4">Условия участия</h2>
         <ul className="space-y-2 list-disc pl-5 text-sm lg:text-base mb-6">
-          {currentCompetition.conditions.map((condition, index) => (
+          {(currentCompetition.conditions as string[] || []).map((condition: string, index: number) => (
             <li key={index}>{condition}</li>
           ))}
         </ul>
@@ -226,7 +221,7 @@ export default function CompetitionDetailPage() {
           <li>
             Проект подаётся в цифровом формате и должен включать:
             <ul className="space-y-2 list-disc pl-5 mt-2">
-              {currentCompetition.projectComposition.map((item, index) => (
+              {(currentCompetition.project_composition as string[] || []).map((item: string, index: number) => (
                 <li key={index}>{item}</li>
               ))}
             </ul>
@@ -239,7 +234,7 @@ export default function CompetitionDetailPage() {
           <li>
             Проекты оцениваются по следующим критериям:
             <ul className="space-y-2 list-disc pl-5 mt-2">
-              {currentCompetition.evaluationCriteria.map((criteria, index) => (
+              {(currentCompetition.evaluation_criteria as string[] || []).map((criteria: string, index: number) => (
                 <li key={index}>{criteria}</li>
               ))}
             </ul>

@@ -3,26 +3,21 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { notFound, useParams } from "next/navigation";
+import { useParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { useAppSelector, useAppDispatch } from "@/app/store/hooks";
 import {
-  fetchProjectById,
-  incrementProjectViews,
-} from "@/app/store/features/projectsSlice";
+  useApiProjectsRetrieveQuery,
+  useApiProjectsViewsCreateMutation,
+} from "@/services/generatedApi";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import {
   Eye,
-  ThumbsUp,
   Calendar,
   Share2,
-  Lock,
-  Globe,
   Heart,
 } from "lucide-react";
-import { Specialist } from "@/types/specialists";
 import ShareModal from "../components/ShareModal";
 
 export default function ProjectDetailPage() {
@@ -30,42 +25,22 @@ export default function ProjectDetailPage() {
   const id = params?.id as string;
   const projectId = parseInt(id);
 
-  const dispatch = useAppDispatch();
-  const { currentProject, loading } = useAppSelector((state) => state.projects);
-  const { specialists } = useAppSelector((state) => state.specialists);
-  const [specialist, setSpecialist] = useState<Specialist | null>(null);
+  const { data: currentProject, isLoading } = useApiProjectsRetrieveQuery(
+    { id: projectId },
+    { skip: isNaN(projectId) }
+  );
+  const [incrementViews] = useApiProjectsViewsCreateMutation();
+
   const [isLiked, setIsLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(0);
-  const [isPublic, setIsPublic] = useState(true);
   const [isOwner, setIsOwner] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
   useEffect(() => {
-    if (projectId && !isNaN(projectId)) {
-      dispatch(fetchProjectById(projectId)).then((action) => {
-        if (action.payload) {
-          dispatch(incrementProjectViews(projectId));
-        }
-      });
-    }
-  }, [dispatch, projectId]);
-
-  useEffect(() => {
     if (currentProject) {
-      const spec = specialists.find(
-        (s) => s.id === currentProject.specialistId,
-      );
-      setSpecialist(spec || null);
-      setLikesCount(currentProject.likes || 0);
-
-      // Проверка на владельца (нужно реализовать с вашей системой авторизации)
-      // const currentUserId = localStorage.getItem('userId');
-      // setIsOwner(currentUserId === currentProject.specialistId.toString());
-
-      // Проверка на публичность
-      // setIsPublic(currentProject.isPublic ?? true);
+      incrementViews({ id: projectId });
     }
-  }, [currentProject, specialists]);
+  }, [currentProject, projectId, incrementViews]);
 
   const handleLike = () => {
     if (isLiked) {
@@ -74,14 +49,13 @@ export default function ProjectDetailPage() {
       setLikesCount((prev) => prev + 1);
     }
     setIsLiked(!isLiked);
-    // TODO: Отправить запрос на сервер для обновления лайка
   };
 
   const handleShare = () => {
     setIsShareModalOpen(true);
   };
 
-  if (loading || !currentProject) {
+  if (isLoading || !currentProject) {
     return (
       <section className="container mx-auto relative px-4 sm:px-6 py-8">
         <div className="text-center py-12">
@@ -113,37 +87,16 @@ export default function ProjectDetailPage() {
         {/* Шапка с автором */}
         <div className="flex items-center justify-between mb-20 mt-6">
           <div className="flex items-center gap-4">
-            {specialist && (
-              <>
-                <Link
-                  href={`/specialists/${specialist.category}/${specialist.slug}`}
-                >
-                  <Image
-                    src={specialist.avatar}
-                    width={80}
-                    height={80}
-                    alt={specialist.name}
-                    className="rounded-full w-20 h-20 object-cover cursor-pointer hover:opacity-80 transition-opacity"
-                  />
-                </Link>
-                <div>
-                  <Link
-                    href={`/specialists/${specialist.category}/${specialist.slug}`}
-                  >
-                    <h2 className="font-semibold text-lg hover:text-blue-600 transition-colors cursor-pointer">
-                      {specialist.name}
-                    </h2>
-                  </Link>
-                  <p className="text-sm text-[#666666]">
-                    {specialist.position || specialist.categoryName}
-                  </p>
-                </div>
-              </>
+            {currentProject.specialist_name && (
+              <div>
+                <h2 className="font-semibold text-lg">
+                  {currentProject.specialist_name}
+                </h2>
+              </div>
             )}
           </div>
 
           <div className="flex items-center gap-3">
-            {/* Кнопка изменить (только для владельца) */}
             {isOwner && (
               <Button variant="outline" size="sm">
                 Изменить
@@ -165,7 +118,7 @@ export default function ProjectDetailPage() {
             <div className="flex items-center gap-1">
               <Calendar className="w-4 h-4" />
               <span>
-                {new Date(currentProject.createdAt).toLocaleDateString("ru-RU")}
+                {new Date(currentProject.created_at).toLocaleDateString("ru-RU")}
               </span>
             </div>
             <div className="flex items-center gap-1">
@@ -177,17 +130,17 @@ export default function ProjectDetailPage() {
 
         <Separator className="mb-6" />
 
-        {/* Галерея изображений - горизонтальный скролл */}
+        {/* Галерея изображений */}
         <div className="mb-8">
           <div className="flex flex-col gap-4 pb-4">
             {currentProject.images &&
-              currentProject.images.map((image: any, index: number) => (
+              (currentProject.images as any[]).map((image: any, index: number) => (
                 <div
                   key={image.id || index}
                   className="relative w-[300px] md:w-[400px] lg:w-full h-full flex-shrink-0 rounded-lg overflow-hidden bg-gray-100"
                 >
                   <img
-                    src={image.url}
+                    src={image.url || image.image}
                     alt={image.alt || currentProject.title}
                     className="w-full h-full object-cover"
                   />
@@ -231,8 +184,8 @@ export default function ProjectDetailPage() {
       <ShareModal
         isOpen={isShareModalOpen}
         onClose={() => setIsShareModalOpen(false)}
-        project={currentProject}
-        specialist={specialist}
+        project={currentProject as any}
+        specialist={null}
       />
     </>
   );

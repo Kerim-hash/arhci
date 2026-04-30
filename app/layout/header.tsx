@@ -115,30 +115,41 @@ const Header: FC = () => {
               className="rounded-full object-scale-down"
             />
           </Button>
-          <Link
-            href={"/create-acticle"}
-            className="w-6 h-6 rounded-full overflow-hidden ml-4"
-          >
-            <Image
-              src="/pencil.svg"
-              alt="article"
-              width={24}
-              height={24}
-              className="rounded-full"
-            />
-          </Link>
-          <Link
-            href={"/profile"}
-            className="w-12 h-12 flex justify-center items-center rounded-full overflow-hidden ml-4"
-          >
-            <Image
-              src={user?.image || "/user.svg"}
-              alt="article"
-              width={48}
-              height={48}
-              className="rounded-full object-none "
-            />
-          </Link>
+          {isAuthenticated ? (
+            <>
+              <Link
+                href={"/create-acticle"}
+                className="w-6 h-6 rounded-full overflow-hidden ml-4"
+              >
+                <Image
+                  src="/pencil.svg"
+                  alt="create article"
+                  width={24}
+                  height={24}
+                  className="rounded-full"
+                />
+              </Link>
+              <Link
+                href={"/profile"}
+                className="w-12 h-12 flex justify-center items-center rounded-full overflow-hidden ml-4"
+              >
+                <Image
+                  src={user?.image || "/user.svg"}
+                  alt="profile"
+                  width={48}
+                  height={48}
+                  className="rounded-full object-none "
+                />
+              </Link>
+            </>
+          ) : (
+            <Link
+              href="/auth/login"
+              className="ml-6 text-[16px] font-medium text-[#333333] hover:text-[#4677F3] transition-colors"
+            >
+              Войти
+            </Link>
+          )}
         </div>
 
         {/* BURGER – mobile only */}
@@ -178,6 +189,15 @@ const Header: FC = () => {
                 {label}
               </Link>
             ))}
+            {!isAuthenticated ? (
+              <Link href="/auth/login" className="text-[#333] font-medium mt-2">
+                Войти
+              </Link>
+            ) : (
+              <Link href="/profile" className="text-[#333] font-medium mt-2">
+                Профиль
+              </Link>
+            )}
           </nav>
         </div>
       </div>

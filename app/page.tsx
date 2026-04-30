@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -5,10 +7,35 @@ import { Separator } from "@/components/ui/separator";
 import { Card } from "@/components/ui/card";
 import ArchitectureFirms from "@/components/architectureFirms";
 import Link from "next/link";
+import {
+  useApiArticlesListQuery,
+  useApiNewsListQuery,
+} from "@/services/generatedApi";
 
 const filters = ["Статьи", "Конкурсы", "Личности", "Объект"];
 
 export default function Page() {
+  const { data: articlesData, isLoading: articlesLoading } =
+    useApiArticlesListQuery({ page: 1 });
+  const { data: newsData, isLoading: newsLoading } = useApiNewsListQuery({
+    page: 1,
+  });
+
+  const articles = articlesData?.results?.slice(0, 3) || [];
+  const news = newsData?.results?.slice(0, 3) || [];
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString("ru-RU", {
+      month: "long",
+      day: "numeric",
+    });
+  };
+
+  const getCategory = (id: number) => {
+    const categories = ["Личности", "Архитектура", "Дизайн", "Искусство"];
+    return categories[id % categories.length];
+  };
+
   return (
     <section className="container mx-auto relative px-4 sm:px-6">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -38,46 +65,53 @@ export default function Page() {
 
           {/* Карточки статей */}
           <div className="space-y-4 md:space-y-6">
-            {[1, 2, 3].map((item, index) => (
-              <Link href={`/articles/${item}`} key={item}>
-                <Card key={item} className="overflow-hidden">
-                  {/* Изображение - меняется пропорция на мобиле */}
-                  <div className="relative aspect-video md:aspect-[2/5] overflow-hidden md:max-h-[320px] w-full">
-                    <Image
-                      src={`/article-${index}.png`}
-                      alt="card image"
-                      fill
-                      className="object-cover w-full"
-                      sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                    />
+            {articlesLoading ? (
+              <div className="text-center py-8 text-gray-500">Загрузка...</div>
+            ) : articles.length > 0 ? (
+              articles.map((item: any) => (
+                <Link href={`/articles/${item.slug}`} key={item.id}>
+                  <Card className="overflow-hidden mb-4 md:mb-6">
+                    {/* Изображение - меняется пропорция на мобиле */}
+                    <div className="relative aspect-video md:aspect-[2/5] overflow-hidden md:max-h-[320px] w-full bg-gray-100">
+                      {item.previewImage ? (
+                        <Image
+                          src={item.previewImage}
+                          alt={item.title}
+                          fill
+                          className="object-cover w-full"
+                          sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                          <span className="text-gray-400">Нет изображения</span>
+                        </div>
+                      )}
 
-                    {/* Бейдж */}
-                    <Badge
-                      variant="secondary"
-                      className="absolute bottom-3 right-3 text-xs"
-                    >
-                      Личности
-                    </Badge>
-                  </div>
+                      {/* Бейдж */}
+                      <Badge
+                        variant="secondary"
+                        className="absolute bottom-3 right-3 text-xs"
+                      >
+                        {getCategory(item.id)}
+                      </Badge>
+                    </div>
 
-                  {/* Контент карточки */}
-                  <div className="p-4 md:p-6">
-                    <h2 className="text-lg sm:text-xl md:text-[32px] font-medium leading-tight underline mb-3">
-                      Тадао Андо: Геометрия, Свет и Поэзия Бетона
-                    </h2>
+                    {/* Контент карточки */}
+                    <div className="p-4 md:p-6">
+                      <h2 className="text-lg sm:text-xl md:text-[32px] font-medium leading-tight underline mb-3">
+                        {item.title}
+                      </h2>
 
-                    <p className="text-sm md:text-[16px] text-[#6D6D6D] leading-relaxed line-clamp-3 md:line-clamp-4">
-                      Тадао Андо (род. 1941) — японский архитектор-самоучка,
-                      лауреат Притцкеровской премии 1995 года, чье творчество
-                      относится к минимализму и критическому регионализму. Андо
-                      известен своей почти религиозной работой с бетоном,
-                      который в его руках приобретает идеальную, шелковистую
-                      гладкость.
-                    </p>
-                  </div>
-                </Card>
-              </Link>
-            ))}
+                      <p className="text-sm md:text-[16px] text-[#6D6D6D] leading-relaxed line-clamp-3 md:line-clamp-4">
+                        {item.shortDescription || "Описание отсутствует"}
+                      </p>
+                    </div>
+                  </Card>
+                </Link>
+              ))
+            ) : (
+              <p className="text-gray-500 py-4">Нет доступных статей.</p>
+            )}
           </div>
         </div>
 
@@ -89,22 +123,27 @@ export default function Page() {
           <Separator className="bg-[#333333] mb-6 md:mb-10" />
 
           <div className="space-y-4 md:space-y-6">
-            {[1, 2, 3].map((item) => (
-              <Card key={item} className="p-4 md:p-6">
-                <time
-                  dateTime="2025-11-25"
-                  className="text-sm font-medium text-muted-foreground block mb-2"
-                >
-                  25 ноября
-                </time>
-                <p className="text-sm md:text-[16px] text-[#333333] leading-relaxed line-clamp-4 md:line-clamp-6">
-                  Мэрия Бишкека утвердила программу «Зеленый пояс»: Власти
-                  начинают масштабную инвентаризацию и восстановление городских
-                  парков и скверов с целью увеличения площади озеленения на 15%
-                  к 2028 году.
-                </p>
-              </Card>
-            ))}
+            {newsLoading ? (
+              <div className="text-center py-8 text-gray-500">Загрузка...</div>
+            ) : news.length > 0 ? (
+              news.map((item: any) => (
+                <Link href={`/news/${item.slug}`} key={item.id} className="block mb-4 md:mb-6">
+                  <Card className="p-4 md:p-6 hover:bg-gray-50 transition-colors">
+                    <time
+                      dateTime={item.createdAt}
+                      className="text-sm font-medium text-muted-foreground block mb-2"
+                    >
+                      {formatDate(item.createdAt)}
+                    </time>
+                    <p className="text-sm md:text-[16px] text-[#333333] leading-relaxed line-clamp-4 md:line-clamp-6">
+                      {item.title}
+                    </p>
+                  </Card>
+                </Link>
+              ))
+            ) : (
+              <p className="text-gray-500 py-4">Нет доступных новостей.</p>
+            )}
           </div>
         </div>
 

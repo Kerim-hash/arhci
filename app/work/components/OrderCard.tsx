@@ -3,24 +3,26 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Order } from "@/app/store/features/ordersSlice";
-import { useAppDispatch } from "@/app/store/hooks";
+import { useApiOrdersRespondCreateMutation } from "@/services/generatedApi";
 import { useState } from "react";
-import { respondToOrder } from "@/app/store/features/orderDetailSlice";
 
 interface OrderCardProps {
-  order: Order;
+  order: any;
 }
 
 export function OrderCard({ order }: OrderCardProps) {
-  const dispatch = useAppDispatch();
+  const [respondToOrder] = useApiOrdersRespondCreateMutation();
   const [isResponding, setIsResponding] = useState(false);
 
   const handleRespond = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setIsResponding(true);
-    await dispatch(respondToOrder(order.id.toString()));
+    try {
+      await respondToOrder({ id: order.id }).unwrap();
+    } catch (err) {
+      console.error('Ошибка отклика', err);
+    }
     setIsResponding(false);
   };
 
@@ -43,7 +45,7 @@ export function OrderCard({ order }: OrderCardProps) {
 
           {/* Теги */}
           <div className="flex flex-wrap gap-2">
-            {order.propertyType.map((type) => (
+            {(order.property_type || order.propertyType || []).map((type: string) => (
               <span
                 key={type}
                 className="text-xs bg-gray-100 px-2 py-1 rounded-full"
@@ -51,7 +53,7 @@ export function OrderCard({ order }: OrderCardProps) {
                 {type}
               </span>
             ))}
-            {order.software.map((sw) => (
+            {(order.software || []).map((sw: string) => (
               <span
                 key={sw}
                 className="text-xs bg-gray-100 px-2 py-1 rounded-full"

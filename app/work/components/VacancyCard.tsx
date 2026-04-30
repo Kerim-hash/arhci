@@ -4,28 +4,25 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Vacancy } from "../model/vacanciesSlice";
-import { useAppDispatch } from "@/app/store/hooks";
-import { respondToVacancy } from "@/app/store/features/vacancyDetailSlice";
+import { useApiVacanciesRespondCreateMutation } from "@/services/generatedApi";
 import { useState } from "react";
 import { RoleGuard } from "@/components/RoleGuard";
 
 interface VacancyCardProps {
-  vacancy: Vacancy;
+  vacancy: any;
 }
 
 export function VacancyCard({ vacancy }: VacancyCardProps) {
-  const dispatch = useAppDispatch();
+  const [respondToVacancy] = useApiVacanciesRespondCreateMutation();
   const [isResponding, setIsResponding] = useState(false);
   const hasSalary = vacancy.salaryFrom > 0 || vacancy.salaryTo > 0;
 
   const handleRespond = async (e: React.MouseEvent) => {
-    e.preventDefault(); // Останавливаем переход по ссылке
-    e.stopPropagation(); // Останавливаем всплытие события
+    e.preventDefault();
+    e.stopPropagation();
     setIsResponding(true);
     try {
-      await dispatch(respondToVacancy(vacancy.id.toString())).unwrap();
-      // Показать уведомление об успехе
+      await respondToVacancy({ id: vacancy.id }).unwrap();
       console.log("Отклик отправлен");
     } catch (error) {
       console.error("Ошибка при отклике", error);

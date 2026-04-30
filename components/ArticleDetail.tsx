@@ -12,13 +12,12 @@ import { ArticleContent } from "./ArticleDetailContent";
 interface ArticleType {
   id: number;
   title: string;
-  preview_image: string;
-  short_description: string;
-  word_file: string;
-  is_published: boolean;
-  created_at: string;
-  updated_at: string;
+  slug: string;
+  previewImage: string;
+  shortDescription: string;
   content: string;
+  views: number;
+  createdAt: string;
 }
 
 interface ArticleDetailProps {

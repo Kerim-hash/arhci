@@ -8,6 +8,11 @@ import { useState } from "react";
 import { ArrowLeft, Check } from "lucide-react";
 import { useForm } from "react-hook-form";
 
+import { useRegisterUserMutation } from "@/app/store/features/authApi";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { useAuth } from "@/hooks/use-auth";
+
 type FormValues = {
   email: string;
   userType: "specialist" | "company" | "";
@@ -16,6 +21,9 @@ type FormValues = {
 
 export default function LoginPage() {
   const [step, setStep] = useState(1);
+  const router = useRouter();
+  const [registerUser, { isLoading }] = useRegisterUserMutation();
+  const { loginSuccess } = useAuth();
 
   const {
     register,
@@ -49,20 +57,42 @@ export default function LoginPage() {
     }
   };
 
-  const onFinalSubmit = (data: FormValues) => {
-    if (userType === "company") {
-      console.log("Form submitted (Company):", {
-        email,
-        userType: "company",
-      });
-      // Здесь отправка формы для компании
-    } else if (userType === "specialist" && specialization) {
-      console.log("Form submitted (Specialist):", {
-        email,
-        userType: "specialist",
-        specialization,
-      });
-      // Здесь отправка формы для специалиста
+  const onFinalSubmit = async (data: FormValues) => {
+    try {
+      const res = await registerUser({
+        email: data.email,
+        region_from: ["Bishkek"],
+        role: data.userType,
+        category: data.specialization || undefined,
+      }).unwrap();
+
+      loginSuccess(res);
+      toast.success("Успешная регистрация!");
+    } catch (error: any) {
+      console.error("Registration error:", error);
+      let errorMessage = "Ошибка при регистрации";
+
+      if (error?.data) {
+        if (typeof error.data === "string") {
+          errorMessage = error.data;
+        } else if (error.data.detail) {
+          errorMessage = error.data.detail;
+        } else if (error.data.message) {
+          errorMessage = error.data.message;
+        } else {
+          // Если бэкенд возвращает ошибки валидации полей, например: { email: ["..."], role: ["..."] }
+          const errors = Object.values(error.data).flat();
+          if (errors.length > 0 && typeof errors[0] === "string") {
+            errorMessage = errors.join(", ");
+          }
+        }
+      } else if (error?.message) {
+        errorMessage = error.message;
+      } else if (typeof error === "string") {
+        errorMessage = error;
+      }
+
+      toast.error(errorMessage);
     }
   };
 
@@ -77,10 +107,10 @@ export default function LoginPage() {
   };
 
   const specializations = [
-    { id: "architect", label: "Архитектор" },
-    { id: "engineer", label: "Инженер" },
-    { id: "visualizer", label: "Визуализатор" },
-    { id: "interior_designer", label: "Дизайнер интерьера" },
+    { id: "architects", label: "Архитектор" },
+    { id: "engineers", label: "Инженер" },
+    { id: "visualizers", label: "Визуализатор" },
+    { id: "interior-designers", label: "Дизайнер интерьера" },
   ];
 
   return (
@@ -275,9 +305,9 @@ export default function LoginPage() {
               type="submit"
               size="lg"
               className="w-full"
-              disabled={!specialization}
+              disabled={!specialization || isLoading}
             >
-              Зарегистрироваться
+              {isLoading ? "Загрузка..." : "Зарегистрироваться"}
             </Button>
 
             <Button

@@ -64,10 +64,15 @@ const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
       );
 
       if (refreshResult.data) {
-        const tokens = refreshResult.data as RefreshTokenResponse;
-        tokenStorage.setTokens(tokens.access_token, tokens.refresh_token);
-
-        result = await baseQuery(args, api, extraOptions);
+        const tokens = refreshResult.data as any;
+        const access = tokens.accessToken || tokens.access_token || tokens.access;
+        const refresh = tokens.refreshToken || tokens.refresh_token || tokens.refresh;
+        if (access && refresh) {
+          tokenStorage.setTokens(access, refresh);
+          result = await baseQuery(args, api, extraOptions);
+        } else {
+          tokenStorage.clearTokens();
+        }
       } else {
         tokenStorage.clearTokens();
         console.warn("Refresh token failed, user should be logged out");

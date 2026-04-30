@@ -2,36 +2,38 @@
 
 "use client";
 
-import { notFound, useParams } from "next/navigation";
-import { useEffect } from "react";
+import { useParams } from "next/navigation";
 import Image from "next/image";
 import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
 import { Mail, MapPin, User } from "lucide-react";
-import { useAppSelector, useAppDispatch } from "@/app/store/hooks";
-import { fetchProjectsBySpecialist } from "@/app/store/features/projectsSlice";
+import {
+  useApiSpecialistsRetrieveQuery,
+  useApiProjectsSpecialistListQuery,
+} from "@/services/generatedApi";
 import ProjectCard from "@/app/projects/components/ProjectCard";
 
 export default function InteriorDesignerPage() {
   const params = useParams();
   const slug = params.slug as string;
-  const dispatch = useAppDispatch();
 
-  const { specialists } = useAppSelector((state) => state.specialists);
-  const { projects } = useAppSelector((state) => state.projects);
-
-  const designer = specialists.find(
-    (s) => s.category === "interior-designers" && s.slug === slug,
+  const { data: designer, isLoading } = useApiSpecialistsRetrieveQuery(
+    { slug },
+    { skip: !slug }
   );
 
-  useEffect(() => {
-    if (designer) {
-      dispatch(fetchProjectsBySpecialist(designer.id));
-    }
-  }, [dispatch, designer]);
+  const { data: projectsData } = useApiProjectsSpecialistListQuery(
+    { specialistId: designer?.id || 0 },
+    { skip: !designer?.id }
+  );
+  const projects = projectsData?.results || [];
 
-  if (!designer) {
-    notFound();
+  if (isLoading || !designer) {
+    return (
+      <section className="container mx-auto relative px-4 sm:px-6 py-8">
+        <div className="text-center py-12">Загрузка...</div>
+      </section>
+    );
   }
 
   const contacts = {
@@ -63,7 +65,7 @@ export default function InteriorDesignerPage() {
           <div className="sticky top-24 space-y-6">
             <div className="flex flex-col gap-8 mb-6">
               <Image
-                src={designer.avatar}
+                src={designer.avatar || '/avatar3.png'}
                 width={80}
                 height={80}
                 alt={designer.name}
@@ -78,9 +80,9 @@ export default function InteriorDesignerPage() {
                 <div className="space-y-3">
                   <div className="flex items-center gap-2 text-[#949494]">
                     <User width={14} />
-                    {designer.categoryName}
+                    {designer.category_name || designer.category || ''}
                   </div>
-                  <p>{designer.firm}</p>
+                  <p>{designer.firm || ''}</p>
                   {contacts && (
                     <div className="flex items-center gap-2 text-[#949494]">
                       <MapPin width={14} />

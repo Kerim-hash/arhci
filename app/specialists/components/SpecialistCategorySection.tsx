@@ -1,14 +1,13 @@
 // components/SpecialistCategorySection.tsx
 import { Button } from "@/components/ui/button";
-import { Specialist, SpecialistCategory } from "@/types/specialists";
 import SpecialistCard from "./SpecialistCard";
 import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
 
 interface SpecialistCategorySectionProps {
   title: string;
-  category: SpecialistCategory;
-  specialists: Specialist[];
+  category: string;
+  specialists: any[];
 }
 
 export default function SpecialistCategorySection({

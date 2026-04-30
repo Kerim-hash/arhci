@@ -1,0 +1,2520 @@
+openapi: 3.0.3
+info:
+  title: Archi Platform API
+  version: 1.0.0
+  description: API для архитектурной платформы Archi
+paths:
+  /api/articles/:
+    get:
+      operationId: apiArticlesList
+      description: GET /api/articles/ — List published articles.
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedArticleListList'
+          description: ''
+  /api/articles/{slug}/:
+    get:
+      operationId: apiArticlesRetrieve
+      description: GET /api/articles/:slug/ — Article detail by slug.
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArticleDetail'
+          description: ''
+  /api/articles/create/:
+    post:
+      operationId: apiArticlesCreateCreate
+      description: POST /api/articles/ — Create article with DOCX upload (authenticated).
+      tags:
+      - api
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ArticleCreate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ArticleCreate'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ArticleCreate'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArticleCreate'
+          description: ''
+  /api/competitions/:
+    get:
+      operationId: apiCompetitionsList
+      description: GET /api/competitions/ — List competitions.
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCompetitionListList'
+          description: ''
+  /api/competitions/{id}/:
+    get:
+      operationId: apiCompetitionsRetrieve
+      description: GET /api/competitions/:id/ — Competition detail by ID.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompetitionDetail'
+          description: ''
+  /api/competitions/{id}/views:
+    post:
+      operationId: apiCompetitionsViewsCreate
+      description: POST /api/competitions/:id/views — Increment competition views.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/competitions/create/:
+    post:
+      operationId: apiCompetitionsCreateCreate
+      description: POST /api/competitions/ — Create competition (authenticated).
+      tags:
+      - api
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CompetitionCreate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CompetitionCreate'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompetitionCreate'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompetitionCreate'
+          description: ''
+  /api/competitions/slug/{slug}/:
+    get:
+      operationId: apiCompetitionsSlugRetrieve
+      description: GET /api/competitions/slug/:slug/ — Competition detail by slug.
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompetitionDetail'
+          description: ''
+  /api/news/:
+    get:
+      operationId: apiNewsList
+      description: GET /api/news/ — List published news.
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedNewsListList'
+          description: ''
+  /api/news/{slug}/:
+    get:
+      operationId: apiNewsRetrieve
+      description: GET /api/news/:slug/ — News detail by slug.
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NewsDetail'
+          description: ''
+  /api/orders/:
+    get:
+      operationId: apiOrdersList
+      description: GET /api/orders/ — List orders with filters.
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedOrderListList'
+          description: ''
+  /api/orders/{id}/:
+    get:
+      operationId: apiOrdersRetrieve
+      description: GET /api/orders/:id/ — Order detail.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderDetail'
+          description: ''
+  /api/orders/{id}/respond:
+    post:
+      operationId: apiOrdersRespondCreate
+      description: POST /api/orders/:id/respond — Respond to order (specialist only).
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/orders/create/:
+    post:
+      operationId: apiOrdersCreateCreate
+      description: POST /api/orders/ — Create order (company only).
+      tags:
+      - api
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/OrderCreate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/OrderCreate'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderCreate'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderCreate'
+          description: ''
+  /api/projects/:
+    get:
+      operationId: apiProjectsList
+      description: GET /api/projects/ — List all projects.
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedProjectListList'
+          description: ''
+  /api/projects/{id}/:
+    get:
+      operationId: apiProjectsRetrieve
+      description: GET /api/projects/:id/ — Project detail.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectDetail'
+          description: ''
+  /api/projects/{id}/views/:
+    post:
+      operationId: apiProjectsViewsCreate
+      description: POST /api/projects/:id/views/ — Increment project views.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/projects/create/:
+    post:
+      operationId: apiProjectsCreateCreate
+      description: POST /api/projects/ — Create a project (authenticated).
+      tags:
+      - api
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ProjectCreate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ProjectCreate'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectCreate'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectCreate'
+          description: ''
+  /api/projects/specialist/{specialistId}/:
+    get:
+      operationId: apiProjectsSpecialistList
+      description: GET /api/projects/specialist/:specialistId/ — Projects by specialist.
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: path
+        name: specialistId
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedProjectListList'
+          description: ''
+  /api/resumes/:
+    get:
+      operationId: apiResumesList
+      description: GET /api/resumes/ — List resumes with filters.
+      parameters:
+      - in: query
+        name: category
+        schema:
+          type: string
+      - in: query
+        name: experience
+        schema:
+          type: string
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - in: query
+        name: region
+        schema:
+          type: string
+      - in: query
+        name: salary_from
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedResumeListList'
+          description: ''
+  /api/resumes/{id}/:
+    get:
+      operationId: apiResumesRetrieve
+      description: GET /api/resumes/:id/ — Resume detail.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResumeDetail'
+          description: ''
+  /api/resumes/create/:
+    post:
+      operationId: apiResumesCreateCreate
+      description: POST /api/resumes/ — Create a resume (authenticated).
+      tags:
+      - api
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ResumeCreate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ResumeCreate'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResumeCreate'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResumeCreate'
+          description: ''
+  /api/specialists/:
+    get:
+      operationId: apiSpecialistsList
+      description: GET /api/specialists/ — List specialists with category filter.
+      parameters:
+      - in: query
+        name: category
+        schema:
+          type: string
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedSpecialistListList'
+          description: ''
+  /api/specialists/{id}/views/:
+    post:
+      operationId: apiSpecialistsViewsCreate
+      description: POST /api/specialists/:id/views/ — Increment specialist views.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/specialists/{slug}/:
+    get:
+      operationId: apiSpecialistsRetrieve
+      description: GET /api/specialists/:slug/ — Specialist detail by slug.
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SpecialistDetail'
+          description: ''
+  /api/specialists/top/:
+    get:
+      operationId: apiSpecialistsTopList
+      description: GET /api/specialists/top/ — Top specialists by rating.
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedSpecialistListList'
+          description: ''
+  /api/vacancies/:
+    get:
+      operationId: apiVacanciesList
+      description: GET /api/vacancies/ — List vacancies with filters.
+      parameters:
+      - in: query
+        name: experience
+        schema:
+          type: string
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - in: query
+        name: region
+        schema:
+          type: string
+      - in: query
+        name: salary_from
+        schema:
+          type: integer
+      - in: query
+        name: salary_to
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedVacancyListList'
+          description: ''
+  /api/vacancies/{id}/:
+    get:
+      operationId: apiVacanciesRetrieve
+      description: GET /api/vacancies/:id/ — Vacancy detail.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VacancyDetail'
+          description: ''
+  /api/vacancies/{id}/respond:
+    post:
+      operationId: apiVacanciesRespondCreate
+      description: POST /api/vacancies/:id/respond — Respond to vacancy.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/vacancies/{id}/save:
+    post:
+      operationId: apiVacanciesSaveCreate
+      description: POST /api/vacancies/:id/save — Toggle save vacancy.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/vacancies/{id}/similar/:
+    get:
+      operationId: apiVacanciesSimilarList
+      description: GET /api/vacancies/:id/similar/ — Similar vacancies by work_tags
+        overlap.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedVacancyListList'
+          description: ''
+  /api/vacancies/create/:
+    post:
+      operationId: apiVacanciesCreateCreate
+      description: POST /api/vacancies/ — Create vacancy (company only).
+      tags:
+      - api
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/VacancyCreate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/VacancyCreate'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VacancyCreate'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VacancyCreate'
+          description: ''
+  /auth/change-password:
+    post:
+      operationId: authChangePasswordCreate
+      description: POST /auth/change-password — Change password.
+      tags:
+      - auth
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /auth/check-code:
+    post:
+      operationId: authCheckCodeCreate
+      description: POST /auth/check-code — Verify password reset code.
+      tags:
+      - auth
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /auth/check-email:
+    post:
+      operationId: authCheckEmailCreate
+      description: POST /auth/check-email — Check if email is available.
+      tags:
+      - auth
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /auth/check-password:
+    post:
+      operationId: authCheckPasswordCreate
+      description: POST /auth/check-password — Check current password.
+      tags:
+      - auth
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /auth/login:
+    post:
+      operationId: authLoginCreate
+      description: POST /auth/login — Login with email and password.
+      tags:
+      - auth
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /auth/profile:
+    get:
+      operationId: authProfileRetrieve
+      description: GET /auth/profile — Get current user profile.
+      tags:
+      - auth
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /auth/recover-password:
+    post:
+      operationId: authRecoverPasswordCreate
+      description: POST /auth/recover-password — Set new password.
+      tags:
+      - auth
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /auth/refresh-token:
+    post:
+      operationId: authRefreshTokenCreate
+      description: POST /auth/refresh-token — Refresh JWT tokens.
+      tags:
+      - auth
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /auth/register/uk:
+    post:
+      operationId: authRegisterUkCreate
+      description: POST /auth/register/uk — Register a new user.
+      tags:
+      - auth
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /auth/request-reset-password/uk:
+    post:
+      operationId: authRequestResetPasswordUkCreate
+      description: POST /auth/request-reset-password/uk — Request password reset code.
+      tags:
+      - auth
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /edit-profile:
+    post:
+      operationId: editProfileCreate
+      description: POST /edit-profile — Edit user profile.
+      tags:
+      - edit-profile
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /events:
+    post:
+      operationId: eventsCreate
+      description: POST /events — Record an analytics event.
+      tags:
+      - events
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /users/change-email:
+    post:
+      operationId: usersChangeEmailCreate
+      description: POST /users/change-email — Change email.
+      tags:
+      - users
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /users/restore:
+    post:
+      operationId: usersRestoreCreate
+      description: POST /users/restore — Restore a soft-deleted account.
+      tags:
+      - users
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+components:
+  schemas:
+    ArticleCreate:
+      type: object
+      description: Create article with DOCX parsing.
+      properties:
+        title:
+          type: string
+          maxLength: 300
+        previewImage:
+          type: string
+          format: uri
+          nullable: true
+        shortDescription:
+          type: string
+        wordFile:
+          type: string
+          format: uri
+          nullable: true
+        isPublished:
+          type: boolean
+      required:
+      - title
+    ArticleDetail:
+      type: object
+      description: Full article detail serializer.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          maxLength: 300
+        slug:
+          type: string
+          maxLength: 50
+          pattern: ^[-a-zA-Z0-9_]+$
+        previewImage:
+          type: string
+          format: uri
+          nullable: true
+        shortDescription:
+          type: string
+        contentHtml:
+          type: string
+        isPublished:
+          type: boolean
+        authorName:
+          type: string
+          readOnly: true
+        views:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - authorName
+      - createdAt
+      - id
+      - slug
+      - title
+    ArticleList:
+      type: object
+      description: Compact article serializer for list views.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          maxLength: 300
+        slug:
+          type: string
+          maxLength: 50
+          pattern: ^[-a-zA-Z0-9_]+$
+        previewImage:
+          type: string
+          format: uri
+          nullable: true
+        shortDescription:
+          type: string
+        authorName:
+          type: string
+          readOnly: true
+        views:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - authorName
+      - createdAt
+      - id
+      - slug
+      - title
+    CategoryEnum:
+      enum:
+      - architects
+      - engineers
+      - interior-designers
+      - visualizers
+      type: string
+      description: |-
+        * `architects` - Архитекторы
+        * `engineers` - Инженеры
+        * `interior-designers` - Дизайнеры интерьера
+        * `visualizers` - Визуализаторы
+    CompetitionCreate:
+      type: object
+      description: Create competition serializer.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        slug:
+          type: string
+          maxLength: 50
+          pattern: ^[-a-zA-Z0-9_]+$
+        title:
+          type: string
+          maxLength: 300
+        description:
+          type: string
+        shortDescription:
+          type: string
+        image:
+          type: string
+          format: uri
+          nullable: true
+        open_for: {}
+        country:
+          type: string
+          maxLength: 100
+        city:
+          type: string
+          maxLength: 100
+        registrationFee:
+          type: string
+          maxLength: 100
+        prize:
+          type: string
+          maxLength: 200
+        organizer:
+          type: string
+          maxLength: 200
+        organizerLink:
+          type: string
+          format: uri
+          maxLength: 200
+        startRegistration:
+          type: string
+          format: date
+          nullable: true
+        endRegistration:
+          type: string
+          format: date
+          nullable: true
+        submissionDeadline:
+          type: string
+          format: date
+          nullable: true
+        resultsAnnouncement:
+          type: string
+          format: date
+          nullable: true
+        tasks: {}
+        conditions: {}
+        project_composition: {}
+        evaluation_criteria: {}
+        isActive:
+          type: boolean
+        isFeatured:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+        updatedAt:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - createdAt
+      - description
+      - id
+      - slug
+      - title
+      - updatedAt
+    CompetitionDetail:
+      type: object
+      description: Full competition detail serializer.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        slug:
+          type: string
+          maxLength: 50
+          pattern: ^[-a-zA-Z0-9_]+$
+        title:
+          type: string
+          maxLength: 300
+        description:
+          type: string
+        shortDescription:
+          type: string
+        image:
+          type: string
+          format: uri
+          nullable: true
+        open_for: {}
+        country:
+          type: string
+          maxLength: 100
+        city:
+          type: string
+          maxLength: 100
+        registrationFee:
+          type: string
+          maxLength: 100
+        prize:
+          type: string
+          maxLength: 200
+        organizer:
+          type: string
+          maxLength: 200
+        organizerLink:
+          type: string
+          format: uri
+          maxLength: 200
+        startRegistration:
+          type: string
+          format: date
+          nullable: true
+        endRegistration:
+          type: string
+          format: date
+          nullable: true
+        submissionDeadline:
+          type: string
+          format: date
+          nullable: true
+        resultsAnnouncement:
+          type: string
+          format: date
+          nullable: true
+        tasks: {}
+        conditions: {}
+        project_composition: {}
+        evaluation_criteria: {}
+        views:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        participantsCount:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        isActive:
+          type: boolean
+        isFeatured:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+        updatedAt:
+          type: string
+          format: date-time
+          readOnly: true
+        createdBy:
+          type: integer
+          nullable: true
+      required:
+      - createdAt
+      - description
+      - id
+      - slug
+      - title
+      - updatedAt
+    CompetitionList:
+      type: object
+      description: Compact competition serializer for list views.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        slug:
+          type: string
+          maxLength: 50
+          pattern: ^[-a-zA-Z0-9_]+$
+        title:
+          type: string
+          maxLength: 300
+        shortDescription:
+          type: string
+        image:
+          type: string
+          format: uri
+          nullable: true
+        country:
+          type: string
+          maxLength: 100
+        city:
+          type: string
+          maxLength: 100
+        prize:
+          type: string
+          maxLength: 200
+        organizer:
+          type: string
+          maxLength: 200
+        startRegistration:
+          type: string
+          format: date
+          nullable: true
+        endRegistration:
+          type: string
+          format: date
+          nullable: true
+        submissionDeadline:
+          type: string
+          format: date
+          nullable: true
+        views:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        participantsCount:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        isActive:
+          type: boolean
+        isFeatured:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - createdAt
+      - id
+      - slug
+      - title
+    NewsDetail:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          maxLength: 300
+        slug:
+          type: string
+          maxLength: 50
+          pattern: ^[-a-zA-Z0-9_]+$
+        previewImage:
+          type: string
+          format: uri
+          nullable: true
+        shortDescription:
+          type: string
+        content:
+          type: string
+        isPublished:
+          type: boolean
+        views:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - createdAt
+      - id
+      - slug
+      - title
+    NewsList:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          maxLength: 300
+        slug:
+          type: string
+          maxLength: 50
+          pattern: ^[-a-zA-Z0-9_]+$
+        previewImage:
+          type: string
+          format: uri
+          nullable: true
+        shortDescription:
+          type: string
+        views:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - createdAt
+      - id
+      - slug
+      - title
+    OrderCreate:
+      type: object
+      description: Create order serializer.
+      properties:
+        title:
+          type: string
+          maxLength: 300
+        budget:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        description:
+          type: string
+        property_type: {}
+        software: {}
+      required:
+      - description
+      - title
+    OrderDetail:
+      type: object
+      description: Full order detail serializer.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          maxLength: 300
+        budget:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        description:
+          type: string
+        property_type: {}
+        software: {}
+        createdByName:
+          type: string
+          readOnly: true
+        responsesCount:
+          type: string
+          readOnly: true
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - createdAt
+      - createdByName
+      - description
+      - id
+      - responsesCount
+      - title
+    OrderList:
+      type: object
+      description: Compact order serializer for list views.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          maxLength: 300
+        budget:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        property_type: {}
+        software: {}
+        createdByName:
+          type: string
+          readOnly: true
+        responsesCount:
+          type: string
+          readOnly: true
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - createdAt
+      - createdByName
+      - id
+      - responsesCount
+      - title
+    PaginatedArticleListList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ArticleList'
+    PaginatedCompetitionListList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/CompetitionList'
+    PaginatedNewsListList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/NewsList'
+    PaginatedOrderListList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderList'
+    PaginatedProjectListList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProjectList'
+    PaginatedResumeListList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResumeList'
+    PaginatedSpecialistListList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/SpecialistList'
+    PaginatedVacancyListList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/VacancyList'
+    ProjectCreate:
+      type: object
+      description: Create project with multipart image upload.
+      properties:
+        title:
+          type: string
+          maxLength: 300
+        description:
+          type: string
+        previewImage:
+          type: string
+          format: uri
+          nullable: true
+        images:
+          type: array
+          items:
+            type: string
+            format: uri
+          writeOnly: true
+      required:
+      - description
+      - title
+    ProjectDetail:
+      type: object
+      description: Full project detail serializer with images.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          maxLength: 300
+        description:
+          type: string
+        previewImage:
+          type: string
+          format: uri
+          nullable: true
+        specialistId:
+          type: integer
+          readOnly: true
+        specialistName:
+          type: string
+          readOnly: true
+        specialistSlug:
+          type: string
+          readOnly: true
+        images:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProjectImage'
+          readOnly: true
+        views:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        likes:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+        updatedAt:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - createdAt
+      - description
+      - id
+      - images
+      - specialistId
+      - specialistName
+      - specialistSlug
+      - title
+      - updatedAt
+    ProjectImage:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        image:
+          type: string
+          format: uri
+        isPreview:
+          type: boolean
+        alt:
+          type: string
+          maxLength: 200
+      required:
+      - id
+      - image
+    ProjectList:
+      type: object
+      description: Compact project serializer for list views.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          maxLength: 300
+        previewImage:
+          type: string
+          format: uri
+          nullable: true
+        specialistName:
+          type: string
+          readOnly: true
+        specialistSlug:
+          type: string
+          readOnly: true
+        views:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        likes:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - createdAt
+      - id
+      - specialistName
+      - specialistSlug
+      - title
+    ResumeCreate:
+      type: object
+      description: Create resume with nested work experience.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        workExperience:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkExperience'
+        name:
+          type: string
+          maxLength: 200
+        salaryFrom:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        salaryTo:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        experience:
+          type: string
+          maxLength: 100
+        specialization: {}
+        category:
+          type: string
+          maxLength: 100
+        description:
+          type: string
+        about:
+          type: string
+        software: {}
+        employment_type: {}
+        region:
+          type: string
+          maxLength: 100
+        avatar:
+          type: string
+          format: uri
+          nullable: true
+        workPlace:
+          type: string
+          maxLength: 200
+        employment:
+          type: string
+          maxLength: 100
+        schedule:
+          type: string
+          maxLength: 100
+        phone:
+          type: string
+          maxLength: 30
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        social_links: {}
+        key_skills: {}
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - createdAt
+      - id
+      - name
+    ResumeDetail:
+      type: object
+      description: Full resume detail serializer with work experience.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 200
+        userName:
+          type: string
+          readOnly: true
+        salaryFrom:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        salaryTo:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        experience:
+          type: string
+          maxLength: 100
+        specialization: {}
+        category:
+          type: string
+          maxLength: 100
+        description:
+          type: string
+        about:
+          type: string
+        software: {}
+        employment_type: {}
+        region:
+          type: string
+          maxLength: 100
+        avatar:
+          type: string
+          format: uri
+          nullable: true
+        workPlace:
+          type: string
+          maxLength: 200
+        employment:
+          type: string
+          maxLength: 100
+        schedule:
+          type: string
+          maxLength: 100
+        phone:
+          type: string
+          maxLength: 30
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        social_links: {}
+        key_skills: {}
+        workExperience:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkExperience'
+          readOnly: true
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - createdAt
+      - id
+      - name
+      - userName
+      - workExperience
+    ResumeList:
+      type: object
+      description: Compact resume serializer for list views.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 200
+        userName:
+          type: string
+          readOnly: true
+        salaryFrom:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        salaryTo:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        experience:
+          type: string
+          maxLength: 100
+        specialization: {}
+        category:
+          type: string
+          maxLength: 100
+        region:
+          type: string
+          maxLength: 100
+        avatar:
+          type: string
+          format: uri
+          nullable: true
+        key_skills: {}
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - createdAt
+      - id
+      - name
+      - userName
+    SpecialistDetail:
+      type: object
+      description: Full specialist profile serializer.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        slug:
+          type: string
+          maxLength: 50
+          pattern: ^[-a-zA-Z0-9_]+$
+        name:
+          type: string
+          readOnly: true
+        avatar:
+          type: string
+          readOnly: true
+        email:
+          type: string
+          format: email
+          readOnly: true
+        phone:
+          type: string
+          readOnly: true
+        bio:
+          type: string
+          readOnly: true
+        position:
+          type: string
+          readOnly: true
+        category:
+          $ref: '#/components/schemas/CategoryEnum'
+        categoryName:
+          type: string
+          maxLength: 100
+        firm:
+          type: string
+          maxLength: 200
+        description:
+          type: string
+        specialization:
+          type: string
+          readOnly: true
+        experienceYears:
+          type: integer
+          readOnly: true
+        regionFrom:
+          readOnly: true
+        rating:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,2}(?:\.\d{0,1})?$
+        views:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        likes:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        instagram:
+          type: string
+          readOnly: true
+        telegram:
+          type: string
+          readOnly: true
+        linkedin:
+          type: string
+          format: uri
+          readOnly: true
+        behance:
+          type: string
+          format: uri
+          readOnly: true
+        website:
+          type: string
+          format: uri
+          readOnly: true
+        projects:
+          type: string
+          readOnly: true
+      required:
+      - avatar
+      - behance
+      - bio
+      - category
+      - email
+      - experienceYears
+      - id
+      - instagram
+      - linkedin
+      - name
+      - phone
+      - position
+      - projects
+      - regionFrom
+      - slug
+      - specialization
+      - telegram
+      - website
+    SpecialistList:
+      type: object
+      description: Compact specialist serializer for list views.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        slug:
+          type: string
+          maxLength: 50
+          pattern: ^[-a-zA-Z0-9_]+$
+        name:
+          type: string
+          readOnly: true
+        avatar:
+          type: string
+          readOnly: true
+        category:
+          $ref: '#/components/schemas/CategoryEnum'
+        categoryName:
+          type: string
+          maxLength: 100
+        firm:
+          type: string
+          maxLength: 200
+        specialization:
+          type: string
+          readOnly: true
+        experienceYears:
+          type: integer
+          readOnly: true
+        rating:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,2}(?:\.\d{0,1})?$
+        views:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        likes:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+      required:
+      - avatar
+      - category
+      - experienceYears
+      - id
+      - name
+      - slug
+      - specialization
+    VacancyCreate:
+      type: object
+      description: Create vacancy serializer.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          maxLength: 300
+        salaryFrom:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        salaryTo:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        currency:
+          type: string
+          maxLength: 10
+        experience:
+          type: string
+          maxLength: 100
+        rating:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,2}(?:\.\d{0,1})?$
+        work_tags: {}
+        description:
+          type: string
+        responsibilities: {}
+        requirements: {}
+        offers: {}
+        key_skills: {}
+        workPlace:
+          type: string
+          maxLength: 200
+        employment:
+          type: string
+          maxLength: 100
+        schedule:
+          type: string
+          maxLength: 100
+        workingHours:
+          type: string
+          maxLength: 50
+        workFormat:
+          type: string
+          maxLength: 100
+        companyName:
+          type: string
+          maxLength: 300
+        companyLogo:
+          type: string
+          format: uri
+          nullable: true
+        companyAddress:
+          type: string
+          maxLength: 300
+        companyWebsite:
+          type: string
+          format: uri
+          maxLength: 200
+        companyPhone:
+          type: string
+          maxLength: 30
+        companyEmail:
+          type: string
+          format: email
+          maxLength: 254
+        companyDescription:
+          type: string
+        publisherName:
+          type: string
+          maxLength: 200
+        publisherPosition:
+          type: string
+          maxLength: 200
+        publisherPhone:
+          type: string
+          maxLength: 30
+        publisherEmail:
+          type: string
+          format: email
+          maxLength: 254
+      required:
+      - companyName
+      - id
+      - title
+    VacancyDetail:
+      type: object
+      description: Full vacancy detail serializer.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          maxLength: 300
+        salaryFrom:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        salaryTo:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        currency:
+          type: string
+          maxLength: 10
+        experience:
+          type: string
+          maxLength: 100
+        rating:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,2}(?:\.\d{0,1})?$
+        work_tags: {}
+        description:
+          type: string
+        responsibilities: {}
+        requirements: {}
+        offers: {}
+        key_skills: {}
+        workPlace:
+          type: string
+          maxLength: 200
+        employment:
+          type: string
+          maxLength: 100
+        schedule:
+          type: string
+          maxLength: 100
+        workingHours:
+          type: string
+          maxLength: 50
+        workFormat:
+          type: string
+          maxLength: 100
+        companyName:
+          type: string
+          maxLength: 300
+        companyLogo:
+          type: string
+          format: uri
+          nullable: true
+        companyAddress:
+          type: string
+          maxLength: 300
+        companyWebsite:
+          type: string
+          format: uri
+          maxLength: 200
+        companyPhone:
+          type: string
+          maxLength: 30
+        companyEmail:
+          type: string
+          format: email
+          maxLength: 254
+        companyDescription:
+          type: string
+        publisherName:
+          type: string
+          maxLength: 200
+        publisherPosition:
+          type: string
+          maxLength: 200
+        publisherPhone:
+          type: string
+          maxLength: 30
+        publisherEmail:
+          type: string
+          format: email
+          maxLength: 254
+        viewsCount:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+        isSaved:
+          type: string
+          readOnly: true
+        responsesCount:
+          type: string
+          readOnly: true
+      required:
+      - companyName
+      - createdAt
+      - id
+      - isSaved
+      - responsesCount
+      - title
+    VacancyList:
+      type: object
+      description: Compact vacancy serializer for list views.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          maxLength: 300
+        salaryFrom:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        salaryTo:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        currency:
+          type: string
+          maxLength: 10
+        experience:
+          type: string
+          maxLength: 100
+        rating:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,2}(?:\.\d{0,1})?$
+        work_tags: {}
+        companyName:
+          type: string
+          maxLength: 300
+        companyLogo:
+          type: string
+          format: uri
+          nullable: true
+        companyAddress:
+          type: string
+          maxLength: 300
+        workPlace:
+          type: string
+          maxLength: 200
+        employment:
+          type: string
+          maxLength: 100
+        schedule:
+          type: string
+          maxLength: 100
+        workFormat:
+          type: string
+          maxLength: 100
+        viewsCount:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+        isSaved:
+          type: string
+          readOnly: true
+      required:
+      - companyName
+      - createdAt
+      - id
+      - isSaved
+      - title
+    WorkExperience:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        company:
+          type: string
+          maxLength: 200
+        position:
+          type: string
+          maxLength: 200
+        startDate:
+          type: string
+          maxLength: 50
+        endDate:
+          type: string
+          maxLength: 50
+        duties: {}
+        achievement:
+          type: string
+      required:
+      - company
+      - endDate
+      - id
+      - startDate
+  securitySchemes:
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

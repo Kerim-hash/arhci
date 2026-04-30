@@ -1,12 +1,10 @@
 // app/projects/page.tsx
 "use client";
 
-import { useEffect, useState } from "react";
-import { useAppSelector, useAppDispatch } from "@/app/store/hooks";
-import { fetchProjects } from "@/app/store/features/projectsSlice";
+import { useState } from "react";
+import { useApiProjectsListQuery } from "@/services/generatedApi";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
 import ProjectCard from "./components/ProjectCard";
 import {
@@ -18,58 +16,24 @@ import {
 } from "@/components/ui/select";
 
 const sortOptions = [
-  { value: "newest", label: "Сначала новые" },
-  { value: "oldest", label: "Сначала старые" },
-  { value: "most-viewed", label: "По просмотрам" },
-  { value: "most-liked", label: "По оценкам" },
+  { value: "-created_at", label: "Сначала новые" },
+  { value: "created_at", label: "Сначала старые" },
+  { value: "-views", label: "По просмотрам" },
+  { value: "-likes", label: "По оценкам" },
 ];
 
 export default function ProjectsPage() {
-  const dispatch = useAppDispatch();
-  const { projects, loading } = useAppSelector((state) => state.projects);
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortBy, setSortBy] = useState("newest");
+  const [sortBy, setSortBy] = useState("-created_at");
+  const [page, setPage] = useState(1);
 
-  useEffect(() => {
-    dispatch(fetchProjects());
-  }, [dispatch]);
+  const { data, isLoading } = useApiProjectsListQuery({
+    search: searchTerm || undefined,
+    ordering: sortBy,
+    page,
+  });
 
-  const filteredAndSortedProjects = () => {
-    let filtered = [...projects];
-
-    if (searchTerm) {
-      filtered = filtered.filter(
-        (project) =>
-          project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          project.description.toLowerCase().includes(searchTerm.toLowerCase()),
-      );
-    }
-
-    switch (sortBy) {
-      case "newest":
-        filtered.sort(
-          (a, b) =>
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-        );
-        break;
-      case "oldest":
-        filtered.sort(
-          (a, b) =>
-            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
-        );
-        break;
-      case "most-viewed":
-        filtered.sort((a, b) => b.views - a.views);
-        break;
-      case "most-liked":
-        filtered.sort((a, b) => b.likes - a.likes);
-        break;
-    }
-
-    return filtered;
-  };
-
-  const results = filteredAndSortedProjects();
+  const results = data?.results || [];
 
   return (
     <section className="container mx-auto relative px-4 sm:px-6 py-8">
@@ -111,11 +75,11 @@ export default function ProjectsPage() {
       {/* Результаты */}
       <div className="mb-4">
         <p className="text-sm text-[#666666]">
-          Найдено: {results.length} проектов
+          Найдено: {data?.count || 0} проектов
         </p>
       </div>
 
-      {loading ? (
+      {isLoading ? (
         <div className="text-center py-12">
           <p className="text-[#666666]">Загрузка проектов...</p>
         </div>

@@ -8,8 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { ImageIcon, Type, X, GripVertical, ArrowLeft, Eye, Calendar } from "lucide-react";
-import { useAppDispatch, useAppSelector } from "@/app/store/hooks";
-import { createProject } from "@/app/store/features/projectsSlice";
+import { useAppSelector } from "@/app/store/hooks";
+import { useApiProjectsCreateCreateMutation } from "@/services/generatedApi";
 import Link from "next/link";
 
 interface UploadedImage {
@@ -20,7 +20,7 @@ interface UploadedImage {
 
 export default function CreateProjectPage() {
   const router = useRouter();
-  const dispatch = useAppDispatch();
+  const [createProject] = useApiProjectsCreateCreateMutation();
   const user = useAppSelector((state) => state.authSlice.user);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -79,23 +79,13 @@ export default function CreateProjectPage() {
     setIsSubmitting(true);
 
     try {
-      // В реальном приложении тут загрузка файлов на сервер
-      const projectData = {
-        title,
-        description,
-        specialistId: user.specialistId || 0,
-        specialistSlug: user.specialistSlug || "",
-        specialistName: user.name || "",
-        specialistAvatar: user.image || "/avatar3.png",
-        previewImage: images[0]?.preview || "",
-        images: images.map((img, index) => ({
-          url: img.preview,
-          isPreview: index === 0,
-          alt: title,
-        })),
-      };
-
-      await dispatch(createProject(projectData)).unwrap();
+      await createProject({
+        projectCreate: {
+          title,
+          description,
+          images: images.map((img) => img.preview),
+        },
+      }).unwrap();
       router.push(`/specialists/architects/${user.specialistSlug}`);
     } catch (error) {
       console.error("Ошибка создания проекта:", error);

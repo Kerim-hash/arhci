@@ -9,8 +9,8 @@ import { Separator } from "@/components/ui/separator";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Plus, X, ImageIcon } from "lucide-react";
-import { useAppDispatch, useAppSelector } from "@/app/store/hooks";
-import { createCompetition } from "@/app/store/features/competitionsSlice";
+import { useAppSelector } from "@/app/store/hooks";
+import { useApiCompetitionsCreateCreateMutation } from "@/services/generatedApi";
 import Link from "next/link";
 
 const OPEN_FOR_OPTIONS = [
@@ -21,7 +21,7 @@ const OPEN_FOR_OPTIONS = [
 
 export default function CreateCompetitionPage() {
   const router = useRouter();
-  const dispatch = useAppDispatch();
+  const [createCompetition] = useApiCompetitionsCreateCreateMutation();
   const user = useAppSelector((state) => state.authSlice.user);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -128,34 +128,32 @@ export default function CreateCompetitionPage() {
     setIsSubmitting(true);
 
     try {
-      const competitionData = {
-        slug: slug || generateSlug(title),
-        title,
-        description,
-        shortDescription,
-        image: imagePreview || "/competition-placeholder.jpg",
-        openFor,
-        country,
-        city,
-        registrationFee: registrationFee || "Бесплатно",
-        prize,
-        organizer,
-        organizerLink: organizerLink || undefined,
-        dates: {
-          startRegistration,
-          endRegistration,
-          submissionDeadline,
-          resultsAnnouncement,
+      await createCompetition({
+        competitionCreate: {
+          slug: slug || generateSlug(title),
+          title,
+          description,
+          short_description: shortDescription,
+          image: imagePreview || undefined,
+          open_for: openFor,
+          country,
+          city,
+          registration_fee: registrationFee || "Бесплатно",
+          prize,
+          organizer,
+          organizer_link: organizerLink || undefined,
+          start_registration: startRegistration || undefined,
+          end_registration: endRegistration || undefined,
+          submission_deadline: submissionDeadline || undefined,
+          results_announcement: resultsAnnouncement || undefined,
+          tasks: tasks.filter((t) => t.trim() !== ""),
+          conditions: conditions.filter((c) => c.trim() !== ""),
+          project_composition: projectComposition.filter((p) => p.trim() !== ""),
+          evaluation_criteria: evaluationCriteria.filter((e) => e.trim() !== ""),
+          is_active: isActive,
+          is_featured: isFeatured,
         },
-        tasks: tasks.filter((t) => t.trim() !== ""),
-        conditions: conditions.filter((c) => c.trim() !== ""),
-        projectComposition: projectComposition.filter((p) => p.trim() !== ""),
-        evaluationCriteria: evaluationCriteria.filter((e) => e.trim() !== ""),
-        isActive,
-        isFeatured,
-      };
-
-      await dispatch(createCompetition(competitionData)).unwrap();
+      }).unwrap();
       router.push("/work");
     } catch (error) {
       console.error("Ошибка создания конкурса:", error);

@@ -17,12 +17,11 @@ import axios from "axios";
 interface ArticleType {
   id: number;
   title: string;
-  preview_image: string;
-  short_description: string;
-  word_file: string;
-  is_published: boolean;
-  created_at: string;
-  updated_at: string;
+  slug: string;
+  previewImage: string;
+  shortDescription: string;
+  views: number;
+  createdAt: string;
 }
 interface ApiResponse {
   count: number;
@@ -126,9 +125,9 @@ function ArticleContent() {
           {articles.map((article) => (
             <Card key={article.id} className="overflow-hidden flex flex-col">
               <div className="relative aspect-video md:aspect-[2/5] overflow-hidden md:max-h-[320px] w-full bg-gray-100">
-                {article.preview_image ? (
+                {article.previewImage ? (
                   <Image
-                    src={`${article.preview_image}`}
+                    src={`${article.previewImage}`}
                     alt={article.title}
                     fill
                     className="object-cover w-full"
@@ -158,16 +157,16 @@ function ArticleContent() {
                 </h2>
 
                 <p className="text-sm md:text-[16px] text-[#6D6D6D] leading-relaxed line-clamp-3 md:line-clamp-4 mb-4">
-                  {article.short_description || "Описание отсутствует"}
+                  {article.shortDescription || "Описание отсутствует"}
                 </p>
 
                 <p className="text-xs text-gray-400 mb-2">
-                  {formatDate(article.created_at)}
+                  {formatDate(article.createdAt)}
                 </p>
               </div>
 
               <Link
-                href={`/articles/${article.id}`}
+                href={`/articles/${article.slug}`}
                 className="block text-right px-4 md:px-6 pb-4 md:pb-6 font-medium text-[18px] text-blue-600 hover:text-blue-800 transition-colors"
               >
                 Читать далее →

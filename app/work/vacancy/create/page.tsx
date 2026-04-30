@@ -8,8 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Plus, X } from "lucide-react";
-import { useAppDispatch, useAppSelector } from "@/app/store/hooks";
-import { createVacancy } from "@/app/work/model/vacanciesSlice";
+import { useAppSelector } from "@/app/store/hooks";
+import { useApiVacanciesCreateCreateMutation } from "@/services/generatedApi";
 import Link from "next/link";
 
 const EXPERIENCE_OPTIONS = [
@@ -22,7 +22,7 @@ const EXPERIENCE_OPTIONS = [
 
 export default function CreateVacancyPage() {
   const router = useRouter();
-  const dispatch = useAppDispatch();
+  const [createVacancy] = useApiVacanciesCreateCreateMutation();
   const user = useAppSelector((state) => state.authSlice.user);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -62,19 +62,19 @@ export default function CreateVacancyPage() {
     setIsSubmitting(true);
 
     try {
-      const vacancyData = {
-        title,
-        salaryFrom: Number(salaryFrom) || 0,
-        salaryTo: Number(salaryTo) || 0,
-        experience,
-        company: company || user.name || "",
-        address,
-        responsibilities: responsibilities.filter((r) => r.trim() !== ""),
-        requirements: requirements.filter((r) => r.trim() !== ""),
-        benefits: benefits.filter((b) => b.trim() !== ""),
-      };
-
-      await dispatch(createVacancy(vacancyData)).unwrap();
+      await createVacancy({
+        vacancyCreate: {
+          title,
+          salary_from: Number(salaryFrom) || undefined,
+          salary_to: Number(salaryTo) || undefined,
+          experience,
+          company_name: company || user?.name || "",
+          company_address: address,
+          responsibilities: responsibilities.filter((r) => r.trim() !== ""),
+          requirements: requirements.filter((r) => r.trim() !== ""),
+          offers: benefits.filter((b) => b.trim() !== ""),
+        },
+      }).unwrap();
       router.push("/work");
     } catch (error) {
       console.error("Ошибка создания вакансии:", error);

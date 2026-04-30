@@ -9,8 +9,8 @@ import { Separator } from "@/components/ui/separator";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Plus, X, ArrowLeft } from "lucide-react";
-import { useAppDispatch, useAppSelector } from "@/app/store/hooks";
-import { createResume } from "@/app/store/features/resumesSlice";
+import { useAppSelector } from "@/app/store/hooks";
+import { useApiResumesCreateCreateMutation } from "@/services/generatedApi";
 import type { WorkExperience } from "@/app/store/features/resumesSlice";
 import Link from "next/link";
 
@@ -63,7 +63,7 @@ interface WorkExpForm {
 
 export default function CreateResumePage() {
   const router = useRouter();
-  const dispatch = useAppDispatch();
+  const [createResume] = useApiResumesCreateCreateMutation();
   const user = useAppSelector((state) => state.authSlice.user);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -191,37 +191,36 @@ export default function CreateResumePage() {
     setIsSubmitting(true);
 
     try {
-      const resumeData = {
-        name: user.name || "",
-        salaryFrom: Number(salaryFrom) || 0,
-        salaryTo: Number(salaryTo) || 0,
-        experience,
-        specialization: specializations,
-        category,
-        description,
-        about,
-        software,
-        employmentType,
-        region,
-        avatar: user.image || "",
-        workPlace,
-        employment,
-        schedule,
-        phone,
-        email,
-        socialLinks,
-        keySkills,
-        workExperience: workExperiences.map((exp) => ({
-          company: exp.company,
-          position: exp.position,
-          startDate: exp.startDate,
-          endDate: exp.endDate,
-          duties: exp.duties.filter((d) => d.trim() !== ""),
-          achievement: exp.achievement || undefined,
-        })) as WorkExperience[],
-      };
-
-      await dispatch(createResume(resumeData)).unwrap();
+      await createResume({
+        resumeCreate: {
+          name: user?.name || "",
+          category,
+          salary_from: Number(salaryFrom) || 0,
+          salary_to: Number(salaryTo) || 0,
+          experience,
+          specialization: specializations,
+          description,
+          about,
+          software,
+          employment_type: employmentType,
+          region,
+          work_place: workPlace,
+          employment,
+          schedule,
+          phone,
+          email,
+          social_links: socialLinks,
+          key_skills: keySkills,
+          work_experience: workExperiences.map((exp) => ({
+            company: exp.company,
+            position: exp.position,
+            start_date: exp.startDate,
+            end_date: exp.endDate,
+            duties: exp.duties.filter((d) => d.trim() !== ""),
+            achievement: exp.achievement || undefined,
+          })),
+        },
+      }).unwrap();
       router.push("/work");
     } catch (error) {
       console.error("Ошибка создания резюме:", error);

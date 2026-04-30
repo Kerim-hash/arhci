@@ -2,41 +2,42 @@
 
 "use client";
 
-import { notFound, useParams } from "next/navigation";
-import { useEffect } from "react";
+import { useParams } from "next/navigation";
 import Image from "next/image";
 import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
 import { Eye, Mail, MapPin, Plus, ThumbsUp, User } from "lucide-react";
-import { useAppSelector, useAppDispatch } from "@/app/store/hooks";
-import { fetchProjectsBySpecialist } from "@/app/store/features/projectsSlice";
+import { useAppSelector } from "@/app/store/hooks";
+import { useApiProjectsSpecialistListQuery } from "@/services/generatedApi";
+import { useApiSpecialistsRetrieveQuery } from "@/services/generatedApi";
 import ProjectCard from "@/app/projects/components/ProjectCard";
 import { Button } from "@/components/ui/button";
 
 export default function ArchitectPage() {
   const params = useParams();
   const slug = params.slug as string;
-  const dispatch = useAppDispatch();
 
-  const { specialists } = useAppSelector((state) => state.specialists);
-  const { projects } = useAppSelector((state) => state.projects);
+  const { data: architect, isLoading: specialistLoading } = useApiSpecialistsRetrieveQuery(
+    { slug },
+    { skip: !slug }
+  );
   const user = useAppSelector((state) => state.authSlice.user);
 
-  const architect = specialists.find(
-    (s) => s.category === "architects" && s.slug === slug,
+  const { data: projectsData } = useApiProjectsSpecialistListQuery(
+    { specialistId: architect?.id || 0 },
+    { skip: !architect?.id }
   );
+  const projects = projectsData?.results || [];
 
   // Проверяем, является ли текущий профиль профилем залогиненного пользователя
   const isOwnProfile = user?.specialistSlug === slug;
 
-  useEffect(() => {
-    if (architect) {
-      dispatch(fetchProjectsBySpecialist(architect.id));
-    }
-  }, [dispatch, architect]);
-
-  if (!architect) {
-    notFound();
+  if (specialistLoading || !architect) {
+    return (
+      <section className="container mx-auto relative px-4 sm:px-6 py-8">
+        <div className="text-center py-12">Загрузка...</div>
+      </section>
+    );
   }
 
   const contacts = {
@@ -67,7 +68,7 @@ export default function ArchitectPage() {
           <div className="sticky top-24 space-y-6">
             <div className="flex flex-col gap-8 mb-6">
               <Image
-                src={architect.avatar}
+                src={architect.avatar || '/avatar3.png'}
                 width={80}
                 height={80}
                 alt={architect.name}
@@ -82,9 +83,9 @@ export default function ArchitectPage() {
                 <div className="space-y-3">
                   <div className="flex items-center gap-2 text-[#949494]">
                     <User width={14} />
-                    {architect.categoryName}
+                    {architect.category_name || architect.category || ''}
                   </div>
-                  <p>{architect.firm}</p>
+                  <p>{architect.firm || ''}</p>
                   {contacts && (
                     <div className="flex items-center gap-2 text-[#949494]">
                       <MapPin width={14} />

@@ -27,11 +27,11 @@ export async function generateMetadata({
 
     return {
       title: article.title,
-      description: article.short_description || "Статья на нашем сайте",
+      description: article.shortDescription || "Статья на нашем сайте",
       openGraph: {
         title: article.title,
-        description: article.short_description,
-        images: article.preview_image ? [article.preview_image] : [],
+        description: article.shortDescription,
+        images: article.previewImage ? [article.previewImage] : [],
       },
     };
   } catch {
@@ -49,7 +49,7 @@ export async function generateStaticParams() {
     const articles = data.results || data;
 
     return articles.map((article: any) => ({
-      slug: article.id.toString(),
+      slug: article.slug,
     }));
   } catch (error) {
     console.error("Error generating static params:", error);

@@ -25,7 +25,7 @@ export default function LoginPage() {
     handleSubmit,
     formState: { errors },
   } = useForm<TypeLoginSchema>({
-    resolver: zodResolver(LoginSchema),
+    // resolver: zodResolver(LoginSchema),
     defaultValues: {
       email: "",
       password: "",
@@ -40,28 +40,31 @@ export default function LoginPage() {
       }).unwrap();
 
       loginSuccess(res);
-    } catch (error) {
-      const errorMessage = typeof error === "string" ? error : "Ошибка при входе в систему";
+    } catch (error: any) {
+      console.error("Login error:", error);
+      let errorMessage = "Ошибка при входе в систему";
+
+      if (error?.data) {
+        if (typeof error.data === "string") {
+          errorMessage = error.data;
+        } else if (error.data.detail) {
+          errorMessage = error.data.detail;
+        } else if (error.data.message) {
+          errorMessage = error.data.message;
+        } else {
+          // Если бэкенд возвращает ошибки валидации полей, например: { non_field_errors: ["..."] }
+          const errors = Object.values(error.data).flat();
+          if (errors.length > 0 && typeof errors[0] === "string") {
+            errorMessage = errors.join(", ");
+          }
+        }
+      } else if (error?.message) {
+        errorMessage = error.message;
+      } else if (typeof error === "string") {
+        errorMessage = error;
+      }
+
       toast.error(errorMessage);
-      // if (
-      // error?.data?.message?.includes(
-      //   "crypto/bcrypt: hashedPassword is not the hash of the given password",
-      // ) ||
-      // error?.data?.error?.includes(
-      //   "crypto/bcrypt: hashedPassword is not the hash of the given password",
-      // ) ||
-      // error?.message?.includes("Invalid credentials")
-      // ) {
-
-      //   toast.error("Incorrect password", { position: "bottom-left" });
-      // } else {
-      //   const message =
-      //     typeof error === "string"
-      //       ? error
-      //       : error?.data?.message || error?.data?.error || "Error logging in";
-
-      //   toast.error(message, { position: "bottom-left" });
-      // }
     }
   };
 
