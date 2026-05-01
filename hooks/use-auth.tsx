@@ -35,7 +35,7 @@ export const useAuth = () => {
   const refreshAuthToken = async (refreshToken: string) => {
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_SERVER_URL}/auth/refresh-token`,
+        `${process.env.NEXT_PUBLIC_SERVER_URL || 'http://84.46.243.175:8000'}/auth/refresh-token`,
         {
           method: "POST",
           headers: {

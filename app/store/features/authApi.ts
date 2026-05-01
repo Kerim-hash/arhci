@@ -36,7 +36,7 @@ export interface RefreshTokenResponse {
 }
 
 const baseQuery = fetchBaseQuery({
-  baseUrl: process.env.NEXT_PUBLIC_SERVER_URL,
+  baseUrl: process.env.NEXT_PUBLIC_SERVER_URL || 'http://84.46.243.175:8000',
   prepareHeaders: (headers) => {
     const token = tokenStorage.getAccessToken();
     if (token) {

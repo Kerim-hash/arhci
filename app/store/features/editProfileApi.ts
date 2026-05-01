@@ -8,7 +8,7 @@ export interface LoginResponse {
 export const editProfileApi = createApi({
   reducerPath: "editProfileApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: process.env.NEXT_PUBLIC_SERVER_URL,
+    baseUrl: process.env.NEXT_PUBLIC_SERVER_URL || 'http://84.46.243.175:8000',
     prepareHeaders: (headers) => {
       const token = localStorage.getItem("access_token");
       if (token) {
