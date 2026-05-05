@@ -47,9 +47,10 @@ export default function Page() {
           <Separator className="bg-[#333333] mb-6 md:mb-10" />
 
           {/* Фильтры - адаптивное отображение */}
-          <div className="flex flex-wrap gap-6 mb-4">
+          <div className="flex overflow-x-auto gap-6 mb-4">
             {filters.map((item, i) => (
-              <button
+              <Link
+                href={i === 0 ? "/articles" : i === 1 ? "/work" : i === 2 ? "/specialists" : "/projects"}
                 key={item}
                 className={cn(
                   "text-[16px] transition-colors cursor-pointer",
@@ -59,7 +60,7 @@ export default function Page() {
                 )}
               >
                 {item}
-              </button>
+              </Link>
             ))}
           </div>
 

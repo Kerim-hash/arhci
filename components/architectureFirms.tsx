@@ -19,20 +19,17 @@ export default function ArchitectureFirms() {
           </h5>
 
           <div className="flex flex-wrap gap-4">
-            {/* Пока статика, так как в API нет отдельного эндпоинта для бюро, 
-                либо можно фильтровать специалистов по категории "компании" */}
-            <p className="text-[#333333] text-[16px] hover:text-[#4677F3] cursor-pointer">
-              Schema
-            </p>
-            <p className="text-[#333333] text-[16px] hover:text-[#4677F3] cursor-pointer">
-              GeoMetric Design
-            </p>
-            <p className="text-[#333333] text-[16px] hover:text-[#4677F3] cursor-pointer">
-              Plane & Angle Studio
-            </p>
-            <p className="text-[#333333] text-[16px] hover:text-[#4677F3] cursor-pointer">
-              Zenith
-            </p>
+            {isLoading ? (
+              <p className="text-gray-500 text-sm">Загрузка...</p>
+            ) : Array.from(new Set(topSpecialists.filter((s: any) => s.firm?.trim()).map((s: any) => s.firm.trim()))).length > 0 ? (
+              Array.from(new Set(topSpecialists.filter((s: any) => s.firm?.trim()).map((s: any) => s.firm.trim()))).slice(0, 5).map((firm: any, index: number) => (
+                <p key={index} className="text-[#333333] text-[16px] hover:text-[#4677F3] cursor-pointer">
+                  {firm}
+                </p>
+              ))
+            ) : (
+              <p className="text-gray-500 text-sm">Нет данных</p>
+            )}
           </div>
         </Card>
 
