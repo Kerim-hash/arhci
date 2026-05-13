@@ -3,8 +3,17 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    domains: ['84.46.243.175'],
     remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'api.ardi.kg',
+        pathname: '/**',
+      },
+      {
+        protocol: 'http',
+        hostname: 'api.ardi.kg',
+        pathname: '/**',
+      },
       {
         protocol: 'http',
         hostname: '84.46.243.175',

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -22,8 +23,16 @@ import { User } from "@/types/user";
 type TabType = "personal" | "social" | "password";
 
 const Profile = () => {
-  const { data: user, isLoading } = useGetProfileQuery();
+  const router = useRouter();
+  const { data: user, isLoading, isError } = useGetProfileQuery();
   const [activeTab, setActiveTab] = useState<TabType>("personal");
+
+  useEffect(() => {
+    const token = typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
+    if (!token || isError) {
+      router.push("/auth/login");
+    }
+  }, [isError, router]);
 
   const tabs = [
     { id: "personal" as const, label: "Личная информация" },
@@ -37,6 +46,11 @@ const Profile = () => {
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
     );
+  }
+
+  // Если нет токена или ошибка, не рендерим ничего пока идет редирект
+  if (isError || (typeof window !== "undefined" && !localStorage.getItem("access_token"))) {
+    return null;
   }
 
   const renderContent = () => {

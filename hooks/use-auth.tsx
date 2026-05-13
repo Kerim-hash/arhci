@@ -35,7 +35,7 @@ export const useAuth = () => {
   const refreshAuthToken = async (refreshToken: string) => {
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_SERVER_URL || 'http://84.46.243.175:8000'}/auth/refresh-token`,
+        `${process.env.NEXT_PUBLIC_SERVER_URL || "https://api.ardi.kg"}/auth/refresh-token`,
         {
           method: "POST",
           headers: {
@@ -64,8 +64,9 @@ export const useAuth = () => {
   const loginSuccess = (tokens: any) => {
     try {
       const access = tokens.accessToken || tokens.access_token || tokens.access;
-      const refresh = tokens.refreshToken || tokens.refresh_token || tokens.refresh;
-      
+      const refresh =
+        tokens.refreshToken || tokens.refresh_token || tokens.refresh;
+
       if (access && refresh) {
         tokenStorage.setTokens(access, refresh);
         dispatch(setAuth(true));

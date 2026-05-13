@@ -50,7 +50,7 @@ export const NewsContent = ({ content }: { content: string }) => {
 
         // Если путь относительный, добавляем базовый URL
         if (src.startsWith("/")) {
-          return `<img${before}src="http://84.46.243.175:8000${src}"${after} class="word-image" loading="lazy" />`;
+          return `<img${before}src="https://api.ardi.kg${src}"${after} class="word-image" loading="lazy" />`;
         }
 
         // Если путь уже абсолютный

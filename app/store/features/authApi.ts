@@ -36,7 +36,7 @@ export interface RefreshTokenResponse {
 }
 
 const baseQuery = fetchBaseQuery({
-  baseUrl: process.env.NEXT_PUBLIC_SERVER_URL || 'http://84.46.243.175:8000',
+  baseUrl: process.env.NEXT_PUBLIC_SERVER_URL || "https://api.ardi.kg",
   prepareHeaders: (headers) => {
     const token = tokenStorage.getAccessToken();
     if (token) {
@@ -65,8 +65,10 @@ const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
 
       if (refreshResult.data) {
         const tokens = refreshResult.data as any;
-        const access = tokens.accessToken || tokens.access_token || tokens.access;
-        const refresh = tokens.refreshToken || tokens.refresh_token || tokens.refresh;
+        const access =
+          tokens.accessToken || tokens.access_token || tokens.access;
+        const refresh =
+          tokens.refreshToken || tokens.refresh_token || tokens.refresh;
         if (access && refresh) {
           tokenStorage.setTokens(access, refresh);
           result = await baseQuery(args, api, extraOptions);

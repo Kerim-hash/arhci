@@ -145,7 +145,7 @@ const CreateArticleForm: React.FC = () => {
     try {
       // Замените URL на ваш эндпоинт
       const response = await axios.post(
-        "http://84.46.243.175:8000/api/articles/",
+        "https://api.ardi.kg/api/articles/",
         submitData,
         {
           headers: {
@@ -202,10 +202,7 @@ const CreateArticleForm: React.FC = () => {
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Поле Title */}
         <div>
-          <label
-            htmlFor="title"
-            className="block text-[#333] font-normal mb-2"
-          >
+          <label htmlFor="title" className="block text-[#333] font-normal mb-2">
             Заголовок статьи
           </label>
           <input
@@ -243,7 +240,7 @@ const CreateArticleForm: React.FC = () => {
             disabled={loading}
           />
         </div> */}
-{/* 
+        {/* 
         <div>
           <label className="block text-gray-700 font-medium mb-2">
             Превью изображение <span className="text-red-500">*</span>

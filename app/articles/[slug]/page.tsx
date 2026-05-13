@@ -17,7 +17,7 @@ export async function generateMetadata({
   try {
     const { slug } = await params;
 
-    const res = await fetch(`http://84.46.243.175:8000/api/articles/${slug}/`, {
+    const res = await fetch(`https://api.ardi.kg/api/articles/${slug}/`, {
       next: { revalidate: 60 },
     });
 
@@ -42,7 +42,7 @@ export async function generateMetadata({
 // Для статической генерации (опционально)
 export async function generateStaticParams() {
   try {
-    const res = await fetch("http://84.46.243.175:8000/api/articles/");
+    const res = await fetch("https://api.ardi.kg/api/articles/");
     const data = await res.json();
 
     // Проверяем структуру ответа

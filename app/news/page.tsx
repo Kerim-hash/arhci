@@ -32,7 +32,7 @@ interface ApiResponse {
 
 const fetchNews = async (): Promise<NewsType[]> => {
   const { data } = await axios.get<ApiResponse>(
-    "http://84.46.243.175:8000/api/news/",
+    "https://api.ardi.kg/api/news/",
   );
 
   // Проверяем, является ли ответ пагинированным (есть поле results)

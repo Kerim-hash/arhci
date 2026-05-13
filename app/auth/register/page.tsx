@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -66,8 +67,9 @@ export default function LoginPage() {
         category: data.specialization || undefined,
       }).unwrap();
 
-      loginSuccess(res);
-      toast.success("Успешная регистрация!");
+      // loginSuccess(res);
+      toast.success("Успешная регистрация! Пожалуйста, войдите в систему.");
+      router.push("/auth/login");
     } catch (error: any) {
       console.error("Registration error:", error);
       let errorMessage = "Ошибка при регистрации";
@@ -107,10 +109,14 @@ export default function LoginPage() {
   };
 
   const specializations = [
-    { id: "architects", label: "Архитектор" },
-    { id: "engineers", label: "Инженер" },
-    { id: "visualizers", label: "Визуализатор" },
-    { id: "interior-designers", label: "Дизайнер интерьера" },
+    { id: "architects", label: "Архитектор", icon: "/achteck.svg" },
+    { id: "engineers", label: "Инженер", icon: "/engineer.svg" },
+    { id: "visualizers", label: "Визуализатор", icon: "/design.svg" },
+    {
+      id: "interior-designers",
+      label: "Дизайнер интерьера",
+      icon: "/design.svg",
+    },
   ];
 
   return (
@@ -279,9 +285,13 @@ export default function LoginPage() {
                   }`}
                 >
                   <div className="w-10 h-10 flex items-center justify-center">
-                    <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
-                      <span className="text-gray-600 text-xs">Icon</span>
-                    </div>
+                    <Image
+                      src={spec.icon}
+                      alt={spec.label}
+                      width={36}
+                      height={36}
+                      className="max-w-9 max-h-9"
+                    />
                   </div>
                   <span className="font-medium text-lg flex-1 text-left">
                     {spec.label}

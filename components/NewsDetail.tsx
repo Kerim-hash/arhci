@@ -27,7 +27,7 @@ interface NewsDetailProps {
 const fetchNewsById = async (slug: string): Promise<NewsType> => {
   console.log("Fetching news with slug:", slug);
   const { data } = await axios.get<NewsType>(
-    `http://84.46.243.175:8000/api/news/${slug}/`,
+    `https://api.ardi.kg/api/news/${slug}/`,
   );
   return data;
 };

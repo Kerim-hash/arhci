@@ -25,9 +25,9 @@ interface ArticleDetailProps {
 }
 
 const fetchArticleById = async (slug: string): Promise<ArticleType> => {
-    console.log("Fetching article with slug:", slug);
+  console.log("Fetching article with slug:", slug);
   const { data } = await axios.get<ArticleType>(
-    `http://84.46.243.175:8000/api/articles/${slug}/`,
+    `https://api.ardi.kg/api/articles/${slug}/`,
   );
   return data;
 };
@@ -43,7 +43,6 @@ const queryClient = new QueryClient({
 });
 
 // Компонент для отображения HTML контента
-
 
 // Основной компонент с логикой
 function ArticleDetailContent({ slug }: ArticleDetailProps) {
