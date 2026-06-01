@@ -82,229 +82,180 @@ export const ArticleContent = ({ content }: { content: string }) => {
     );
 
     return `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <meta charset="utf-8"/>
-          <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-          <style>
-            body {
-              font-family: 'Proxima Nova Rg', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-              width: 100%;
-              max-width: 100%;
-              margin: 0;
-              padding: 2rem;
-              line-height: 1.6;
-              color: #333;
-              background: #fff;
-              overflow-x: hidden;
-            }
-            
-            /* Контейнер для контента - центрированный но не сужающий фон */
-            .content-wrapper {
-              max-width: 900px;
-              margin: 0 auto;
-              width: 100%;
-            }
-            
-            /* Стили для параграфов */
-            .western-paragraph {
-              margin-bottom: 1.25rem;
-              text-align: left;
-              line-height: 1.7;
-              font-size: 1rem;
-              width: 100%;
-            }
-            
-            /* Стили для заголовков */
-            .western-heading {
-              color: #9f6bdb;
-              font-size: 1.5rem;
-              font-weight: 700;
-              margin: 2.5rem 0 1rem;
-              padding-bottom: 0.5rem;
-              border-bottom: 2px solid #e9d5ff;
-              width: 100%;
-            }
-            
-            /* Стили для изображений */
-            .word-image {
-              max-width: 100%;
-              height: auto;
-              display: block;
-              margin: 2rem auto;
-              border-radius: 12px;
-              box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
-            }
-            
-            /* Контейнер для изображений-заглушек */
-            .image-placeholder {
-              margin: 2rem 0;
-              width: 100%;
-            }
-            
-            /* Стили для ссылок */
-            .word-link {
-              color: #2563eb;
-              text-decoration: underline;
-              text-underline-offset: 2px;
-            }
-            
-            .word-link:hover {
-              color: #1d4ed8;
-            }
-            
-            /* Выделенные блоки */
-            .highlight-box {
-              background-color: #f8f5ff;
-              border-left: 4px solid #9f6bdb;
-              padding: 1.25rem 1.5rem;
-              margin: 1.5rem 0;
-              border-radius: 0 12px 12px 0;
-              width: 100%;
-            }
-            
-            .important-block {
-              background: linear-gradient(to right, #f8f5ff, transparent);
-            }
-            
-            /* Контейнер для таблиц */
-            .table-container {
-              overflow-x: auto;
-              margin: 1.5rem 0;
-              border-radius: 8px;
-              border: 1px solid #eaeaea;
-              width: 100%;
-            }
-            
-            .table-container table {
-              width: 100%;
-              border-collapse: collapse;
-              font-size: 0.95rem;
-              min-width: 600px;
-            }
-            
-            .table-container th {
-              background-color: #f3f4f6;
-              font-weight: 600;
-              padding: 0.75rem;
-              border: 1px solid #e5e7eb;
-              text-align: left;
-            }
-            
-            .table-container td {
-              padding: 0.75rem;
-              border: 1px solid #e5e7eb;
-            }
-            
-            .table-container tr:nth-child(even) {
-              background-color: #f9fafb;
-            }
-            
-            /* Стили для списков */
-            ul, ol {
-              margin: 1rem 0;
-              padding-left: 2rem;
-              width: 100%;
-            }
-            
-            li {
-              margin: 0.5rem 0;
-              line-height: 1.6;
-            }
-            
-            /* Стили для цитат */
-            blockquote {
-              border-left: 4px solid #e5e7eb;
-              padding: 0.75rem 0 0.75rem 1.5rem;
-              margin: 1.5rem 0;
-              font-style: italic;
-              color: #4b5563;
-              background-color: #f9fafb;
-              border-radius: 0 8px 8px 0;
-              width: 100%;
-            }
-            
-            /* Мета-информация (footer) - теперь на всю ширину */
-            .document-meta {
-              margin-top: 3rem;
-              padding: 1.5rem 0;
-              border-top: 2px solid #eaeaea;
-              font-size: 0.875rem;
-              color: #6b7280;
-              display: flex;
-              justify-content: space-between;
-              flex-wrap: wrap;
-              gap: 1rem;
-              width: 100%;
-              background: #f9f9f9;
-              margin-left: -2rem;
-              padding-left: 2rem;
-              padding-right: 2rem;
-              margin-right: -2rem;
-              margin-bottom: -2rem;
-            }
-            
-            /* Адаптивность */
-            @media (max-width: 768px) {
-              body {
-                padding: 1rem;
-              }
-              
-              .western-heading {
-                font-size: 1.25rem;
-                margin: 1.5rem 0 0.75rem;
-              }
-              
-              .western-paragraph {
-                font-size: 0.95rem;
-              }
-              
-              .table-container {
-                font-size: 0.85rem;
-              }
-              
-              .document-meta {
-                margin-left: -1rem;
-                padding-left: 1rem;
-                padding-right: 1rem;
-                margin-right: -1rem;
-              }
-            }
-            
-            /* Стили для печати */
-            @media print {
-              body {
-                padding: 0;
-              }
-              
-              .document-meta {
-                display: none;
-              }
-              
-              .word-image {
-                box-shadow: none;
-              }
-            }
-          </style>
-        </head>
-        <body>
-          <div class="content-wrapper">
-            ${bodyContent}
-          </div>
+      <style>
+        .word-article-wrapper {
+          font-family: 'Proxima Nova Rg', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+          width: 100%;
+          max-width: 100%;
+          margin: 0;
+          padding: 2rem;
+          line-height: 1.6;
+          color: #333;
+          background: #fff;
+          overflow-x: hidden;
+        }
+        
+        .word-article-wrapper .content-wrapper {
+          max-width: 900px;
+          margin: 0 auto;
+          width: 100%;
+        }
+        
+        .word-article-wrapper .western-paragraph {
+          margin-bottom: 1.25rem;
+          text-align: left;
+          line-height: 1.7;
+          font-size: 1rem;
+          width: 100%;
+        }
+        
+        .word-article-wrapper .western-heading {
+          color: #9f6bdb;
+          font-size: 1.5rem;
+          font-weight: 700;
+          margin: 2.5rem 0 1rem;
+          padding-bottom: 0.5rem;
+          border-bottom: 2px solid #e9d5ff;
+          width: 100%;
+        }
+        
+        .word-article-wrapper .word-image {
+          max-width: 100%;
+          height: auto;
+          display: block;
+          margin: 2rem auto;
+          border-radius: 12px;
+          box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+        }
+        
+        .word-article-wrapper .image-placeholder {
+          margin: 2rem 0;
+          width: 100%;
+        }
+        
+        .word-article-wrapper .word-link {
+          color: #2563eb;
+          text-decoration: underline;
+          text-underline-offset: 2px;
+        }
+        
+        .word-article-wrapper .word-link:hover {
+          color: #1d4ed8;
+        }
+        
+        .word-article-wrapper .highlight-box {
+          background-color: #f8f5ff;
+          border-left: 4px solid #9f6bdb;
+          padding: 1.25rem 1.5rem;
+          margin: 1.5rem 0;
+          border-radius: 0 12px 12px 0;
+          width: 100%;
+        }
+        
+        .word-article-wrapper .important-block {
+          background: linear-gradient(to right, #f8f5ff, transparent);
+        }
+        
+        .word-article-wrapper .table-container {
+          overflow-x: auto;
+          margin: 1.5rem 0;
+          border-radius: 8px;
+          border: 1px solid #eaeaea;
+          width: 100%;
+        }
+        
+        .word-article-wrapper .table-container table {
+          width: 100%;
+          border-collapse: collapse;
+          font-size: 0.95rem;
+          min-width: 600px;
+        }
+        
+        .word-article-wrapper .table-container th {
+          background-color: #f3f4f6;
+          font-weight: 600;
+          padding: 0.75rem;
+          border: 1px solid #e5e7eb;
+          text-align: left;
+        }
+        
+        .word-article-wrapper .table-container td {
+          padding: 0.75rem;
+          border: 1px solid #e5e7eb;
+        }
+        
+        .word-article-wrapper .table-container tr:nth-child(even) {
+          background-color: #f9fafb;
+        }
+        
+        .word-article-wrapper ul, .word-article-wrapper ol {
+          margin: 1rem 0;
+          padding-left: 2rem;
+          width: 100%;
+        }
+        
+        .word-article-wrapper li {
+          margin: 0.5rem 0;
+          line-height: 1.6;
+        }
+        
+        .word-article-wrapper blockquote {
+          border-left: 4px solid #e5e7eb;
+          padding: 0.75rem 0 0.75rem 1.5rem;
+          margin: 1.5rem 0;
+          font-style: italic;
+          color: #4b5563;
+          background-color: #f9fafb;
+          border-radius: 0 8px 8px 0;
+          width: 100%;
+        }
+        
+        .word-article-wrapper .document-meta {
+          margin-top: 3rem;
+          padding: 1.5rem 0;
+          border-top: 2px solid #eaeaea;
+          font-size: 0.875rem;
+          color: #6b7280;
+          display: flex;
+          justify-content: space-between;
+          flex-wrap: wrap;
+          gap: 1rem;
+          width: 100%;
+          background: #f9f9f9;
+        }
+        
+        @media (max-width: 768px) {
+          .word-article-wrapper {
+            padding: 1rem;
+          }
           
-          <div class="document-meta">
-            <span>📅 ${new Date().toLocaleDateString("ru-RU")}</span>
-            <span>📄 Статья с сайта</span>
-          </div>
-        </body>
-      </html>
+          .word-article-wrapper .western-heading {
+            font-size: 1.25rem;
+            margin: 1.5rem 0 0.75rem;
+          }
+          
+          .word-article-wrapper .western-paragraph {
+            font-size: 0.95rem;
+          }
+          
+          .word-article-wrapper .table-container {
+            font-size: 0.85rem;
+          }
+        }
+      </style>
+      <div class="content-wrapper">
+        ${bodyContent}
+      </div>
+      <div class="document-meta">
+        <span>📅 ${new Date().toLocaleDateString("ru-RU")}</span>
+        <span>📄 Статья с сайта</span>
+      </div>
     `;
   }, [content]);
 
   return (
     <div
-      className="word-article-wrapper w-full my-10"
+      className="word-article-wrapper w-full my-10 bg-white shadow-sm rounded-xl p-4 sm:p-8"
       dangerouslySetInnerHTML={{ __html: processedContent }}
     />
   );

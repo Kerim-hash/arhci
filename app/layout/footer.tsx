@@ -13,7 +13,7 @@ const Footer = () => {
             <p className="text-[20px] mb-10">
               {" "}
               <Image
-                src="/logo.svg"
+                src="/logo.png"
                 width={155}
                 height={23}
                 alt="Logotype"

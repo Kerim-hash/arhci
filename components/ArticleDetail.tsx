@@ -15,7 +15,8 @@ interface ArticleType {
   slug: string;
   previewImage: string;
   shortDescription: string;
-  content: string;
+  content?: string;
+  contentHtml?: string;
   views: number;
   createdAt: string;
 }
@@ -117,7 +118,7 @@ function ArticleDetailContent({ slug }: ArticleDetailProps) {
         Назад к списку
       </button>
 
-      <ArticleContent content={article.content} />
+      <ArticleContent content={article.contentHtml || article.content || ""} />
     </section>
   );
 }
