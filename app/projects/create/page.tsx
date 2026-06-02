@@ -118,11 +118,11 @@ export default function CreateProjectPage() {
         <div className="flex items-center justify-between mb-20 mt-6">
           <div className="flex items-center gap-4">
             <Image
-              src={user?.image || "/avatar3.png"}
+              src={user?.image || "/user.svg"}
               width={80}
               height={80}
               alt={user?.name || ""}
-              className="rounded-full w-20 h-20 object-cover"
+              className={`rounded-full w-20 h-20 ${user?.image ? 'object-cover' : 'object-none'}`}
             />
             <div>
               <h2 className="font-semibold text-lg">{user?.name}</h2>
@@ -156,10 +156,12 @@ export default function CreateProjectPage() {
                 key={img.id}
                 className="relative w-full rounded-lg overflow-hidden bg-gray-100"
               >
-                <img
+                <Image
                   src={img.preview}
                   alt={`${title} - ${index + 1}`}
-                  className="w-full h-full object-cover"
+                  width={1200}
+                  height={800}
+                  className="w-full h-auto object-cover"
                 />
               </div>
             ))}
@@ -271,10 +273,11 @@ export default function CreateProjectPage() {
                       key={img.id}
                       className="relative group rounded-lg overflow-hidden aspect-video"
                     >
-                      <img
+                      <Image
                         src={img.preview}
                         alt={`Uploaded ${index + 1}`}
-                        className="w-full h-full object-cover"
+                        fill
+                        className="object-cover"
                       />
                       {index === 0 && (
                         <span className="absolute top-2 left-2 bg-black/60 text-white text-[10px] px-2 py-0.5 rounded">

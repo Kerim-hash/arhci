@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useApiOrdersRespondCreateMutation } from "@/services/generatedApi";
 import { useState } from "react";
+import { toast } from "sonner";
 
 interface OrderCardProps {
   order: any;
@@ -20,10 +21,17 @@ export function OrderCard({ order }: OrderCardProps) {
     setIsResponding(true);
     try {
       await respondToOrder({ id: order.id }).unwrap();
-    } catch (err) {
-      console.error('Ошибка отклика', err);
+      toast.success("Отклик отправлен");
+    } catch (error: any) {
+      if (error?.status === 401) {
+        toast.error("Авторизуйтесь, чтобы откликнуться");
+      } else {
+        toast.error("Ошибка при отправке отклика");
+      }
+      console.error('Ошибка отклика', error);
+    } finally {
+      setIsResponding(false);
     }
-    setIsResponding(false);
   };
 
   return (

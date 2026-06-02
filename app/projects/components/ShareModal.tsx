@@ -73,10 +73,11 @@ export default function ShareModal({
 
         {/* Картинка 620x400 */}
         <div className="relative w-full h-[400px] bg-gray-900">
-          <img
+          <Image
             src={project.previewImage}
             alt={project.title}
-            className="w-full h-full object-cover"
+            fill
+            className="object-cover"
           />
 
           {/* Затемнение снизу только для текста */}

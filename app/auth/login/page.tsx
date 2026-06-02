@@ -16,16 +16,14 @@ import { useAuth } from "@/hooks/use-auth";
 // Схема валидации формы
 
 export default function LoginPage() {
-  const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
-  const [login] = useLoginMutation();
+  const [login, { isLoading }] = useLoginMutation();
   const { loginSuccess } = useAuth();
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<TypeLoginSchema>({
-    // resolver: zodResolver(LoginSchema),
+    resolver: zodResolver(LoginSchema),
     defaultValues: {
       email: "",
       password: "",

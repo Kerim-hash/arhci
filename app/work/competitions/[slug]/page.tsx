@@ -184,9 +184,11 @@ export default function CompetitionDetailPage() {
       <div className="mt-10 lg:mt-20">
         <div className="flex flex-col lg:flex-row gap-6 lg:gap-10 mb-8">
           <div className="w-full lg:w-auto mx-auto lg:mx-0">
-            <img
+            <Image
               src={currentCompetition.image || ''}
               alt={currentCompetition.title}
+              width={328}
+              height={328}
               className="w-full max-w-[328px] h-auto mx-auto lg:mx-0 rounded-lg"
             />
           </div>

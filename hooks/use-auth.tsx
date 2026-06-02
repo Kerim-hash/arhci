@@ -70,7 +70,7 @@ export const useAuth = () => {
       if (access && refresh) {
         tokenStorage.setTokens(access, refresh);
         dispatch(setAuth(true));
-        refetch();
+        // refetch();
         router.push("/");
       } else {
         console.error("No valid tokens found in response:", tokens);

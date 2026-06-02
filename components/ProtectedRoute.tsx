@@ -24,7 +24,6 @@ export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     if (isPublicRoute) {
-      setAuthChecked(true);
       return;
     }
 

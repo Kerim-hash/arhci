@@ -139,9 +139,11 @@ export default function ProjectDetailPage() {
                   key={image.id || index}
                   className="relative w-[300px] md:w-[400px] lg:w-full h-full flex-shrink-0 rounded-lg overflow-hidden bg-gray-100"
                 >
-                  <img
+                  <Image
                     src={image.url || image.image}
                     alt={image.alt || currentProject.title}
+                    width={1200}
+                    height={800}
                     className="w-full h-full object-cover"
                   />
                 </div>

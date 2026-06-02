@@ -9,6 +9,7 @@ import type { VacancyDetail, SimilarVacancy } from "@/types/vacancy";
 import { useApiVacanciesRespondCreateMutation } from "@/services/generatedApi";
 import { useState } from "react";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
+import { toast } from "sonner";
 
 interface VacancyDetailProps {
   vacancy: VacancyDetail;
@@ -18,11 +19,21 @@ export function VacancyDetailComponent({ vacancy }: VacancyDetailProps) {
   const [respondToVacancy] = useApiVacanciesRespondCreateMutation();
   const [isResponding, setIsResponding] = useState(false);
 
-  const handleRespond = () => {
+  const handleRespond = async () => {
     setIsResponding(true);
-    respondToVacancy({ id: vacancy.id }).finally(() => {
+    try {
+      await respondToVacancy({ id: vacancy.id }).unwrap();
+      toast.success("Отклик отправлен");
+    } catch (error: any) {
+      if (error?.status === 401) {
+        toast.error("Авторизуйтесь, чтобы откликнуться");
+      } else {
+        toast.error("Ошибка при отправке отклика");
+      }
+      console.error("Ошибка при отклике", error);
+    } finally {
       setIsResponding(false);
-    });
+    }
   };
 
   return (
@@ -213,11 +224,21 @@ function SimilarVacancyCard({ vacancy }: { vacancy: SimilarVacancy }) {
   const [isResponding, setIsResponding] = useState(false);
   const [respondToVacancy] = useApiVacanciesRespondCreateMutation();
 
-  const handleRespond = () => {
+  const handleRespond = async () => {
     setIsResponding(true);
-    respondToVacancy({ id: vacancy.id }).finally(() => {
+    try {
+      await respondToVacancy({ id: vacancy.id }).unwrap();
+      toast.success("Отклик отправлен");
+    } catch (error: any) {
+      if (error?.status === 401) {
+        toast.error("Авторизуйтесь, чтобы откликнуться");
+      } else {
+        toast.error("Ошибка при отправке отклика");
+      }
+      console.error("Ошибка при отклике", error);
+    } finally {
       setIsResponding(false);
-    });
+    }
   };
 
   return (

@@ -3,6 +3,7 @@
 
 import { useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
@@ -281,7 +282,7 @@ export default function CreateCompetitionPage() {
               </label>
               {imagePreview ? (
                 <div className="relative rounded-lg overflow-hidden aspect-video max-w-[400px]">
-                  <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                  <Image src={imagePreview} alt="Preview" fill className="object-cover" />
                   <button
                     onClick={() => {
                       setImagePreview("");

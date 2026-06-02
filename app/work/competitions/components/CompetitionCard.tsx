@@ -17,10 +17,11 @@ export default function CompetitionCard({ competition }: CompetitionCardProps) {
     <Link href={`/work/competitions/${competition.slug}`}>
       <Card className="overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 cursor-pointer h-full flex flex-col">
         <div className="relative h-48 overflow-hidden">
-          <img
+          <Image
             src={competition.image}
             alt={competition.title}
-            className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+            fill
+            className="object-cover transition-transform duration-300 hover:scale-105"
           />
           <div className="absolute top-3 right-3">
             <Badge className={isActive ? "bg-green-500" : "bg-gray-500"}>

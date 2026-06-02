@@ -22,11 +22,11 @@ export default function SpecialistCard({
       <Card className="text-center gap-6">
         <div className="rounded-full mx-auto w-[40px] h-[40px] md:w-[60px] md:h-[60px] lg:w-[80px] lg:h-[80px] overflow-hidden border-4 border-white">
           <Image
-            src={specialist.avatar || '/avatar3.png'}
+            src={specialist.avatar || '/user.svg'}
             width={80}
             height={80}
             alt={specialist.name}
-            className="w-full h-full object-cover"
+            className={`w-full h-full ${specialist.avatar ? 'object-cover' : 'object-none'}`}
           />
         </div>
         <div>

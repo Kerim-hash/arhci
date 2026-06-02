@@ -79,7 +79,7 @@ const Profile = () => {
                   src={user?.image || "/user.svg"}
                   alt="Avatar"
                   fill
-                  className="rounded-full object-cover"
+                  className="rounded-full object-none"
                 />
                 <button className="absolute bottom-0 right-0 bg-primary text-white p-1.5 rounded-full">
                   <svg
@@ -242,7 +242,7 @@ const PersonalInfo = ({ user }: { user?: User }) => {
             id="phone"
             type="tel"
             {...register("phone")}
-            placeholder="+7 (999) 123-45-67"
+            placeholder="+996 (555) 123-456"
             className="mt-1.5"
           />
           {errors.phone && <p className="text-sm text-red-500 mt-1">{errors.phone.message}</p>}
@@ -301,7 +301,7 @@ const PersonalInfo = ({ user }: { user?: User }) => {
             id="experience_years"
             type="number"
             {...register("experience_years", { valueAsNumber: true })}
-            placeholder="5"
+            placeholder="0"
             className="mt-1.5"
           />
           {errors.experience_years && <p className="text-sm text-red-500 mt-1">{errors.experience_years.message}</p>}

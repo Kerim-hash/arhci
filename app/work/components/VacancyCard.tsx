@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useApiVacanciesRespondCreateMutation } from "@/services/generatedApi";
 import { useState } from "react";
 import { RoleGuard } from "@/components/RoleGuard";
+import { toast } from "sonner";
 
 interface VacancyCardProps {
   vacancy: any;
@@ -23,8 +24,14 @@ export function VacancyCard({ vacancy }: VacancyCardProps) {
     setIsResponding(true);
     try {
       await respondToVacancy({ id: vacancy.id }).unwrap();
+      toast.success("Отклик отправлен");
       console.log("Отклик отправлен");
-    } catch (error) {
+    } catch (error: any) {
+      if (error?.status === 401) {
+        toast.error("Авторизуйтесь, чтобы откликнуться");
+      } else {
+        toast.error("Ошибка при отправке отклика");
+      }
       console.error("Ошибка при отклике", error);
     } finally {
       setIsResponding(false);

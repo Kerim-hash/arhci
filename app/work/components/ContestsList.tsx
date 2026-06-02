@@ -3,6 +3,7 @@
 
 import { useApiCompetitionsListQuery } from "@/services/generatedApi";
 import Link from "next/link";
+import Image from "next/image";
 
 export function ContestsList() {
   const { data, isLoading } = useApiCompetitionsListQuery({});
@@ -29,10 +30,11 @@ export function ContestsList() {
                 className="group block"
               >
                 <div className="relative overflow-hidden rounded-lg aspect-[4/3] bg-gray-100">
-                  <img
+                  <Image
                     src={competition.image || ''}
                     alt={competition.title}
-                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    fill
+                    className="object-cover transition-transform duration-300 group-hover:scale-105"
                   />
                 </div>
                 <p className="mt-2 text-sm font-medium text-[#333] line-clamp-2 leading-tight">
@@ -56,10 +58,11 @@ export function ContestsList() {
                 className="group block"
               >
                 <div className="relative overflow-hidden rounded-lg aspect-[4/3] bg-gray-100">
-                  <img
+                  <Image
                     src={competition.image || ''}
                     alt={competition.title}
-                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 opacity-80"
+                    fill
+                    className="object-cover transition-transform duration-300 group-hover:scale-105 opacity-80"
                   />
                 </div>
                 <p className="mt-2 text-sm font-medium text-[#333] line-clamp-2 leading-tight">

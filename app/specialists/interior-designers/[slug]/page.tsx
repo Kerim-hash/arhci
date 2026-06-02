@@ -65,11 +65,11 @@ export default function InteriorDesignerPage() {
           <div className="sticky top-24 space-y-6">
             <div className="flex flex-col gap-8 mb-6">
               <Image
-                src={designer.avatar || '/avatar3.png'}
+                src={designer.avatar || '/user.svg'}
                 width={80}
                 height={80}
                 alt={designer.name}
-                className="object-cover w-20 h-20 rounded-full"
+                className={`w-20 h-20 rounded-full ${designer.avatar ? 'object-cover' : 'object-none'}`}
                 priority
               />
 
@@ -128,7 +128,7 @@ export default function InteriorDesignerPage() {
             {projects.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {projects.map((project) => (
-                  <ProjectCard key={project.id} project={project} />
+                  <ProjectCard key={project.id} project={project} category="interior-designers" />
                 ))}
               </div>
             ) : (

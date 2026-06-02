@@ -68,11 +68,11 @@ export default function ArchitectPage() {
           <div className="sticky top-24 space-y-6">
             <div className="flex flex-col gap-8 mb-6">
               <Image
-                src={architect.avatar || '/avatar3.png'}
+                src={architect.avatar || '/user.svg'}
                 width={80}
                 height={80}
                 alt={architect.name}
-                className="object-cover w-20 h-20 rounded-full"
+                className={`w-20 h-20 rounded-full ${architect.avatar ? 'object-cover' : 'object-none'}`}
                 priority
               />
 
@@ -150,6 +150,7 @@ export default function ArchitectPage() {
                 <ProjectCard
                   key={project.id}
                   project={project}
+                  category="architects"
                 />
               ))}
 

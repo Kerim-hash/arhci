@@ -7,7 +7,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { ArrowLeft, Check } from "lucide-react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 
 import { useRegisterUserMutation } from "@/app/store/features/authApi";
 import { useRouter } from "next/navigation";
@@ -29,7 +29,7 @@ export default function LoginPage() {
   const {
     register,
     handleSubmit,
-    watch,
+    control,
     setValue,
     formState: { errors },
   } = useForm<FormValues>({
@@ -40,9 +40,9 @@ export default function LoginPage() {
     },
   });
 
-  const email = watch("email");
-  const userType = watch("userType");
-  const specialization = watch("specialization");
+  const email = useWatch({ control, name: "email" }) || "";
+  const userType = useWatch({ control, name: "userType" }) || "";
+  const specialization = useWatch({ control, name: "specialization" }) || "";
 
   const onNextStep = (data: Partial<FormValues>) => {
     if (step === 1 && data.email) {
