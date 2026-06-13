@@ -55,8 +55,8 @@ export function VacancyCard({ vacancy }: VacancyCardProps) {
                 {hasSalary ? (
                   <div className="flex items-center gap-1 text-primary font-medium">
                     <span>
-                      {vacancy.salaryFrom.toLocaleString()} ₽ —{" "}
-                      {vacancy.salaryTo.toLocaleString()} ₽
+                      {vacancy.salaryFrom.toLocaleString()} —{" "}
+                      {vacancy.salaryTo.toLocaleString()} {vacancy.currency || 'сом'}
                     </span>
                   </div>
                 ) : (

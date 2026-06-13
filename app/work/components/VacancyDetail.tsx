@@ -41,7 +41,7 @@ export function VacancyDetailComponent({ vacancy }: VacancyDetailProps) {
       <Breadcrumb >
         <BreadcrumbList className="p-0!">
           <BreadcrumbItem>
-            <BreadcrumbLink href="/">Работа</BreadcrumbLink>
+            <BreadcrumbLink href="/work">Работа</BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
@@ -62,7 +62,7 @@ export function VacancyDetailComponent({ vacancy }: VacancyDetailProps) {
                     <div className="flex items-center gap-1 font-semibold">
                       <span>
                         {vacancy.salaryFrom?.toLocaleString()} —{" "}
-                        {vacancy.salaryTo?.toLocaleString()} {vacancy.currency}
+                        {vacancy.salaryTo?.toLocaleString()} {vacancy.currency || 'сом'}
                       </span>
                     </div>
                     <div className="flex bg-[#F5F5F7] px-2 py-1 rounded-[40px] items-center gap-1 text-[#949494]">
@@ -250,7 +250,7 @@ function SimilarVacancyCard({ vacancy }: { vacancy: SimilarVacancy }) {
             {hasSalary ? (
               <div className="font-medium text-sm">
                 {vacancy.salaryFrom!.toLocaleString()} —{" "}
-                {vacancy.salaryTo!.toLocaleString()} {vacancy.currency}
+                {vacancy.salaryTo!.toLocaleString()} {vacancy.currency || 'сом'}
               </div>
             ) : (
               <div className="text-gray-500 text-sm">

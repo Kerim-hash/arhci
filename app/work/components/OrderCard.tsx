@@ -3,6 +3,7 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 import { useApiOrdersRespondCreateMutation } from "@/services/generatedApi";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -36,9 +37,8 @@ export function OrderCard({ order }: OrderCardProps) {
 
   return (
     <Card className="border border-[#F1EFEF] hover:shadow-md transition-shadow">
-      <CardContent className="p-0!">
-        <div className="flex flex-col gap-4">
-          {/* <div className="flex-1"> */}
+      <CardContent className="p-5!">
+        <Link href={`/work/order/${order.id}`} className="flex flex-col gap-4">
           <h3 className="text-[20px] font-bold text-primary">{order.title}</h3>
 
           <div className="flex items-center gap-3 ">
@@ -79,8 +79,7 @@ export function OrderCard({ order }: OrderCardProps) {
               {isResponding ? "Отправка..." : "Откликнуться"}
             </Button>
           </div>
-          {/* </div> */}
-        </div>
+        </Link>
       </CardContent>
     </Card>
   );
