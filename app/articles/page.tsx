@@ -124,13 +124,16 @@ function ArticleContent() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
           {articles.map((article) => (
             <Card key={article.id} className="overflow-hidden flex flex-col">
-              <div className="relative aspect-video md:aspect-[2/5] overflow-hidden md:max-h-[320px] w-full bg-gray-100">
+              <Link
+                href={`/articles/${article.slug}`}
+                className="relative block aspect-video md:aspect-[2/5] overflow-hidden md:max-h-[320px] w-full bg-gray-100 group"
+              >
                 {article.previewImage ? (
                   <Image
                     src={`${article.previewImage}`}
                     alt={article.title}
                     fill
-                    className="object-cover w-full"
+                    className="object-cover w-full transition-transform duration-300 group-hover:scale-105"
                     sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
@@ -149,11 +152,13 @@ function ArticleContent() {
                 >
                   {getCategory(article)}
                 </Badge>
-              </div>
+              </Link>
 
               <div className="p-4 md:p-6 flex-1">
                 <h2 className="text-lg sm:text-xl md:text-[32px] font-medium leading-tight underline mb-3 line-clamp-2">
-                  {article.title}
+                  <Link href={`/articles/${article.slug}`} className="hover:text-blue-600 transition-colors">
+                    {article.title}
+                  </Link>
                 </h2>
 
                 <p className="text-sm md:text-[16px] text-[#6D6D6D] leading-relaxed line-clamp-3 md:line-clamp-4 mb-4">
