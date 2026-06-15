@@ -70,7 +70,7 @@ export default function Page() {
               <div className="text-center py-8 text-gray-500">Загрузка...</div>
             ) : articles.length > 0 ? (
               articles.map((item: any) => (
-                <Link href={`/articles/${item.slug}`} key={item.id}>
+                <Link href={`/articles/${item.slug}`} key={item.id} className="group">
                   <Card className="overflow-hidden mb-4 md:mb-6">
                     {/* Изображение - меняется пропорция на мобиле */}
                     <div className="relative aspect-video md:aspect-[2/5] overflow-hidden md:max-h-[320px] w-full bg-gray-100">
@@ -79,7 +79,7 @@ export default function Page() {
                           src={item.previewImage}
                           alt={item.title}
                           fill
-                          className="object-cover w-full"
+                          className="object-cover w-full transition-transform duration-300 group-hover:scale-105"
                           sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                         />
                       ) : (
@@ -99,7 +99,7 @@ export default function Page() {
 
                     {/* Контент карточки */}
                     <div className="p-4 md:p-6">
-                      <h2 className="text-lg sm:text-xl md:text-[32px] font-medium leading-tight underline mb-3">
+                      <h2 className="text-lg sm:text-xl md:text-[32px] font-medium leading-tight group-hover:underline mb-3">
                         {item.title}
                       </h2>
 

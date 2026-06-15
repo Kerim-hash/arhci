@@ -155,8 +155,8 @@ function ArticleContent() {
               </Link>
 
               <div className="p-4 md:p-6 flex-1">
-                <h2 className="text-lg sm:text-xl md:text-[32px] font-medium leading-tight underline mb-3 line-clamp-2">
-                  <Link href={`/articles/${article.slug}`} className="hover:text-blue-600 transition-colors">
+                <h2 className="text-lg sm:text-xl md:text-[32px] font-medium leading-tight mb-3 line-clamp-2">
+                  <Link href={`/articles/${article.slug}`} className="hover:text-blue-600 hover:underline transition-colors">
                     {article.title}
                   </Link>
                 </h2>
