@@ -118,9 +118,10 @@ export function VacancyDetailComponent({ vacancy }: VacancyDetailProps) {
 
           {/* Описание */}
           {vacancy.description && (
-            <p className="text-gray-700 leading-relaxed">
-              {vacancy.description}
-            </p>
+            <div 
+              className="ck-content text-gray-700 leading-relaxed"
+              dangerouslySetInnerHTML={{ __html: vacancy.description }}
+            />
           )}
 
           {/* Обязанности */}

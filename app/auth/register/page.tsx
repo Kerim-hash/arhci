@@ -67,9 +67,8 @@ export default function LoginPage() {
         category: data.specialization || undefined,
       }).unwrap();
 
-      // loginSuccess(res);
-      toast.success("Успешная регистрация! Пожалуйста, войдите в систему.");
-      router.push("/auth/login");
+      loginSuccess(res);
+      toast.success("Успешная регистрация!");
     } catch (error: any) {
       console.error("Registration error:", error);
       let errorMessage = "Ошибка при регистрации";

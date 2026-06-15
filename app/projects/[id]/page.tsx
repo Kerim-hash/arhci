@@ -155,9 +155,10 @@ export default function ProjectDetailPage() {
         <div className="mb-8">
           <h2 className="text-xl font-semibold mb-4">Описание проекта</h2>
           <div className="prose max-w-none">
-            <p className="text-[#333333] leading-relaxed whitespace-pre-wrap">
-              {currentProject.description}
-            </p>
+            <div 
+              className="ck-content text-[#333333] leading-relaxed"
+              dangerouslySetInnerHTML={{ __html: currentProject.description }}
+            />
           </div>
         </div>
 

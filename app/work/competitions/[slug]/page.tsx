@@ -194,9 +194,10 @@ export default function CompetitionDetailPage() {
           </div>
           <div className="lg:flex-1">
             <h2 className="font-semibold mb-4 text-xl">О конкурсе</h2>
-            <p className="text-sm lg:text-base leading-relaxed">
-              {currentCompetition.description}
-            </p>
+            <div 
+              className="ck-content text-sm lg:text-base leading-relaxed"
+              dangerouslySetInnerHTML={{ __html: currentCompetition.description }}
+            />
           </div>
         </div>
 
