@@ -6,6 +6,7 @@ import axios, { AxiosError } from "axios";
 import { useDropzone } from "react-dropzone";
 import type { ApiError } from "../types/article.types";
 import { Button } from "./ui/button";
+import { tokenStorage } from "@/hooks/storage";
 
 interface CreateArticleData {
   title: string;
@@ -143,15 +144,20 @@ const CreateArticleForm: React.FC = () => {
     submitData.append("is_published", String(formData.is_published));
 
     try {
-      // Замените URL на ваш эндпоинт
+      const token = tokenStorage.getAccessToken();
+      const headers: Record<string, string> = {
+        "Content-Type": "multipart/form-data",
+        Accept: "application/json",
+      };
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+
       const response = await axios.post(
-        "https://api.ardi.kg/api/articles/",
+        `${process.env.NEXT_PUBLIC_SERVER_URL || "https://api.ardi.kg"}/api/articles/create/`,
         submitData,
         {
-          headers: {
-            "Content-Type": "multipart/form-data",
-            Accept: "application/json",
-          },
+          headers,
         },
       );
       console.log("Ответ сервера:", response.data);
