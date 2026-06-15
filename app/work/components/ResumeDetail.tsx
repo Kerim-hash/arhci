@@ -134,7 +134,10 @@ export function ResumeDetailComponent({ resume }: ResumeDetailProps) {
           <div>
             <h2 className="text-xl font-semibold mb-4">О себе</h2>
             <Separator className="mb-4" />
-            <p className="text-gray-700 leading-relaxed">{resume.about}</p>
+            <div 
+              className="ck-content text-gray-700 leading-relaxed"
+              dangerouslySetInnerHTML={{ __html: resume.about }}
+            />
           </div>
         )}
 

@@ -92,9 +92,10 @@ export function OrderDetailComponent({ order }: OrderDetailProps) {
               <div className="pt-4 space-y-6">
                 <div>
                   <h2 className="text-xl font-bold mb-4">Описание проекта</h2>
-                  <div className="text-gray-700 whitespace-pre-wrap leading-relaxed text-[15px]">
-                    {order.description}
-                  </div>
+                  <div 
+                    className="ck-content text-gray-700 leading-relaxed text-[15px]"
+                    dangerouslySetInnerHTML={{ __html: order.description }}
+                  />
                 </div>
                 
                 {/* Если в будущем добавятся поля для файлов или локации, их можно вывести здесь */}
