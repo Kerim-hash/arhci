@@ -134,6 +134,23 @@ html {
   background: #fbfbfb !important;
 }
 
+/* Rich text block inside article content blocks */
+.rich-text-block {
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  overflow: hidden;
+  min-height: 120px;
+}
+
+.rich-text-block .bn-editor {
+  background: #fff !important;
+  padding: 4px 0;
+}
+
+.rich-text-block .bn-container {
+  font-size: 14px;
+}
+
 /* styles/WordArticle.module.css */
 .word-article {
   font-family:

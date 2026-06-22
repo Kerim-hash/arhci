@@ -7,34 +7,30 @@ import { BlockNoteView } from "@blocknote/mantine";
 import { useCreateBlockNote } from "@blocknote/react";
 import { ru } from "@blocknote/core/locales";
 
-interface BlockNoteEditorProps {
-  onChange?: (html: string) => void;
-  editable?: boolean;
+interface RichTextBlockProps {
+  onChange: (html: string) => void;
 }
 
-export default function BlockNoteEditor({
-  onChange,
-  editable = true,
-}: BlockNoteEditorProps) {
+export default function RichTextBlock({ onChange }: RichTextBlockProps) {
   const editor = useCreateBlockNote({
     initialContent: [
-      { type: "heading", props: { level: 1 }, content: [] },
       { type: "paragraph", content: [] },
     ],
     dictionary: ru,
   });
+
   return (
-    <BlockNoteView
-      editor={editor}
-      theme="light"
-      lang="ru"
-      editable={editable}
-      onChange={async () => {
-        if (onChange) {
+    <div className="rich-text-block">
+      <BlockNoteView
+        editor={editor}
+        theme="light"
+        lang="ru"
+        slashMenu={false}
+        onChange={async () => {
           const html = await editor.blocksToHTMLLossy(editor.document);
           onChange(html);
-        }
-      }}
-    />
+        }}
+      />
+    </div>
   );
 }

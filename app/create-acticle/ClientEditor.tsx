@@ -7,6 +7,11 @@ const BlockNoteEditor = dynamic(
   { ssr: false }
 );
 
-export default function ClientEditor() {
-  return <BlockNoteEditor />;
+interface ClientEditorProps {
+  onChange?: (html: string) => void;
+  editable?: boolean;
+}
+
+export default function ClientEditor({ onChange, editable = true }: ClientEditorProps) {
+  return <BlockNoteEditor onChange={onChange} editable={editable} />;
 }
