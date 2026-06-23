@@ -1,7 +1,195 @@
 import { useMemo } from "react";
 
-// components/ArticleDetail.tsx (обновленный ArticleContent)
-export const ArticleContent = ({ content }: { content: string }) => {
+const getYoutubeEmbedUrl = (url: string): string | null => {
+  if (!url) return null;
+  const match = url.match(
+    /(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
+  );
+  return match ? `https://www.youtube.com/embed/${match[1]}` : null;
+};
+
+export const ArticleContent = ({ article }: { article: any }) => {
+  const content = article.contentHtml || article.content || "";
+
+  if (article.contentMode === "editor" || (article.blocks && article.blocks.length > 0)) {
+    return (
+      <div className="word-article-wrapper w-full my-10 bg-white shadow-sm rounded-xl p-4 sm:p-8">
+        <style>{`
+          .word-article-wrapper {
+            font-family: 'Proxima Nova Rg', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            width: 100%;
+            max-width: 100%;
+            margin: 0;
+            padding: 2rem;
+            line-height: 1.6;
+            color: #333;
+            background: #fff;
+            overflow-x: hidden;
+          }
+          .word-article-wrapper .content-wrapper {
+            max-width: 900px;
+            margin: 0 auto;
+            width: 100%;
+          }
+          .word-article-wrapper p {
+            margin-bottom: 1.25rem;
+            text-align: left;
+            line-height: 1.7;
+            font-size: 1rem;
+            width: 100%;
+          }
+          .word-article-wrapper .word-image {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 2rem auto;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+          }
+          .word-article-wrapper .word-link {
+            color: #2563eb;
+            text-decoration: underline;
+            text-underline-offset: 2px;
+          }
+          .word-article-wrapper .word-link:hover {
+            color: #1d4ed8;
+          }
+          .word-article-wrapper ul, .word-article-wrapper ol {
+            margin: 1rem 0;
+            padding-left: 2rem;
+            width: 100%;
+          }
+          .word-article-wrapper li {
+            margin: 0.5rem 0;
+            line-height: 1.6;
+          }
+          .word-article-wrapper blockquote {
+            border-left: 4px solid #e5e7eb;
+            padding: 0.75rem 0 0.75rem 1.5rem;
+            margin: 1.5rem 0;
+            font-style: italic;
+            color: #4b5563;
+            background-color: #f9fafb;
+            border-radius: 0 8px 8px 0;
+            width: 100%;
+          }
+          .word-article-wrapper .document-meta {
+            margin-top: 3rem;
+            padding: 1.5rem 0;
+            border-top: 2px solid #eaeaea;
+            font-size: 0.875rem;
+            color: #6b7280;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+            width: 100%;
+            background: #f9f9f9;
+          }
+        `}</style>
+        <div className="content-wrapper">
+          {article.blocks.map((block: any) => {
+            switch (block.type) {
+              case "text":
+                return (
+                  <div
+                    key={block.id}
+                    className="mb-6"
+                    dangerouslySetInnerHTML={{ __html: block.content }}
+                  />
+                );
+              case "image": {
+                const imgUrl = block.images && block.images[0]?.image;
+                return (
+                  <div key={block.id} className="my-8">
+                    {imgUrl && (
+                      <img
+                        src={imgUrl}
+                        alt={block.altText || "Изображение"}
+                        className="word-image"
+                        loading="lazy"
+                      />
+                    )}
+                    {block.altText && (
+                      <p className="text-center text-xs text-gray-500 mt-2 italic">
+                        {block.altText}
+                      </p>
+                    )}
+                  </div>
+                );
+              }
+              case "video": {
+                const embedUrl = getYoutubeEmbedUrl(block.content);
+                return (
+                  <div key={block.id} className="my-8">
+                    {embedUrl ? (
+                      <div className="rounded-lg overflow-hidden border border-gray-200">
+                        <iframe
+                          src={embedUrl}
+                          className="w-full aspect-video"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                          title={block.altText || "YouTube видео"}
+                        />
+                      </div>
+                    ) : (
+                      <a
+                        href={block.content}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="word-link break-all"
+                      >
+                        {block.content}
+                      </a>
+                    )}
+                    {block.altText && (
+                      <p className="text-center text-xs text-gray-500 mt-2 italic">
+                        {block.altText}
+                      </p>
+                    )}
+                  </div>
+                );
+              }
+              case "gallery":
+                return (
+                  <div key={block.id} className="my-8">
+                    {block.images && block.images.length > 0 && (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                        {block.images.map((imgObj: any) => (
+                          <div
+                            key={imgObj.id}
+                            className="rounded-xl overflow-hidden shadow-sm border border-gray-100"
+                          >
+                            <img
+                              src={imgObj.image}
+                              alt={block.altText || "Галерея"}
+                              className="w-full h-48 object-cover hover:scale-105 transition-transform duration-300"
+                              loading="lazy"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {block.altText && (
+                      <p className="text-center text-xs text-gray-500 mt-2 italic">
+                        {block.altText}
+                      </p>
+                    )}
+                  </div>
+                );
+              default:
+                return null;
+            }
+          })}
+        </div>
+        <div className="document-meta">
+          <span>📅 {new Date(article.createdAt || Date.now()).toLocaleDateString("ru-RU")}</span>
+          <span>📄 Статья с сайта</span>
+        </div>
+      </div>
+    );
+  }
+
   const processedContent = useMemo(() => {
     if (!content) return "";
 
@@ -32,7 +220,7 @@ export const ArticleContent = ({ content }: { content: string }) => {
     // 5. Обрабатываем изображения - добавляем правильные пути
     bodyContent = bodyContent.replace(
       /<img([^>]*)src="([^"]*\.(png|jpg|jpeg|gif|webp))"([^>]*)>/g,
-      (match, before, src, ext, after) => {
+      (match: string, before: string, src: string, ext: string, after: string) => {
         // Если это изображение из временных файлов или относительный путь
         if (
           src.includes("document_html_") ||
