@@ -144,6 +144,25 @@ const CreateArticleForm: React.FC = () => {
   const [error, setError] = useState("");
   const [formState, setFormState] = useState<"editing" | "success">("editing");
   const [isSticky, setIsSticky] = useState(false);
+  const [zoomImages, setZoomImages] = useState<string[]>([]);
+  const [zoomIndex, setZoomIndex] = useState<number>(-1);
+
+  useEffect(() => {
+    if (zoomIndex === -1) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "ArrowRight") {
+        setZoomIndex(prev => (prev < zoomImages.length - 1 ? prev + 1 : prev));
+      } else if (e.key === "ArrowLeft") {
+        setZoomIndex(prev => (prev > 0 ? prev - 1 : prev));
+      } else if (e.key === "Escape") {
+        setZoomIndex(-1);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [zoomIndex, zoomImages.length]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -812,11 +831,17 @@ const CreateArticleForm: React.FC = () => {
         return (
           <div key={block.id}>
             {block.previewUrl && (
-              <div className="rounded-lg overflow-hidden">
+              <div className="rounded-lg overflow-hidden cursor-zoom-in">
                 <img
                   src={block.previewUrl}
                   alt={block.altText || "Image"}
-                  className="w-full h-auto max-h-[400px] object-cover"
+                  className="w-full h-auto max-h-[400px] object-cover hover:scale-[1.01] transition-transform duration-200"
+                  onClick={() => {
+                    if (block.previewUrl) {
+                      setZoomImages([block.previewUrl]);
+                      setZoomIndex(0);
+                    }
+                  }}
                 />
               </div>
             )}
@@ -860,11 +885,17 @@ const CreateArticleForm: React.FC = () => {
             {block.previewUrls && block.previewUrls.length > 0 && (
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 {block.previewUrls.map((url, idx) => (
-                  <div key={idx} className="rounded-lg overflow-hidden border border-gray-100">
+                  <div key={idx} className="rounded-lg overflow-hidden border border-gray-100 cursor-zoom-in">
                     <img
                       src={url}
                       alt={`${block.altText || "Gallery"} ${idx + 1}`}
-                      className="w-full h-32 object-cover"
+                      className="w-full h-32 object-cover hover:scale-105 transition-transform duration-200"
+                      onClick={() => {
+                        if (block.previewUrls) {
+                          setZoomImages(block.previewUrls);
+                          setZoomIndex(idx);
+                        }
+                      }}
                     />
                   </div>
                 ))}
@@ -1109,6 +1140,77 @@ const CreateArticleForm: React.FC = () => {
           </div>
         </SheetContent>
       </Sheet>
+
+      {zoomIndex >= 0 && zoomImages.length > 0 && (
+        <div 
+          className="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-4 select-none animate-in fade-in duration-200"
+          onClick={() => setZoomIndex(-1)}
+        >
+          <button 
+            type="button" 
+            className="absolute top-4 right-4 text-white hover:text-gray-300 bg-white/10 hover:bg-white/20 p-2.5 rounded-full transition-colors cursor-pointer z-55"
+            onClick={(e) => {
+              e.stopPropagation();
+              setZoomIndex(-1);
+            }}
+            aria-label="Закрыть"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+
+          {zoomIndex > 0 && (
+            <button
+              type="button"
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-white hover:text-gray-300 bg-white/10 hover:bg-white/20 p-3 rounded-full transition-colors cursor-pointer z-55"
+              onClick={(e) => {
+                e.stopPropagation();
+                setZoomIndex(prev => prev - 1);
+              }}
+              aria-label="Предыдущее"
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="15,18 9,12 15,6" />
+              </svg>
+            </button>
+          )}
+
+          {zoomIndex < zoomImages.length - 1 && (
+            <button
+              type="button"
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-white hover:text-gray-300 bg-white/10 hover:bg-white/20 p-3 rounded-full transition-colors cursor-pointer z-55"
+              onClick={(e) => {
+                e.stopPropagation();
+                setZoomIndex(prev => prev + 1);
+              }}
+              aria-label="Следующее"
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="9,18 15,12 9,6" />
+              </svg>
+            </button>
+          )}
+
+          <div 
+            className="relative max-w-5xl max-h-[85vh] w-full h-full flex flex-col items-center justify-center gap-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <img 
+              src={zoomImages[zoomIndex]} 
+              alt={`Zoomed image ${zoomIndex + 1}`} 
+              className="max-w-full max-h-full object-contain rounded-lg shadow-2xl transition-all duration-300 animate-in zoom-in-95 duration-200"
+              key={zoomIndex}
+            />
+            {zoomImages.length > 1 && (
+              <span className="text-white/60 text-xs px-3 py-1 bg-white/10 rounded-full backdrop-blur-xs">
+                {zoomIndex + 1} / {zoomImages.length}
+              </span>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
