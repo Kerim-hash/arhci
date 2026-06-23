@@ -1,7 +1,7 @@
 // components/CreateArticleForm.tsx
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import dynamic from "next/dynamic";
 import axios, { AxiosError } from "axios";
 import { useDropzone } from "react-dropzone";
@@ -10,6 +10,7 @@ import { Button } from "./ui/button";
 import { tokenStorage } from "@/hooks/storage";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { useGetProfileQuery } from "@/app/store/features/authApi";
 import {
   Sheet,
   SheetContent,
@@ -138,9 +139,20 @@ const generateId = () => Math.random().toString(36).substring(2, 10);
 
 const CreateArticleForm: React.FC = () => {
   const router = useRouter();
+  const { data: user } = useGetProfileQuery();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [formState, setFormState] = useState<"editing" | "success">("editing");
+  const [isSticky, setIsSticky] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsSticky(window.scrollY > 20);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   // Form state
   const [title, setTitle] = useState("");
@@ -553,13 +565,13 @@ const CreateArticleForm: React.FC = () => {
         <div className="flex items-center gap-2 mb-8 text-sm text-muted-foreground">
           Написать как:
           <Image
-            src="/article.jpg"
+            src={user?.image || "/user.svg"}
             width={24}
             height={24}
             alt="avatar"
-            className="rounded-full"
+            className="rounded-full object-cover"
           />
-          Daniar Asanov
+          {user?.email || "Daniar Asanov"}
         </div>
 
         <h1 className="text-3xl font-bold text-[#333] mb-4">
@@ -874,28 +886,35 @@ const CreateArticleForm: React.FC = () => {
   // Main render
   // ═══════════════════════════════════════════════════════════
   return (
-    <div className="max-w-2xl mx-auto pb-12">
-      {/* ─── Top bar: Назад / Далее ─── */}
-      <div className="flex items-center justify-between mb-8">
-        <button
-          type="button"
-          onClick={() => router.back()}
-          className="px-4 py-1.5 text-xs border border-gray-300 rounded-md hover:bg-gray-50 transition-colors text-[#333]"
-        >
-          Назад
-        </button>
-        <Button
-          type="button"
-          onClick={handleSubmit}
-          disabled={loading}
-          size="sm"
-          className="px-6"
-        >
-          {loading ? "Отправка..." : "Далее"}
-        </Button>
+    <div className="w-full pb-12">
+      {/* ─── Top bar: Назад / Далее (sticky full width wrapper) ─── */}
+      <div className={`sticky top-[92px] md:top-[110px] z-30 w-full transition-all duration-200 ${
+        isSticky
+          ? "bg-white/90 backdrop-blur-md border-b border-gray-100 shadow-xs"
+          : "bg-transparent"
+      }`}>
+        <div className="max-w-2xl mx-auto flex items-center justify-between py-3 px-4 md:px-0">
+          <button
+            type="button"
+            onClick={() => router.back()}
+            className="px-4 py-1.5 text-xs border border-gray-300 rounded-md hover:bg-gray-50 transition-colors text-[#333] cursor-pointer"
+          >
+            Назад
+          </button>
+          <Button
+            type="button"
+            onClick={handleSubmit}
+            disabled={loading}
+            size="sm"
+            className="px-6 cursor-pointer"
+          >
+            {loading ? "Отправка..." : "Далее"}
+          </Button>
+        </div>
       </div>
 
-      {/* Alerts */}
+      <div className="max-w-2xl mx-auto px-4 md:px-0 mt-8">
+        {/* Alerts */}
       {error && (
         <div className="mb-5 p-3 bg-red-50 text-red-600 rounded-lg border border-red-100 text-sm" role="alert">
           {error}
@@ -1044,6 +1063,7 @@ const CreateArticleForm: React.FC = () => {
             rows={4}
           />
         </div>
+      </div>
       </div>
 
       {/* ═══ Side Panel (Sheet) ═══════════════════════════════ */}

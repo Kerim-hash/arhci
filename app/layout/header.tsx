@@ -3,12 +3,9 @@
 import React, { FC, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import clsx from "clsx";
-import { Search } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
-import { toast } from "sonner";
 import { useSelector } from "react-redux";
 import { selectUser } from "../auth/model/authSlice";
 
@@ -18,7 +15,6 @@ const Header: FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const { isAuthenticated } = useAuth();
-  const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
@@ -65,7 +61,7 @@ const Header: FC = () => {
     <header
       className={clsx(
         "py-4 fixed top-0 left-0 w-full z-50 transition-colors duration-300",
-        isScrolled ? "bg-white shadow-md" : "bg-transparent",
+        isScrolled ? "bg-white" : "bg-transparent",
       )}
     >
       <div className="mx-auto container grid grid-cols-12 items-center py-4 px-5">
@@ -98,23 +94,8 @@ const Header: FC = () => {
           </nav>
         </div>
 
-        {/* SEARCH – 15% (desktop only) */}
-        <div className="f hidden lg:flex items-center col-span-2 justify-end">
-          <Button
-            variant="ghost"
-            className="w-6 h-6"
-            size="icon"
-            aria-label="Search"
-            asChild
-          >
-            <Image
-              src="/search.svg"
-              alt="article"
-              width={24}
-              height={24}
-              className="rounded-full object-scale-down"
-            />
-          </Button>
+        {/* Actions – 15% (desktop only) */}
+        <div className="hidden lg:flex items-center col-span-2 justify-end">
           {isAuthenticated ? (
             <>
               <Link
@@ -189,6 +170,11 @@ const Header: FC = () => {
                 {label}
               </Link>
             ))}
+            {isAuthenticated && (
+              <Link href="/create-acticle" className="text-[#333] font-medium mt-2">
+                Написать статью
+              </Link>
+            )}
             {!isAuthenticated ? (
               <Link href="/auth/login" className="text-[#333] font-medium mt-2">
                 Войти
