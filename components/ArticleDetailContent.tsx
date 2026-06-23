@@ -220,7 +220,7 @@ export const ArticleContent = ({ article }: { article: any }) => {
     // 5. Обрабатываем изображения - добавляем правильные пути
     bodyContent = bodyContent.replace(
       /<img([^>]*)src="([^"]*\.(png|jpg|jpeg|gif|webp))"([^>]*)>/g,
-      (match, before, src, ext, after) => {
+      (match: string, before: string, src: string, ext: string, after: string) => {
         // Если это изображение из временных файлов или относительный путь
         if (
           src.includes("document_html_") ||
