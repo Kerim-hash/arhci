@@ -9,6 +9,19 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import { ArticleContent } from "./ArticleDetailContent";
 
+interface ArticleBlockType {
+  id: number;
+  type: "text" | "image" | "video" | "gallery";
+  content: string;
+  altText: string;
+  order: number;
+  images: Array<{
+    id: number;
+    image: string;
+    order: number;
+  }>;
+}
+
 interface ArticleType {
   id: number;
   title: string;
@@ -19,6 +32,9 @@ interface ArticleType {
   contentHtml?: string;
   views: number;
   createdAt: string;
+  contentMode?: "editor" | "docx";
+  biography?: string;
+  blocks?: ArticleBlockType[];
 }
 
 interface ArticleDetailProps {
@@ -118,10 +134,11 @@ function ArticleDetailContent({ slug }: ArticleDetailProps) {
         Назад к списку
       </button>
 
-      <ArticleContent content={article.contentHtml || article.content || ""} />
+      <ArticleContent article={article} />
     </section>
   );
 }
+
 
 // Оборачиваем в провайдер
 const ArticleDetail = ({ slug }: ArticleDetailProps) => {
