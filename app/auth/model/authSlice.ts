@@ -8,21 +8,10 @@ export interface AuthState {
   user: User | null;
 }
 
-// TODO: Убрать мок-пользователя перед продакшеном
 const initialState: AuthState = {
-  isAuthenticated: true,
+  isAuthenticated: false,
   loading: false,
-  user: {
-    id: "dev-user-1",
-    email: "specialist@archi.kg",
-    created_at: "2025-01-01T00:00:00Z",
-    updated_at: "2025-01-01T00:00:00Z",
-    name: "Смит Джон",
-    role: "company",
-    is_verified: true,
-    specialistSlug: "smith-john",
-    specialistId: 3,
-  },
+  user: null,
 };
 
 export const authReducer = createSlice({

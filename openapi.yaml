@@ -1,8 +1,8 @@
 openapi: 3.0.3
 info:
-  title: Archi Platform API
+  title: Ardi Platform API
   version: 1.0.0
-  description: API для архитектурной платформы Archi
+  description: API для архитектурной платформы Ardi
 paths:
   /api/articles/:
     get:

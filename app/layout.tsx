@@ -18,7 +18,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Archi",
+  title: "Ardi",
   description: "Architects ",
   icons: {
     icon: "/logo.png",

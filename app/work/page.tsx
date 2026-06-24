@@ -62,7 +62,8 @@ function MainPage() {
             onValueChange={handleTabChange}
             className="w-full"
           >
-            <TabsList className="grid gap-5 w-fit grid-cols-4 mb-6">
+          <div className="w-full overflow-x-auto pb-1 mb-6 scrollbar-none -mx-4 px-4 lg:mx-0 lg:px-0">
+            <TabsList className="grid gap-5 w-max min-w-full grid-cols-4">
               <TabsTrigger
                 value="vacancies"
                 className="data-[state=active]:bg-[#333] cursor-pointer data-[state=active]:text-[#F1EFEF] text-[#333333] flex items-center justify-center gap-2"
@@ -105,6 +106,7 @@ function MainPage() {
                 Конкурсы
               </TabsTrigger>
             </TabsList>
+          </div>
 
             {/* Кнопки создания по ролям */}
             {activeTab === "vacancies" && (
