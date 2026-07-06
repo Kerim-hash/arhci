@@ -509,7 +509,7 @@ const CreateArticleForm: React.FC = () => {
 
     const submitData = new FormData();
     submitData.append("title", title);
-    submitData.append("is_published", "true");
+    submitData.append("is_published", "false");
     submitData.append("content_mode", hasDocx ? "docx" : "editor");
 
     if (previewImage) {
@@ -598,11 +598,11 @@ const CreateArticleForm: React.FC = () => {
         </h1>
 
         <p className="text-sm text-[#333] mb-4">
-          Проверка займет около 3 дней
+          Проверка займет около 1 дня
         </p>
 
         <p className="text-sm text-gray-500 leading-relaxed mb-8">
-          Мы внимательно изучим вашу публикацию в течение трех рабочих дней.
+          Мы внимательно изучим вашу публикацию в течение одного рабочего дня.
           Если возникнут вопросы, мы пришлем письмо с подробностями.
           Успешно одобренные публикации сразу появятся в вашем профиле.
         </p>

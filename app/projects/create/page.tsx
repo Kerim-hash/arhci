@@ -11,6 +11,12 @@ import { ImageIcon, Type, X, GripVertical, ArrowLeft, Eye, Calendar } from "luci
 import { useAppSelector } from "@/app/store/hooks";
 import { useApiProjectsCreateCreateMutation } from "@/services/generatedApi";
 import Link from "next/link";
+import dynamic from "next/dynamic";
+
+const BlockNoteEditor = dynamic(
+  () => import("@/components/BlockNoteEditor"),
+  { ssr: false }
+);
 
 interface UploadedImage {
   id: string;
@@ -31,6 +37,7 @@ export default function CreateProjectPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeBlock, setActiveBlock] = useState<"image" | "text" | null>(null);
   const [showPreview, setShowPreview] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleFiles = useCallback((files: FileList | null) => {
     if (!files) return;
@@ -44,6 +51,10 @@ export default function CreateProjectPage() {
       }));
 
     setImages((prev) => [...prev, ...newImages]);
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   }, []);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -76,19 +87,48 @@ export default function CreateProjectPage() {
   const handleSubmit = async () => {
     if (!title.trim() || !user) return;
 
+    setError(null);
+
+    const cleanText = description.replace(/<[^>]*>/g, "").trim();
+    if (!cleanText) {
+      setError("Описание проекта обязательно для заполнения. Пожалуйста, откройте текстовый блок и добавьте описание.");
+      setActiveBlock("text");
+      setShowPreview(false);
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
+      const formData = new FormData();
+      formData.append("title", title);
+      formData.append("description", description);
+      
+      images.forEach((img) => {
+        if (img.file) {
+          formData.append("images", img.file);
+        }
+      });
+
       await createProject({
-        projectCreate: {
-          title,
-          description,
-          images: images.map((img) => img.preview),
-        },
+        projectCreate: formData as any,
       }).unwrap();
       router.push(`/specialists/architects/${user.specialistSlug}`);
-    } catch (error) {
-      console.error("Ошибка создания проекта:", error);
+    } catch (err: any) {
+      console.error("Ошибка создания проекта:", err);
+      const errorData = err?.data;
+      if (errorData && typeof errorData === "object") {
+        const messages = Object.entries(errorData)
+          .map(([field, errors]) => {
+            const fieldName = field === "description" ? "Описание" : field === "title" ? "Заголовок" : field === "images" ? "Изображения" : field;
+            const errMsgs = Array.isArray(errors) ? errors.join(", ") : String(errors);
+            return `${fieldName}: ${errMsgs}`;
+          })
+          .join("\n");
+        setError(messages || "Произошла ошибка при создании проекта");
+      } else {
+        setError(err?.message || "Произошла ошибка при создании проекта");
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -161,6 +201,7 @@ export default function CreateProjectPage() {
                   alt={`${title} - ${index + 1}`}
                   width={1200}
                   height={800}
+                  unoptimized
                   className="w-full h-auto object-cover"
                 />
               </div>
@@ -173,14 +214,21 @@ export default function CreateProjectPage() {
           <div className="mb-8">
             <h2 className="text-xl font-semibold mb-4">Описание проекта</h2>
             <div className="prose max-w-none">
-              <p className="text-[#333333] leading-relaxed whitespace-pre-wrap">
-                {description}
-              </p>
+              <div 
+                className="text-[#333333] leading-relaxed"
+                dangerouslySetInnerHTML={{ __html: description }}
+              />
             </div>
           </div>
         )}
 
         <Separator className="mb-6" />
+
+        {error && (
+          <div className="max-w-md mx-auto text-red-500 text-sm bg-red-50 border border-red-200 rounded-lg p-3 mb-6">
+            {error.split('\n').map((line, i) => <div key={i}>{line}</div>)}
+          </div>
+        )}
 
         {/* Кнопки */}
         <div className="flex justify-center gap-4">
@@ -277,6 +325,7 @@ export default function CreateProjectPage() {
                         src={img.preview}
                         alt={`Uploaded ${index + 1}`}
                         fill
+                        unoptimized
                         className="object-cover"
                       />
                       {index === 0 && (
@@ -316,17 +365,13 @@ export default function CreateProjectPage() {
 
           {/* Описание */}
           {activeBlock === "text" && (
-            <div>
-              <label className="text-sm font-medium text-[#333] mb-2 block">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-[#333] block">
                 Описание проекта
               </label>
-              <textarea
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Расскажите о проекте..."
-                rows={6}
-                className="w-full border rounded-lg p-3 text-base resize-none focus:outline-none focus:ring-2 focus:ring-[#333] focus:border-transparent"
-              />
+              <div className="border rounded-lg p-2 min-h-[200px] bg-white">
+                <BlockNoteEditor onChange={(html) => setDescription(html)} />
+              </div>
             </div>
           )}
         </div>
@@ -363,11 +408,25 @@ export default function CreateProjectPage() {
 
           {/* Действия */}
           <div className="space-y-3 pt-4">
+            {error && (
+              <div className="text-red-500 text-sm bg-red-50 border border-red-200 rounded-lg p-3">
+                {error.split('\n').map((line, i) => <div key={i}>{line}</div>)}
+              </div>
+            )}
             <Button
               variant="outline"
               className="w-full rounded-[40px]"
               disabled={!title.trim() || images.length === 0}
-              onClick={() => setShowPreview(true)}
+              onClick={() => {
+                setError(null);
+                const cleanText = description.replace(/<[^>]*>/g, "").trim();
+                if (!cleanText) {
+                  setError("Описание проекта обязательно для заполнения. Пожалуйста, откройте текстовый блок и добавьте описание.");
+                  setActiveBlock("text");
+                  return;
+                }
+                setShowPreview(true);
+              }}
             >
               Предварительный просмотр
             </Button>

@@ -19,12 +19,15 @@ import {
   useCheckPasswordMutation
 } from "@/app/store/features/editProfileApi";
 import { User } from "@/types/user";
+import { LogOut } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
 
 type TabType = "personal" | "social" | "password";
 
 const Profile = () => {
   const router = useRouter();
   const { data: user, isLoading, isError } = useGetProfileQuery();
+  const { logout } = useAuth();
   const [activeTab, setActiveTab] = useState<TabType>("personal");
 
   useEffect(() => {
@@ -124,6 +127,13 @@ const Profile = () => {
                   </button>
                 );
               })}
+              <button
+                onClick={logout}
+                className="w-full cursor-pointer flex items-center gap-3 py-3 text-red-500 hover:text-red-700 transition-all duration-200 border-b border-transparent"
+              >
+                <LogOut className="w-4 h-4" />
+                <span>Выйти</span>
+              </button>
             </nav>
           </div>
         </div>

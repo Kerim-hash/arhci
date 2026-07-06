@@ -5,7 +5,7 @@ import { useState } from "react";
 import { useApiProjectsListQuery } from "@/services/generatedApi";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
+import { Search, Plus } from "lucide-react";
 import ProjectCard from "./components/ProjectCard";
 import {
   Select,
@@ -14,6 +14,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { RoleGuard } from "@/components/RoleGuard";
+import Link from "next/link";
 
 const sortOptions = [
   { value: "-created_at", label: "Сначала новые" },
@@ -37,13 +40,23 @@ export default function ProjectsPage() {
 
   return (
     <section className="container mx-auto relative px-4 sm:px-6 py-8">
-      <div className="mb-6">
-        <h1 className="text-2xl sm:text-3xl md:text-[40px] font-bold text-left mb-2">
-          Все проекты
-        </h1>
-        <p className="text-[#666666] text-sm sm:text-base">
-          Портфолио работ наших архитекторов и дизайнеров
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <div>
+          <h1 className="text-2xl sm:text-3xl md:text-[40px] font-bold text-left mb-2">
+            Все проекты
+          </h1>
+          <p className="text-[#666666] text-sm sm:text-base">
+            Портфолио работ наших архитекторов и дизайнеров
+          </p>
+        </div>
+        <RoleGuard role="specialist">
+          <Link href="/projects/create" passHref legacyBehavior>
+            <Button className="w-full sm:w-auto rounded-[40px] gap-2">
+              <Plus className="w-4 h-4" />
+              Создать проект
+            </Button>
+          </Link>
+        </RoleGuard>
       </div>
       <Separator className="bg-[#333333] mb-6" />
 

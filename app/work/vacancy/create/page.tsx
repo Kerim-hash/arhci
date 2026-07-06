@@ -1,10 +1,11 @@
 // app/work/vacancy/create/page.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Plus, X } from "lucide-react";
@@ -20,6 +21,25 @@ const EXPERIENCE_OPTIONS = [
   "По доверенности",
 ];
 
+const CURRENCY_OPTIONS = ["сом", "₽", "USD", "EUR"];
+
+const EMPLOYMENT_OPTIONS = [
+  "Полная занятость",
+  "Частичная занятость",
+  "Проектная работа",
+  "Стажировка",
+];
+
+const SCHEDULE_OPTIONS = [
+  "Полный день",
+  "Сменный график",
+  "Гибкий график",
+  "Удаленная работа",
+  "Гибридный формат",
+];
+
+const WORK_FORMAT_OPTIONS = ["Офис", "Удаленка", "Гибрид"];
+
 export default function CreateVacancyPage() {
   const router = useRouter();
   const [createVacancy] = useApiVacanciesCreateCreateMutation();
@@ -27,16 +47,43 @@ export default function CreateVacancyPage() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // States
   const [title, setTitle] = useState("");
   const [salaryFrom, setSalaryFrom] = useState("");
   const [salaryTo, setSalaryTo] = useState("");
+  const [currency, setCurrency] = useState("сом");
   const [experience, setExperience] = useState("");
+  
+  const [workPlace, setWorkPlace] = useState("");
+  const [employment, setEmployment] = useState("");
+  const [schedule, setSchedule] = useState("");
+  const [workFormat, setWorkFormat] = useState("");
+  const [workingHours, setWorkingHours] = useState("");
+
   const [company, setCompany] = useState("");
   const [address, setAddress] = useState("");
+  const [companyWebsite, setCompanyWebsite] = useState("");
+  const [companyPhone, setCompanyPhone] = useState("");
+  const [companyEmail, setCompanyEmail] = useState("");
+  const [companyDescription, setCompanyDescription] = useState("");
 
+  const [publisherName, setPublisherName] = useState("");
+  const [publisherPosition, setPublisherPosition] = useState("");
+  const [publisherPhone, setPublisherPhone] = useState("");
+  const [publisherEmail, setPublisherEmail] = useState("");
+
+  const [description, setDescription] = useState("");
   const [responsibilities, setResponsibilities] = useState<string[]>([""]);
   const [requirements, setRequirements] = useState<string[]>([""]);
   const [benefits, setBenefits] = useState<string[]>([""]);
+
+  // Prefill publisher fields when user details load
+  useEffect(() => {
+    if (user) {
+      setPublisherName(user.name || "");
+      setPublisherEmail(user.email || "");
+    }
+  }, [user]);
 
   const handleListItemChange = (
     setter: React.Dispatch<React.SetStateAction<string[]>>,
@@ -67,12 +114,27 @@ export default function CreateVacancyPage() {
           title,
           salary_from: Number(salaryFrom) || undefined,
           salary_to: Number(salaryTo) || undefined,
+          currency,
           experience,
-          company_name: company || user?.name || "",
-          company_address: address,
+          description,
           responsibilities: responsibilities.filter((r) => r.trim() !== ""),
           requirements: requirements.filter((r) => r.trim() !== ""),
           offers: benefits.filter((b) => b.trim() !== ""),
+          work_place: workPlace,
+          employment,
+          schedule,
+          working_hours: workingHours,
+          work_format: workFormat,
+          company_name: company || user?.name || "",
+          company_address: address,
+          company_website: companyWebsite,
+          company_phone: companyPhone,
+          company_email: companyEmail,
+          company_description: companyDescription,
+          publisher_name: publisherName,
+          publisher_position: publisherPosition,
+          publisher_phone: publisherPhone,
+          publisher_email: publisherEmail,
         },
       }).unwrap();
       router.push("/work");
@@ -117,32 +179,52 @@ export default function CreateVacancyPage() {
 
         {/* ===== Зарплата ===== */}
         <div>
-          <h2 className="text-lg font-semibold mb-4">Зарплата</h2>
+          <h2 className="text-lg font-semibold mb-4">Зарплата и валюта</h2>
           <Separator className="mb-4" />
-          <div>
-            <label className="text-sm font-medium text-[#333] mb-2 block">
-              Диапазон зарплаты (₽)
-            </label>
-            <div className="flex items-center gap-3">
-              <Input
-                type="number"
-                value={salaryFrom}
-                onChange={(e) => setSalaryFrom(e.target.value)}
-                placeholder="от"
-                className="flex-1"
-              />
-              <span className="text-[#949494]">—</span>
-              <Input
-                type="number"
-                value={salaryTo}
-                onChange={(e) => setSalaryTo(e.target.value)}
-                placeholder="до"
-                className="flex-1"
-              />
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium text-[#333] mb-2 block">
+                Диапазон зарплаты
+              </label>
+              <div className="flex items-center gap-3">
+                <Input
+                  type="number"
+                  value={salaryFrom}
+                  onChange={(e) => setSalaryFrom(e.target.value)}
+                  placeholder="от"
+                  className="flex-1"
+                />
+                <span className="text-[#949494]">—</span>
+                <Input
+                  type="number"
+                  value={salaryTo}
+                  onChange={(e) => setSalaryTo(e.target.value)}
+                  placeholder="до"
+                  className="flex-1"
+                />
+              </div>
+              <p className="text-xs text-[#949494] mt-2">
+                Оставьте пустым, если зарплата не указывается
+              </p>
             </div>
-            <p className="text-xs text-[#949494] mt-2">
-              Оставьте пустым, если зарплата не указывается
-            </p>
+
+            <div>
+              <label className="text-sm font-medium text-[#333] mb-2 block">
+                Валюта
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {CURRENCY_OPTIONS.map((curr) => (
+                  <Badge
+                    key={curr}
+                    variant={currency === curr ? "default" : "outline"}
+                    className="cursor-pointer text-sm py-1.5 px-4"
+                    onClick={() => setCurrency(curr)}
+                  >
+                    {curr}
+                  </Badge>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
 
@@ -164,6 +246,89 @@ export default function CreateVacancyPage() {
           </div>
         </div>
 
+        {/* ===== Условия работы ===== */}
+        <div>
+          <h2 className="text-lg font-semibold mb-4">Условия работы</h2>
+          <Separator className="mb-4" />
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium text-[#333] mb-2 block">
+                Место работы (город, регион)
+              </label>
+              <Input
+                value={workPlace}
+                onChange={(e) => setWorkPlace(e.target.value)}
+                placeholder="Бишкек, Кыргызстан"
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-[#333] mb-2 block">
+                Занятость
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {EMPLOYMENT_OPTIONS.map((emp) => (
+                  <Badge
+                    key={emp}
+                    variant={employment === emp ? "default" : "outline"}
+                    className="cursor-pointer text-sm py-1.5 px-4"
+                    onClick={() => setEmployment(emp)}
+                  >
+                    {emp}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-[#333] mb-2 block">
+                График работы
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {SCHEDULE_OPTIONS.map((sched) => (
+                  <Badge
+                    key={sched}
+                    variant={schedule === sched ? "default" : "outline"}
+                    className="cursor-pointer text-sm py-1.5 px-4"
+                    onClick={() => setSchedule(sched)}
+                  >
+                    {sched}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-[#333] mb-2 block">
+                Формат работы
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {WORK_FORMAT_OPTIONS.map((format) => (
+                  <Badge
+                    key={format}
+                    variant={workFormat === format ? "default" : "outline"}
+                    className="cursor-pointer text-sm py-1.5 px-4"
+                    onClick={() => setWorkFormat(format)}
+                  >
+                    {format}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-[#333] mb-2 block">
+                Рабочие часы
+              </label>
+              <Input
+                value={workingHours}
+                onChange={(e) => setWorkingHours(e.target.value)}
+                placeholder="Например: 9:00 - 18:00"
+              />
+            </div>
+          </div>
+        </div>
+
         {/* ===== Компания ===== */}
         <div>
           <h2 className="text-lg font-semibold mb-4">Компания</h2>
@@ -181,7 +346,7 @@ export default function CreateVacancyPage() {
             </div>
             <div>
               <label className="text-sm font-medium text-[#333] mb-2 block">
-                Адрес
+                Адрес компании
               </label>
               <Input
                 value={address}
@@ -189,11 +354,116 @@ export default function CreateVacancyPage() {
                 placeholder="Бишкек, улица Акариба Банкова, 148/3"
               />
             </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <label className="text-sm font-medium text-[#333] mb-2 block">
+                  Сайт компании
+                </label>
+                <Input
+                  value={companyWebsite}
+                  onChange={(e) => setCompanyWebsite(e.target.value)}
+                  placeholder="https://example.com"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-[#333] mb-2 block">
+                  Телефон компании
+                </label>
+                <Input
+                  value={companyPhone}
+                  onChange={(e) => setCompanyPhone(e.target.value)}
+                  placeholder="+996 XXX XXX XXX"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-[#333] mb-2 block">
+                  Email компании
+                </label>
+                <Input
+                  value={companyEmail}
+                  type="email"
+                  onChange={(e) => setCompanyEmail(e.target.value)}
+                  placeholder="hr@example.com"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-[#333] mb-2 block">
+                Описание компании
+              </label>
+              <Textarea
+                value={companyDescription}
+                onChange={(e) => setCompanyDescription(e.target.value)}
+                placeholder="Расскажите немного о вашей компании, проектах и команде..."
+                rows={4}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* ===== Контактное лицо ===== */}
+        <div>
+          <h2 className="text-lg font-semibold mb-4">Контактное лицо (Публикатор)</h2>
+          <Separator className="mb-4" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm font-medium text-[#333] mb-2 block">
+                Имя контактного лица
+              </label>
+              <Input
+                value={publisherName}
+                onChange={(e) => setPublisherName(e.target.value)}
+                placeholder="Александр Иванов"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium text-[#333] mb-2 block">
+                Должность
+              </label>
+              <Input
+                value={publisherPosition}
+                onChange={(e) => setPublisherPosition(e.target.value)}
+                placeholder="HR-менеджер"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium text-[#333] mb-2 block">
+                Телефон для связи
+              </label>
+              <Input
+                value={publisherPhone}
+                onChange={(e) => setPublisherPhone(e.target.value)}
+                placeholder="+996 XXX XXX XXX"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium text-[#333] mb-2 block">
+                Email для связи
+              </label>
+              <Input
+                value={publisherEmail}
+                type="email"
+                onChange={(e) => setPublisherEmail(e.target.value)}
+                placeholder="alexander@example.com"
+              />
+            </div>
           </div>
         </div>
 
         {/* ===== Детали вакансии ===== */}
         <div className="space-y-8">
+          {/* Описание вакансии */}
+          <div>
+            <h2 className="text-lg font-semibold mb-4">Описание вакансии</h2>
+            <Separator className="mb-4" />
+            <Textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Подробно опишите вакансию, задачи, стек технологий..."
+              rows={6}
+            />
+          </div>
+
           {/* Обязанности */}
           <div>
             <h2 className="text-lg font-semibold mb-4">Обязанности</h2>
