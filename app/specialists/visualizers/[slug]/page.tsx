@@ -37,7 +37,7 @@ export default function VisualizerPage() {
   }
 
   const contacts = {
-    email: `${visualizer.slug}@example.com`,
+    email: visualizer.email || `${visualizer.slug}@example.com`,
     country: "Кыргызстан",
   };
 
@@ -77,7 +77,7 @@ export default function VisualizerPage() {
                 <div className="space-y-3">
                   <div className="flex items-center gap-2 text-[#949494]">
                     <User width={14} />
-                    {visualizer.category_name || visualizer.category || ''}
+                    {visualizer.categoryName || visualizer.category || ''}
                   </div>
                   <p>{visualizer.firm || ''}</p>
                   {contacts && (

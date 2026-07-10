@@ -12,6 +12,8 @@ import { Plus, X } from "lucide-react";
 import { useAppSelector } from "@/app/store/hooks";
 import { useApiVacanciesCreateCreateMutation } from "@/services/generatedApi";
 import Link from "next/link";
+import { useAuth } from "@/hooks/use-auth";
+import { toast } from "sonner";
 
 const EXPERIENCE_OPTIONS = [
   "Без опыта",
@@ -43,7 +45,7 @@ const WORK_FORMAT_OPTIONS = ["Офис", "Удаленка", "Гибрид"];
 export default function CreateVacancyPage() {
   const router = useRouter();
   const [createVacancy] = useApiVacanciesCreateCreateMutation();
-  const user = useAppSelector((state) => state.authSlice.user);
+  const { user, isAuthenticated } = useAuth();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -105,41 +107,59 @@ export default function CreateVacancyPage() {
   };
 
   const handleSubmit = async () => {
-    if (!title.trim() || !user) return;
+    if (!title.trim()) return;
+    if (!isAuthenticated || !user) {
+      toast.error("Пожалуйста, войдите в систему, чтобы опубликовать вакансию.");
+      return;
+    }
     setIsSubmitting(true);
 
     try {
       await createVacancy({
         vacancyCreate: {
           title,
-          salary_from: Number(salaryFrom) || undefined,
-          salary_to: Number(salaryTo) || undefined,
+          salaryFrom: Number(salaryFrom) || undefined,
+          salaryTo: Number(salaryTo) || undefined,
           currency,
           experience,
           description,
           responsibilities: responsibilities.filter((r) => r.trim() !== ""),
           requirements: requirements.filter((r) => r.trim() !== ""),
           offers: benefits.filter((b) => b.trim() !== ""),
-          work_place: workPlace,
+          workPlace: workPlace,
           employment,
           schedule,
-          working_hours: workingHours,
-          work_format: workFormat,
-          company_name: company || user?.name || "",
-          company_address: address,
-          company_website: companyWebsite,
-          company_phone: companyPhone,
-          company_email: companyEmail,
-          company_description: companyDescription,
-          publisher_name: publisherName,
-          publisher_position: publisherPosition,
-          publisher_phone: publisherPhone,
-          publisher_email: publisherEmail,
+          workingHours: workingHours,
+          workFormat: workFormat,
+          companyName: company || user?.name || "",
+          companyAddress: address,
+          companyWebsite: companyWebsite,
+          companyPhone: companyPhone,
+          companyEmail: companyEmail,
+          companyDescription: companyDescription,
+          publisherName: publisherName,
+          publisherPosition: publisherPosition,
+          publisherPhone: publisherPhone,
+          publisherEmail: publisherEmail,
         },
       }).unwrap();
+      toast.success("Вакансия успешно опубликована!");
       router.push("/work");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Ошибка создания вакансии:", error);
+      let errMsg = "Не удалось опубликовать вакансию.";
+      if (error?.data) {
+        if (typeof error.data === "string") errMsg = error.data;
+        else if (error.data.detail) errMsg = error.data.detail;
+        else if (error.data.message) errMsg = error.data.message;
+        else {
+          const fieldErrors = Object.values(error.data).flat();
+          if (fieldErrors.length > 0 && typeof fieldErrors[0] === "string") {
+            errMsg = fieldErrors.join(", ");
+          }
+        }
+      }
+      toast.error(errMsg);
     } finally {
       setIsSubmitting(false);
     }

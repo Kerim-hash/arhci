@@ -29,19 +29,22 @@ export default function ProjectCard({ project, category }: ProjectCardProps) {
 
   return (
     <Link href={`/projects/${project.id}`}>
-      <div className="relative  overflow-hidden max-h-[200px] h-[200px]">
+      <div className="relative overflow-hidden max-h-[200px] h-[200px] rounded-lg bg-gray-100">
         <Image
-          src={project.preview_image || getPlaceholder(category, project.id)}
+          src={project.previewImage || getPlaceholder(category, project.id)}
           alt={project.title}
           fill
           className="object-cover transition-transform duration-300 hover:scale-105"
         />
       </div>
-      <div className="mt-2">
+      <div className="mt-2 space-y-1">
+        <h3 className="font-semibold text-sm text-[#333333] line-clamp-1 hover:text-blue-600 transition-colors">
+          {project.title}
+        </h3>
         <div className="flex justify-between items-center">
           <div className="flex items-center">
-            <span className="text-sm text-[#666666]">
-              {project.specialist_name || ''}
+            <span className="text-xs text-[#666666]">
+              {project.specialistName || ""}
             </span>
           </div>
           <div className="flex items-center gap-3">

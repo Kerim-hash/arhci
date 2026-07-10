@@ -37,7 +37,7 @@ export default function EngineerPage() {
   }
 
   const contacts = {
-    email: `${engineer.slug}@example.com`,
+    email: engineer.email || `${engineer.slug}@example.com`,
     country: "Кыргызстан",
   };
 
@@ -77,7 +77,7 @@ export default function EngineerPage() {
                 <div className="space-y-3">
                   <div className="flex items-center gap-2 text-[#949494]">
                     <User width={14} />
-                    {engineer.category_name || engineer.category || ''}
+                    {engineer.categoryName || engineer.category || ''}
                   </div>
                   <p>{engineer.firm || ''}</p>
                   {contacts && (

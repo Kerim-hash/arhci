@@ -79,18 +79,18 @@ export default function CompetitionDetailPage() {
         <div className="flex flex-wrap items-center gap-4 text-sm text-[#666666] mb-6">
           <div className="flex items-center gap-1">
             <Calendar className="w-4 h-4" />
-            <span>Дедлайн: {currentCompetition.submission_deadline ? formatDate(currentCompetition.submission_deadline) : 'Не указан'}</span>
+            <span>Дедлайн: {currentCompetition.submissionDeadline ? formatDate(currentCompetition.submissionDeadline) : 'Не указан'}</span>
           </div>
           <div className="flex items-center gap-1">
             <Users className="w-4 h-4" />
-            <span>{currentCompetition.participants_count || 0} участников</span>
+            <span>{currentCompetition.participantsCount || 0} участников</span>
           </div>
           <div className="flex items-center gap-1">
             <Eye className="w-4 h-4" />
             <span>{currentCompetition.views} просмотров</span>
           </div>
-          <Badge className={currentCompetition.is_active ? "bg-green-500" : "bg-gray-500"}>
-            {currentCompetition.is_active ? "Активный" : "Завершен"}
+          <Badge className={currentCompetition.isActive ? "bg-green-500" : "bg-gray-500"}>
+            {currentCompetition.isActive ? "Активный" : "Завершен"}
           </Badge>
         </div>
       </div>
@@ -114,21 +114,21 @@ export default function CompetitionDetailPage() {
         <div className="w-full lg:w-1/2 bg-white border rounded-lg p-4">
           <div className="flex flex-col sm:flex-row mb-4 sm:mb-6 gap-2 sm:gap-0">
             <div className="sm:flex-1 text-[#383838]">Начало регистрации:</div>
-            <div className="sm:flex-1 font-semibold">{currentCompetition.start_registration ? formatDate(currentCompetition.start_registration) : '-'}</div>
+            <div className="sm:flex-1 font-semibold">{currentCompetition.startRegistration ? formatDate(currentCompetition.startRegistration) : '-'}</div>
           </div>
           <div className="flex flex-col sm:flex-row gap-2 sm:gap-0">
             <div className="sm:flex-1 text-[#383838]">Дедлайн регистрации:</div>
-            <div className="sm:flex-1 font-semibold">{currentCompetition.end_registration ? formatDate(currentCompetition.end_registration) : '-'}</div>
+            <div className="sm:flex-1 font-semibold">{currentCompetition.endRegistration ? formatDate(currentCompetition.endRegistration) : '-'}</div>
           </div>
         </div>
         <div className="w-full lg:w-1/2 bg-[#F5F5F7] rounded-lg p-4">
           <div className="flex flex-col sm:flex-row mb-4 sm:mb-6 gap-2 sm:gap-0">
             <div className="sm:flex-1 text-[#383838]">Дедлайн подачи проектов:</div>
-            <div className="sm:flex-1 font-semibold">{currentCompetition.submission_deadline ? formatDate(currentCompetition.submission_deadline) : '-'}</div>
+            <div className="sm:flex-1 font-semibold">{currentCompetition.submissionDeadline ? formatDate(currentCompetition.submissionDeadline) : '-'}</div>
           </div>
           <div className="flex flex-col sm:flex-row gap-2 sm:gap-0">
             <div className="sm:flex-1 text-[#383838]">Объявление результатов:</div>
-            <div className="sm:flex-1 font-semibold">{currentCompetition.results_announcement ? formatDate(currentCompetition.results_announcement) : '-'}</div>
+            <div className="sm:flex-1 font-semibold">{currentCompetition.resultsAnnouncement ? formatDate(currentCompetition.resultsAnnouncement) : '-'}</div>
           </div>
         </div>
       </div>
@@ -157,7 +157,7 @@ export default function CompetitionDetailPage() {
 
           <div>
             <div className="text-[#383838] text-sm mb-1">Регистрационный взнос</div>
-            <div className="font-semibold">{currentCompetition.registration_fee}</div>
+            <div className="font-semibold">{currentCompetition.registrationFee}</div>
           </div>
 
           <div>
@@ -172,9 +172,9 @@ export default function CompetitionDetailPage() {
         </div>
       </div>
 
-      {currentCompetition.organizer_link && (
+      {currentCompetition.organizerLink && (
         <p className="italic mb-6 underline text-[16px] text-center lg:text-left">
-          <a href={currentCompetition.organizer_link} target="_blank" rel="noopener noreferrer">
+          <a href={currentCompetition.organizerLink} target="_blank" rel="noopener noreferrer">
             Страничка конкурса на сайте {currentCompetition.organizer}
           </a>
         </p>

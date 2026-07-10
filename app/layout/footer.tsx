@@ -44,7 +44,12 @@ const Footer = () => {
           <div className="lg:col-span-3">
             <p className="text-[16px] mb-10">Follow Us</p>
             <div className="flex flex-col gap-5">
-              <Link href="/" className="text-[16px] text-[#6D6D6D] flex gap-2">
+              <Link
+                href="https://www.facebook.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[16px] text-[#6D6D6D] flex gap-2"
+              >
                 <Image
                   src="/facebook.svg"
                   width={24}

@@ -9,8 +9,8 @@ export function ContestsList() {
   const { data, isLoading } = useApiCompetitionsListQuery({});
   const competitions = data?.results || [];
 
-  const activeCompetitions = competitions.filter((c: any) => c.is_active);
-  const pastCompetitions = competitions.filter((c: any) => !c.is_active);
+  const activeCompetitions = competitions.filter((c: any) => c.isActive);
+  const pastCompetitions = competitions.filter((c: any) => !c.isActive);
 
   if (isLoading) {
     return <div className="text-center py-8 text-gray-500">Загрузка...</div>;
@@ -26,7 +26,7 @@ export function ContestsList() {
             {activeCompetitions.map((competition: any) => (
               <Link
                 key={competition.id}
-                href={`/work/competitions/${competition.slug}`}
+                href={`/competitions/${competition.slug}`}
                 className="group block"
               >
                 <div className="relative overflow-hidden rounded-lg aspect-[4/3] bg-gray-100">
@@ -54,7 +54,7 @@ export function ContestsList() {
             {pastCompetitions.map((competition: any) => (
               <Link
                 key={competition.id}
-                href={`/work/competitions/${competition.slug}`}
+                href={`/competitions/${competition.slug}`}
                 className="group block"
               >
                 <div className="relative overflow-hidden rounded-lg aspect-[4/3] bg-gray-100">

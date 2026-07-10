@@ -50,7 +50,7 @@ export default function Page() {
           <div className="flex overflow-x-auto gap-6 mb-4">
             {filters.map((item, i) => (
               <Link
-                href={i === 0 ? "/articles" : i === 1 ? "/work" : i === 2 ? "/specialists" : "/projects"}
+                href={i === 0 ? "/articles" : i === 1 ? "/competitions" : i === 2 ? "/specialists" : "/projects"}
                 key={item}
                 className={cn(
                   "text-[16px] transition-colors cursor-pointer",

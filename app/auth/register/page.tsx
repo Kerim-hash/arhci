@@ -16,6 +16,7 @@ import { useAuth } from "@/hooks/use-auth";
 
 type FormValues = {
   email: string;
+  password: string;
   userType: "specialist" | "company" | "";
   specialization: string;
 };
@@ -35,17 +36,19 @@ export default function LoginPage() {
   } = useForm<FormValues>({
     defaultValues: {
       email: "",
+      password: "",
       userType: "",
       specialization: "",
     },
   });
 
   const email = useWatch({ control, name: "email" }) || "";
+  const password = useWatch({ control, name: "password" }) || "";
   const userType = useWatch({ control, name: "userType" }) || "";
   const specialization = useWatch({ control, name: "specialization" }) || "";
 
   const onNextStep = (data: Partial<FormValues>) => {
-    if (step === 1 && data.email) {
+    if (step === 1 && data.email && data.password) {
       setStep(2);
     }
   };
@@ -54,7 +57,7 @@ export default function LoginPage() {
     if (userType === "specialist") {
       setStep(3);
     } else {
-      onFinalSubmit({ email, userType, specialization: "" });
+      onFinalSubmit({ email, password, userType, specialization: "" });
     }
   };
 
@@ -62,6 +65,7 @@ export default function LoginPage() {
     try {
       const res = await registerUser({
         email: data.email,
+        password: data.password,
         region_from: ["Bishkek"],
         role: data.userType,
         category: data.specialization || undefined,
@@ -127,30 +131,50 @@ export default function LoginPage() {
       </h1>
 
       {step === 1 ? (
-        // Шаг 1: Email
+        // Шаг 1: Email и Пароль
         <form
           onSubmit={handleSubmit(onNextStep)}
           className="mt-8 space-y-6 w-full"
         >
-          <div className="space-y-2">
-            <Input
-              type="email"
-              placeholder="Email"
-              {...register("email", {
-                required: "Email обязателен",
-                pattern: {
-                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                  message: "Неверный формат email",
-                },
-              })}
-              className="w-full"
-            />
-            {errors.email && (
-              <p className="text-sm text-red-500">{errors.email.message}</p>
-            )}
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Input
+                type="email"
+                placeholder="Email"
+                {...register("email", {
+                  required: "Email обязателен",
+                  pattern: {
+                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                    message: "Неверный формат email",
+                  },
+                })}
+                className="w-full"
+              />
+              {errors.email && (
+                <p className="text-sm text-red-500">{errors.email.message}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Input
+                type="password"
+                placeholder="Пароль"
+                {...register("password", {
+                  required: "Пароль обязателен",
+                  minLength: {
+                    value: 6,
+                    message: "Пароль должен быть не менее 6 символов",
+                  },
+                })}
+                className="w-full"
+              />
+              {errors.password && (
+                <p className="text-sm text-red-500">{errors.password.message}</p>
+              )}
+            </div>
           </div>
 
-          <Button type="submit" size="lg" className="w-full" disabled={!email}>
+          <Button type="submit" size="lg" className="w-full" disabled={!email || !password}>
             Продолжить
           </Button>
 

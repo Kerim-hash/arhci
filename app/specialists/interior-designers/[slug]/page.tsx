@@ -37,7 +37,7 @@ export default function InteriorDesignerPage() {
   }
 
   const contacts = {
-    email: `${designer.slug}@example.com`,
+    email: designer.email || `${designer.slug}@example.com`,
     country: "Кыргызстан",
   };
 
@@ -80,7 +80,7 @@ export default function InteriorDesignerPage() {
                 <div className="space-y-3">
                   <div className="flex items-center gap-2 text-[#949494]">
                     <User width={14} />
-                    {designer.category_name || designer.category || ''}
+                    {designer.categoryName || designer.category || ''}
                   </div>
                   <p>{designer.firm || ''}</p>
                   {contacts && (

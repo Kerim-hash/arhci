@@ -13,6 +13,8 @@ import { useAppSelector } from "@/app/store/hooks";
 import { useApiResumesCreateCreateMutation } from "@/services/generatedApi";
 import type { WorkExperience } from "@/app/store/features/resumesSlice";
 import Link from "next/link";
+import { useAuth } from "@/hooks/use-auth";
+import { toast } from "sonner";
 
 const SPECIALIZATION_OPTIONS = [
   "Архитекторы",
@@ -64,7 +66,7 @@ interface WorkExpForm {
 export default function CreateResumePage() {
   const router = useRouter();
   const [createResume] = useApiResumesCreateCreateMutation();
-  const user = useAppSelector((state) => state.authSlice.user);
+  const { user, isAuthenticated } = useAuth();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -187,7 +189,10 @@ export default function CreateResumePage() {
   // --- Сабмит ---
 
   const handleSubmit = async () => {
-    if (!user) return;
+    if (!isAuthenticated || !user) {
+      toast.error("Пожалуйста, войдите в систему, чтобы опубликовать резюме.");
+      return;
+    }
     setIsSubmitting(true);
 
     try {
@@ -195,8 +200,8 @@ export default function CreateResumePage() {
         resumeCreate: {
           name: user?.name || "",
           category,
-          salary_from: Number(salaryFrom) || 0,
-          salary_to: Number(salaryTo) || 0,
+          salaryFrom: Number(salaryFrom) || 0,
+          salaryTo: Number(salaryTo) || 0,
           experience,
           specialization: specializations,
           description,
@@ -204,26 +209,40 @@ export default function CreateResumePage() {
           software,
           employment_type: employmentType,
           region,
-          work_place: workPlace,
+          workPlace: workPlace,
           employment,
           schedule,
           phone,
           email,
           social_links: socialLinks,
           key_skills: keySkills,
-          work_experience: workExperiences.map((exp) => ({
+          workExperience: workExperiences.map((exp) => ({
             company: exp.company,
             position: exp.position,
-            start_date: exp.startDate,
-            end_date: exp.endDate,
+            startDate: exp.startDate,
+            endDate: exp.endDate,
             duties: exp.duties.filter((d) => d.trim() !== ""),
             achievement: exp.achievement || undefined,
           })),
         },
       }).unwrap();
+      toast.success("Резюме успешно опубликовано!");
       router.push("/work");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Ошибка создания резюме:", error);
+      let errMsg = "Не удалось опубликовать резюме.";
+      if (error?.data) {
+        if (typeof error.data === "string") errMsg = error.data;
+        else if (error.data.detail) errMsg = error.data.detail;
+        else if (error.data.message) errMsg = error.data.message;
+        else {
+          const fieldErrors = Object.values(error.data).flat();
+          if (fieldErrors.length > 0 && typeof fieldErrors[0] === "string") {
+            errMsg = fieldErrors.join(", ");
+          }
+        }
+      }
+      toast.error(errMsg);
     } finally {
       setIsSubmitting(false);
     }

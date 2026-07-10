@@ -145,13 +145,6 @@ function NewsContent() {
                     <span className="text-gray-400">Нет изображения</span>
                   </div>
                 )}
-
-                <Badge
-                  variant="secondary"
-                  className="absolute bottom-3 right-3 text-[16px] px-7 z-10"
-                >
-                  {getCategory(item)}
-                </Badge>
               </Link>
 
               <div className="p-4 md:p-6 flex-1">

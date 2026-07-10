@@ -14,7 +14,7 @@ export default function CompetitionCard({ competition }: CompetitionCardProps) {
   const isActive = competition.isActive;
   
   return (
-    <Link href={`/work/competitions/${competition.slug}`}>
+    <Link href={`/competitions/${competition.slug}`}>
       <Card className="overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 cursor-pointer h-full flex flex-col">
         <div className="relative h-48 overflow-hidden">
           <Image

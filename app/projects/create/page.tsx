@@ -275,12 +275,12 @@ export default function CreateProjectPage() {
           {/* Заголовок */}
           <div>
             <label className="text-sm font-medium text-[#333] mb-2 block">
-              Заголовок статьи
+              Название проекта
             </label>
             <Input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Напишите заголовок статьи"
+              placeholder="Напишите название проекта"
               className="text-base"
             />
           </div>

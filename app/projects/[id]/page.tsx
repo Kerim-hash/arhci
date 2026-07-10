@@ -35,6 +35,9 @@ export default function ProjectDetailPage() {
   const [likesCount, setLikesCount] = useState(0);
   const [isOwner, setIsOwner] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [imageFit, setImageFit] = useState<"cover" | "contain">("cover");
+  const [aspectRatio, setAspectRatio] = useState<"3/2" | "16/9" | "auto">("3/2");
 
   useEffect(() => {
     if (currentProject) {
@@ -87,10 +90,10 @@ export default function ProjectDetailPage() {
         {/* Шапка с автором */}
         <div className="flex items-center justify-between mb-20 mt-6">
           <div className="flex items-center gap-4">
-            {currentProject.specialist_name && (
+            {currentProject.specialistName && (
               <div>
                 <h2 className="font-semibold text-lg">
-                  {currentProject.specialist_name}
+                  {currentProject.specialistName}
                 </h2>
               </div>
             )}
@@ -118,7 +121,7 @@ export default function ProjectDetailPage() {
             <div className="flex items-center gap-1">
               <Calendar className="w-4 h-4" />
               <span>
-                {new Date(currentProject.created_at).toLocaleDateString("ru-RU")}
+                {new Date(currentProject.createdAt).toLocaleDateString("ru-RU")}
               </span>
             </div>
             <div className="flex items-center gap-1">
@@ -130,26 +133,142 @@ export default function ProjectDetailPage() {
 
         <Separator className="mb-6" />
 
-        {/* Галерея изображений */}
-        <div className="mb-8">
-          <div className="flex flex-col gap-4 pb-4">
-            {currentProject.images &&
-              (currentProject.images as any[]).map((image: any, index: number) => (
-                <div
-                  key={image.id || index}
-                  className="relative w-[300px] md:w-[400px] lg:w-full h-full flex-shrink-0 rounded-lg overflow-hidden bg-gray-100"
-                >
+        {/* Галерея изображений в виде слайдера */}
+        {(() => {
+          const images = (currentProject.images as any[]) || [];
+          
+          const prevImage = () => {
+            setActiveIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+          };
+
+          const nextImage = () => {
+            setActiveIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+          };
+
+          const getSliderClass = () => {
+            switch (aspectRatio) {
+              case "16/9":
+                return "aspect-[16/9] w-full max-h-[500px]";
+              case "auto":
+                return "h-[500px] w-full";
+              default:
+                return "aspect-[3/2] w-full max-h-[600px]";
+            }
+          };
+
+          if (images.length === 0) return null;
+
+          return (
+            <div className="mb-8 space-y-4">
+              {/* Панель настроек размера */}
+              <div className="flex flex-wrap items-center justify-between gap-4 bg-gray-50 p-3 rounded-lg border border-gray-100">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-medium text-gray-500">Пропорции:</span>
+                  <div className="flex bg-gray-200 p-0.5 rounded-md text-xs">
+                    {(["3/2", "16/9", "auto"] as const).map((ratio) => (
+                      <button
+                        key={ratio}
+                        onClick={() => setAspectRatio(ratio)}
+                        className={`px-3 py-1 rounded-md transition-colors cursor-pointer ${
+                          aspectRatio === ratio
+                            ? "bg-white text-gray-900 font-medium shadow-sm"
+                            : "text-gray-600 hover:text-gray-900"
+                        }`}
+                      >
+                        {ratio === "3/2" ? "3:2" : ratio === "16/9" ? "16:9" : "Авто"}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-medium text-gray-500">Отображение:</span>
+                  <div className="flex bg-gray-200 p-0.5 rounded-md text-xs">
+                    {(["cover", "contain"] as const).map((fit) => (
+                      <button
+                        key={fit}
+                        onClick={() => setImageFit(fit)}
+                        className={`px-3 py-1 rounded-md transition-colors cursor-pointer ${
+                          imageFit === fit
+                            ? "bg-white text-gray-900 font-medium shadow-sm"
+                            : "text-gray-600 hover:text-gray-900"
+                        }`}
+                      >
+                        {fit === "cover" ? "Заполнить" : "Вписать"}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Главный вид слайдера */}
+              <div className="relative group">
+                <div className={`relative rounded-lg overflow-hidden bg-black/5 ${getSliderClass()}`}>
                   <Image
-                    src={image.url || image.image}
-                    alt={image.alt || currentProject.title}
-                    width={1200}
-                    height={800}
-                    className="w-full h-full object-cover"
+                    src={images[activeIndex]?.url || images[activeIndex]?.image}
+                    alt={images[activeIndex]?.alt || `${currentProject.title} - ${activeIndex + 1}`}
+                    fill
+                    className={`transition-all duration-300 ${
+                      imageFit === "cover" ? "object-cover" : "object-contain"
+                    }`}
+                    priority
                   />
                 </div>
-              ))}
-          </div>
-        </div>
+
+                {/* Стрелки навигации */}
+                {images.length > 1 && (
+                  <>
+                    <button
+                      onClick={prevImage}
+                      className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white p-2.5 rounded-full transition-colors cursor-pointer z-10"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                      </svg>
+                    </button>
+                    <button
+                      onClick={nextImage}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white p-2.5 rounded-full transition-colors cursor-pointer z-10"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                  </>
+                )}
+
+                {/* Номер слайда */}
+                {images.length > 1 && (
+                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/50 text-white text-xs px-3 py-1 rounded-full font-medium z-10">
+                    {activeIndex + 1} / {images.length}
+                  </div>
+                )}
+              </div>
+
+              {/* Эскизы */}
+              {images.length > 1 && (
+                <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin">
+                  {images.map((img, index) => (
+                    <button
+                      key={img.id || index}
+                      onClick={() => setActiveIndex(index)}
+                      className={`relative w-20 h-14 flex-shrink-0 rounded-md overflow-hidden border-2 transition-all cursor-pointer ${
+                        activeIndex === index ? "border-primary scale-[1.02]" : "border-transparent opacity-60 hover:opacity-100"
+                      }`}
+                    >
+                      <Image
+                        src={img.url || img.image}
+                        alt={`Thumbnail ${index + 1}`}
+                        fill
+                        className="object-cover"
+                      />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })()}
 
         {/* Описание проекта */}
         <div className="mb-8">

@@ -41,7 +41,7 @@ export default function ArchitectPage() {
   }
 
   const contacts = {
-    email: `${architect.slug}@example.com`,
+    email: architect.email || `${architect.slug}@example.com`,
     country: "Кыргызстан",
   };
 
@@ -83,7 +83,7 @@ export default function ArchitectPage() {
                 <div className="space-y-3">
                   <div className="flex items-center gap-2 text-[#949494]">
                     <User width={14} />
-                    {architect.category_name || architect.category || ''}
+                    {architect.categoryName || architect.category || ''}
                   </div>
                   <p>{architect.firm || ''}</p>
                   {contacts && (

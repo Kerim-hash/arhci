@@ -10,10 +10,13 @@ import { ResumeCard } from "./ResumeCard";
 
 export function ResumesList() {
   const dispatch = useAppDispatch();
-  const { searchQuery } = useAppSelector((state) => state.resumes);
+  const { searchQuery, filters } = useAppSelector((state) => state.resumes);
 
   const { data, isLoading } = useApiResumesListQuery({
     search: searchQuery || undefined,
+    experience: filters.experience || undefined,
+    region: filters.region && filters.region !== "all" ? filters.region : undefined,
+    salaryFrom: filters.incomeFrom ? Number(filters.incomeFrom) : undefined,
   });
   const resumes = data?.results || [];
 

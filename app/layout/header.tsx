@@ -61,7 +61,7 @@ const Header: FC = () => {
     <header
       className={clsx(
         "py-4 fixed top-0 left-0 w-full z-50 transition-colors duration-300",
-        isScrolled ? "bg-white" : "bg-transparent",
+        isScrolled ? "bg-white border-b border-[#E5E7EB]" : "bg-transparent",
       )}
     >
       <div className="mx-auto container grid grid-cols-12 items-center py-4 px-5">
@@ -99,7 +99,7 @@ const Header: FC = () => {
           {isAuthenticated ? (
             <>
               <Link
-                href={"/create-acticle"}
+                href={"/create-article"}
                 className="w-6 h-6 rounded-full overflow-hidden ml-4"
               >
                 <Image
@@ -171,7 +171,7 @@ const Header: FC = () => {
               </Link>
             ))}
             {isAuthenticated && (
-              <Link href="/create-acticle" className="text-[#333] font-medium mt-2">
+              <Link href="/create-article" className="text-[#333] font-medium mt-2">
                 Написать статью
               </Link>
             )}

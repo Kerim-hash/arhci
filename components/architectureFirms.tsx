@@ -18,12 +18,12 @@ export default function ArchitectureFirms() {
             Архитектурные бюро
           </h5>
 
-          <div className="flex flex-wrap gap-4">
+          <div className="grid grid-cols-2 gap-4">
             {isLoading ? (
               <p className="text-gray-500 text-sm">Загрузка...</p>
             ) : Array.from(new Set(topSpecialists.filter((s: any) => s.firm?.trim()).map((s: any) => s.firm.trim()))).length > 0 ? (
               Array.from(new Set(topSpecialists.filter((s: any) => s.firm?.trim()).map((s: any) => s.firm.trim()))).slice(0, 5).map((firm: any, index: number) => (
-                <p key={index} className="text-[#333333] text-[16px] hover:text-[#4677F3] cursor-pointer">
+                <p key={index} className="text-[#333333] text-[16px] hover:text-[#4677F3] cursor-pointer truncate">
                   {firm}
                 </p>
               ))
@@ -40,7 +40,7 @@ export default function ArchitectureFirms() {
             Топ Архитекторы
           </h5>
 
-          <div className="flex flex-col gap-3">
+          <div className="grid grid-cols-2 gap-3">
             {isLoading ? (
               <p className="text-gray-500 text-sm">Загрузка...</p>
             ) : topSpecialists.length > 0 ? (

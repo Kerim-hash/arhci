@@ -15,7 +15,7 @@ export function ContestCard({ competition }: ContestCardProps) {
     <Card className="border border-[#F1EFEF] transition-shadow">
       <CardContent className="p-5">
         <div className="flex justify-between items-start gap-4">
-          <Link href={`/work/competitions/${competition.slug}`} className="flex-1">
+          <Link href={`/competitions/${competition.slug}`} className="flex-1">
             <div>
               <h3 className="text-[24px] font-bold mb-2 text-primary">
                 {competition.title}

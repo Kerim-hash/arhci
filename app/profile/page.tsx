@@ -29,6 +29,23 @@ const Profile = () => {
   const { data: user, isLoading, isError } = useGetProfileQuery();
   const { logout } = useAuth();
   const [activeTab, setActiveTab] = useState<TabType>("personal");
+  const [editProfile] = useEditProfileMutation();
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("image", file);
+
+    try {
+      await editProfile(formData as any).unwrap();
+      toast.success("Фото профиля успешно обновлено");
+    } catch (err) {
+      console.error(err);
+      toast.error("Не удалось обновить фото профиля");
+    }
+  };
 
   useEffect(() => {
     const token = typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
@@ -82,9 +99,19 @@ const Profile = () => {
                   src={user?.image || "/user.svg"}
                   alt="Avatar"
                   fill
-                  className="rounded-full object-none"
+                  className="rounded-full object-cover"
                 />
-                <button className="absolute bottom-0 right-0 bg-primary text-white p-1.5 rounded-full">
+                <input
+                  type="file"
+                  id="avatar-upload"
+                  className="hidden"
+                  accept="image/*"
+                  onChange={handleAvatarChange}
+                />
+                <button
+                  onClick={() => document.getElementById("avatar-upload")?.click()}
+                  className="absolute bottom-0 right-0 bg-primary text-white p-1.5 rounded-full cursor-pointer"
+                >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="12"

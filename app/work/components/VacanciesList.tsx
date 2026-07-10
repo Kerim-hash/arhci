@@ -11,10 +11,14 @@ import Link from "next/link";
 
 export function VacanciesList() {
   const dispatch = useAppDispatch();
-  const { searchQuery } = useAppSelector((state) => state.vacancies);
+  const { searchQuery, filters } = useAppSelector((state) => state.vacancies);
 
   const { data, isLoading } = useApiVacanciesListQuery({
     search: searchQuery || undefined,
+    experience: filters.experience || undefined,
+    region: filters.region && filters.region !== "all" ? filters.region : undefined,
+    salaryFrom: filters.incomeFrom ? Number(filters.incomeFrom) : undefined,
+    salaryTo: filters.incomeTo ? Number(filters.incomeTo) : undefined,
   });
   const vacancies = data?.results || [];
 

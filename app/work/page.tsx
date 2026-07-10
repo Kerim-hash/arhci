@@ -136,7 +136,7 @@ function MainPage() {
             {activeTab === "contests" && (
               <RoleGuard role="company">
                 <div className="mb-4">
-                  <Link href="/work/competitions/create">
+                  <Link href="/competitions/create">
                     <Button className="rounded-[40px] gap-2">
                       <Plus className="w-4 h-4" />
                       Создать конкурс
