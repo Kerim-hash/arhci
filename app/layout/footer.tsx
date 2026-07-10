@@ -31,13 +31,13 @@ const Footer = () => {
             <p className="text-[16px] mb-10">About</p>
             <div className="flex flex-col gap-5">
               <Link href="/" className="text-[16px] text-[#6D6D6D]">
-                Студентам
+                Главная
               </Link>
-              <Link href="/architects" className="text-[16px] text-[#6D6D6D]">
-                Архитекторы
+              <Link href="/specialists" className="text-[16px] text-[#6D6D6D]">
+                Специалисты
               </Link>
-              <Link href="/competitions" className="text-[16px] text-[#6D6D6D]">
-                Конкурсы
+              <Link href="/work" className="text-[16px] text-[#6D6D6D]">
+                Работа
               </Link>
             </div>
           </div>
@@ -54,14 +54,16 @@ const Footer = () => {
                 Facebook
               </Link>
               <Link
-                href="/architects"
+                href="https://www.instagram.com/10studio.kg?igsh=eTlsOTlnaWphMml0"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="text-[16px] text-[#6D6D6D] flex gap-2"
               >
                 <Image
                   src="/instagram.svg"
                   width={24}
                   height={24}
-                  alt="facebook"
+                  alt="instagram"
                 />{" "}
                 Instagram
               </Link>
