@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
+import { cn, stripHtml } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
 import { Card } from "@/components/ui/card";
 import ArchitectureFirms from "@/components/architectureFirms";
@@ -104,7 +104,7 @@ export default function Page() {
                       </h2>
 
                       <p className="text-sm md:text-[16px] text-[#6D6D6D] leading-relaxed line-clamp-3 md:line-clamp-4">
-                        {item.shortDescription || "Описание отсутствует"}
+                        {stripHtml(item.shortDescription) || "Описание отсутствует"}
                       </p>
                     </div>
                   </Card>

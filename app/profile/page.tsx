@@ -26,7 +26,7 @@ type TabType = "personal" | "social" | "password";
 
 const Profile = () => {
   const router = useRouter();
-  const { data: user, isLoading, isError } = useGetProfileQuery();
+  const { data: user, isLoading, isError, refetch } = useGetProfileQuery();
   const { logout } = useAuth();
   const [activeTab, setActiveTab] = useState<TabType>("personal");
   const [editProfile] = useEditProfileMutation();
@@ -37,9 +37,11 @@ const Profile = () => {
 
     const formData = new FormData();
     formData.append("image", file);
+    formData.append("avatar", file);
 
     try {
-      await editProfile(formData as any).unwrap();
+      await editProfile(formData).unwrap();
+      await refetch();
       toast.success("Фото профиля успешно обновлено");
     } catch (err) {
       console.error(err);
@@ -76,9 +78,9 @@ const Profile = () => {
   const renderContent = () => {
     switch (activeTab) {
       case "personal":
-        return <PersonalInfo user={user} />;
+        return <PersonalInfo user={user} refetch={refetch} />;
       case "social":
-        return <SocialLinks user={user} />;
+        return <SocialLinks user={user} refetch={refetch} />;
       case "password":
         return <ChangePassword />;
       default:
@@ -174,8 +176,7 @@ const Profile = () => {
   );
 };
 
-// Компонент личной информации
-const PersonalInfo = ({ user }: { user?: User }) => {
+const PersonalInfo = ({ user, refetch }: { user?: User; refetch?: () => any }) => {
   const [editProfile, { isLoading }] = useEditProfileMutation();
 
   const {
@@ -223,7 +224,30 @@ const PersonalInfo = ({ user }: { user?: User }) => {
           payload.last_name = parts.slice(1).join(" ");
         }
       }
+
+      // Fallback keys for compatibility with backend variations
+      if (payload.first_name) {
+        (payload as any).firstName = payload.first_name;
+      }
+      if (payload.last_name) {
+        (payload as any).lastName = payload.last_name;
+      }
+      if (payload.company_name) {
+        (payload as any).companyName = payload.company_name;
+        (payload as any).firm = payload.company_name;
+      }
+      if (payload.experience_years) {
+        (payload as any).experienceYears = payload.experience_years;
+      }
+      if (payload.bio) {
+        (payload as any).description = payload.bio;
+        (payload as any).biography = payload.bio;
+      }
+
       await editProfile(payload).unwrap();
+      if (refetch) {
+        await refetch();
+      }
       toast.success("Профиль успешно обновлен");
     } catch (error: any) {
       if (error?.data && typeof error.data === 'object') {
@@ -353,7 +377,7 @@ const PersonalInfo = ({ user }: { user?: User }) => {
 };
 
 // Компонент социальных сетей
-const SocialLinks = ({ user }: { user?: User }) => {
+const SocialLinks = ({ user, refetch }: { user?: User; refetch?: () => any }) => {
   const [editProfile, { isLoading }] = useEditProfileMutation();
 
   const {
@@ -388,6 +412,9 @@ const SocialLinks = ({ user }: { user?: User }) => {
   const onSubmit = async (data: TypeEditProfileSchema) => {
     try {
       await editProfile(data).unwrap();
+      if (refetch) {
+        await refetch();
+      }
       toast.success("Социальные сети успешно обновлены");
     } catch (error: any) {
       if (error?.data && typeof error.data === 'object') {

@@ -2,6 +2,7 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
+import { stripHtml } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import Image from "next/image";
@@ -162,7 +163,7 @@ function ArticleContent() {
                 </h2>
 
                 <p className="text-sm md:text-[16px] text-[#6D6D6D] leading-relaxed line-clamp-3 md:line-clamp-4 mb-4">
-                  {article.shortDescription || "Описание отсутствует"}
+                  {stripHtml(article.shortDescription) || "Описание отсутствует"}
                 </p>
 
                 <p className="text-xs text-gray-400 mb-2">

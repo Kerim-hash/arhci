@@ -3,6 +3,7 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import NewsDetail from "@/components/NewsDetail";
+import { stripHtml } from "@/lib/utils";
 
 interface PageProps {
   params: Promise<{
@@ -27,10 +28,10 @@ export async function generateMetadata({
 
     return {
       title: news.title,
-      description: news.shortDescription || "Новость на нашем сайте",
+      description: stripHtml(news.shortDescription) || "Новость на нашем сайте",
       openGraph: {
         title: news.title,
-        description: news.shortDescription,
+        description: stripHtml(news.shortDescription),
         images: news.previewImage ? [news.previewImage] : [],
       },
     };

@@ -19,12 +19,24 @@ export const editProfileApi = createApi({
   }),
   tagTypes: ["UserProfile"], // Добавляем тег
   endpoints: (builder) => ({
-    editProfile: builder.mutation<LoginResponse, TypeEditProfileSchema>({
-      query: (credentials) => ({
-        url: "/edit-profile",
-        method: "POST",
-        body: credentials,
-      }),
+    editProfile: builder.mutation<LoginResponse, FormData | TypeEditProfileSchema>({
+      query: (body) => {
+        let finalBody = body;
+        if (!(body instanceof FormData)) {
+          const formData = new FormData();
+          Object.entries(body).forEach(([key, val]) => {
+            if (val !== undefined && val !== null) {
+              formData.append(key, String(val));
+            }
+          });
+          finalBody = formData;
+        }
+        return {
+          url: "/edit-profile",
+          method: "POST",
+          body: finalBody,
+        };
+      },
       invalidatesTags: ["UserProfile"], // Инвалидируем кэш
     }),
 

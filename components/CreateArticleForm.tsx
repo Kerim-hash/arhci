@@ -177,7 +177,6 @@ const CreateArticleForm: React.FC = () => {
   const [title, setTitle] = useState("");
   const [previewImage, setPreviewImage] = useState<File | null>(null);
   const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
-  const [biography, setBiography] = useState("");
   const [blocks, setBlocks] = useState<ContentBlock[]>([]);
   const [docxFile, setDocxFile] = useState<File | null>(null);
 
@@ -514,10 +513,6 @@ const CreateArticleForm: React.FC = () => {
 
     if (previewImage) {
       submitData.append("preview_image", previewImage);
-    }
-
-    if (biography) {
-      submitData.append("biography", biography);
     }
 
     if (hasDocx && docxFile) {
@@ -1079,21 +1074,7 @@ const CreateArticleForm: React.FC = () => {
           </div>
         )}
 
-        {/* Biography */}
-        <div>
-          <label htmlFor="biography" className="block text-xs text-[#333] mb-1.5">
-            Биография
-          </label>
-          <textarea
-            id="biography"
-            value={biography}
-            onChange={(e) => setBiography(e.target.value)}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-[3px] focus:outline-none focus:border-gray-500 resize-none min-h-[100px]"
-            placeholder="Enter text"
-            disabled={loading}
-            rows={4}
-          />
-        </div>
+
       </div>
       </div>
 
