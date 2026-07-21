@@ -61,7 +61,9 @@ const Header: FC = () => {
     <header
       className={clsx(
         "py-4 fixed top-0 left-0 w-full z-50 transition-colors duration-300",
-        isScrolled ? "bg-white border-b border-[#E5E7EB]" : "bg-transparent",
+        pathname === "/"
+          ? (isScrolled ? "bg-white border-b border-[#333333]" : "bg-transparent border-b border-[#333333]")
+          : (isScrolled ? "bg-white border-b border-[#E5E7EB]" : "bg-transparent"),
       )}
     >
       <div className="mx-auto container grid grid-cols-12 items-center py-4 px-5">
