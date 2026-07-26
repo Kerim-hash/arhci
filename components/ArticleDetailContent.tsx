@@ -12,7 +12,10 @@ const getYoutubeEmbedUrl = (url: string): string | null => {
 export const ArticleContent = ({ article }: { article: any }) => {
   const [zoomImages, setZoomImages] = useState<string[]>([]);
   const [zoomIndex, setZoomIndex] = useState<number>(-1);
-  const content = article.contentHtml || article.content || "";
+  const content = article.contentHtml || article.content_html || article.content || "";
+  const createdAtDate = article.createdAt || article.created_at;
+  const contentMode = article.contentMode || article.content_mode || "editor";
+  const baseUrl = process.env.NEXT_PUBLIC_SERVER_URL || "https://api.ardi.kg";
 
   const handleContainerClick = (e: React.MouseEvent<HTMLDivElement>) => {
     const target = e.target as HTMLElement;
@@ -49,8 +52,8 @@ export const ArticleContent = ({ article }: { article: any }) => {
   }, [zoomIndex, zoomImages.length]);
 
   const articleDate = useMemo(() => {
-    return article.createdAt ? new Date(article.createdAt).toLocaleDateString("ru-RU") : "";
-  }, [article.createdAt]);
+    return createdAtDate ? new Date(createdAtDate).toLocaleDateString("ru-RU") : "";
+  }, [createdAtDate]);
 
   const processedContent = useMemo(() => {
     if (!content) return "";
@@ -100,7 +103,7 @@ export const ArticleContent = ({ article }: { article: any }) => {
 
         // Если путь относительный, добавляем базовый URL
         if (src.startsWith("/")) {
-          return `<img${before}src="https://api.ardi.kg${src}"${after} class="word-image" loading="lazy" />`;
+          return `<img${before}src="${baseUrl}${src}"${after} class="word-image" loading="lazy" />`;
         }
 
         // Если путь уже абсолютный
@@ -324,7 +327,7 @@ export const ArticleContent = ({ article }: { article: any }) => {
     `;
   }, [content]);
 
-  if (article.contentMode === "editor" || (article.blocks && article.blocks.length > 0)) {
+  if (contentMode === "editor" || (article.blocks && article.blocks.length > 0)) {
     return (
       <>
         <div 

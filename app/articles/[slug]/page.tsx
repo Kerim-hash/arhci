@@ -17,22 +17,25 @@ export async function generateMetadata({
 }: PageProps): Promise<Metadata> {
   try {
     const { slug } = await params;
+    const baseUrl = process.env.NEXT_PUBLIC_SERVER_URL || "https://api.ardi.kg";
 
-    const res = await fetch(`https://api.ardi.kg/api/articles/${slug}/`, {
+    const res = await fetch(`${baseUrl}/api/articles/${slug}/`, {
       next: { revalidate: 60 },
     });
 
     if (!res.ok) return {};
 
     const article = await res.json();
+    const shortDesc = stripHtml(article.shortDescription || article.short_description || "") || "Статья на нашем сайте";
+    const previewImg = article.previewImage || article.preview_image;
 
     return {
       title: article.title,
-      description: stripHtml(article.shortDescription) || "Статья на нашем сайте",
+      description: shortDesc,
       openGraph: {
         title: article.title,
-        description: stripHtml(article.shortDescription),
-        images: article.previewImage ? [article.previewImage] : [],
+        description: shortDesc,
+        images: previewImg ? [previewImg] : [],
       },
     };
   } catch {
@@ -43,7 +46,8 @@ export async function generateMetadata({
 // Для статической генерации (опционально)
 export async function generateStaticParams() {
   try {
-    const res = await fetch("https://api.ardi.kg/api/articles/");
+    const baseUrl = process.env.NEXT_PUBLIC_SERVER_URL || "https://api.ardi.kg";
+    const res = await fetch(`${baseUrl}/api/articles/`);
     const data = await res.json();
 
     // Проверяем структуру ответа

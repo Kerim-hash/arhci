@@ -42,9 +42,10 @@ interface ArticleDetailProps {
 }
 
 const fetchArticleById = async (slug: string): Promise<ArticleType> => {
+  const baseUrl = process.env.NEXT_PUBLIC_SERVER_URL || "https://api.ardi.kg";
   console.log("Fetching article with slug:", slug);
   const { data } = await axios.get<ArticleType>(
-    `https://api.ardi.kg/api/articles/${slug}/`,
+    `${baseUrl}/api/articles/${slug}/`,
   );
   return data;
 };
