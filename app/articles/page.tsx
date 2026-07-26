@@ -175,7 +175,7 @@ function ArticleContent() {
                   </h2>
 
                   <p className="text-sm md:text-[16px] text-[#6D6D6D] leading-relaxed line-clamp-3 md:line-clamp-4 mb-4">
-                    {stripHtml(shortDesc) || "Описание отсутствует"}
+                    {stripHtml(shortDesc || "") || "Описание отсутствует"}
                   </p>
 
                   {createdAtDate && (
