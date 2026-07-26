@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 
 // components/NewsDetailContent.tsx (обновленный NewsContent)
-export const NewsContent = ({ content }: { content: string }) => {
+export const NewsContent = ({ content, title }: { content: string; title?: string }) => {
   const processedContent = useMemo(() => {
     if (!content) return "";
 
@@ -105,6 +105,14 @@ export const NewsContent = ({ content }: { content: string }) => {
               max-width: 900px;
               margin: 0 auto;
               width: 100%;
+            }
+
+            .news-main-title {
+              font-size: 2.25rem;
+              font-weight: 700;
+              color: #111827;
+              margin-bottom: 1.5rem;
+              line-height: 1.3;
             }
             
             /* Стили для параграфов */
@@ -250,6 +258,11 @@ export const NewsContent = ({ content }: { content: string }) => {
               body {
                 padding: 1rem;
               }
+
+              .news-main-title {
+                font-size: 1.5rem;
+                margin-bottom: 1rem;
+              }
               
               .western-heading {
                 font-size: 1.25rem;
@@ -290,6 +303,7 @@ export const NewsContent = ({ content }: { content: string }) => {
         </head>
         <body>
           <div class="content-wrapper">
+            ${title ? `<h1 class="news-main-title">${title}</h1>` : ""}
             ${bodyContent}
           </div>
           
@@ -300,7 +314,7 @@ export const NewsContent = ({ content }: { content: string }) => {
         </body>
       </html>
     `;
-  }, [content]);
+  }, [content, title]);
 
   return (
     <div

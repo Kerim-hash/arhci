@@ -115,7 +115,7 @@ function NewsDetailContent({ slug }: NewsDetailProps) {
         Назад к списку
       </button>
 
-      <NewsContent content={news.content} />
+      <NewsContent content={news.content} title={news.title} />
     </section>
   );
 }

@@ -150,6 +150,14 @@ export const ArticleContent = ({ article }: { article: any }) => {
           margin: 0 auto;
           width: 100%;
         }
+
+        .word-article-wrapper .article-main-title {
+          font-size: 2.25rem;
+          font-weight: 700;
+          color: #111827;
+          margin-bottom: 1.5rem;
+          line-height: 1.3;
+        }
         
         .word-article-wrapper .western-paragraph {
           margin-bottom: 1.25rem;
@@ -285,6 +293,11 @@ export const ArticleContent = ({ article }: { article: any }) => {
           .word-article-wrapper {
             padding: 1rem;
           }
+
+          .word-article-wrapper .article-main-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+          }
           
           .word-article-wrapper .western-heading {
             font-size: 1.25rem;
@@ -301,6 +314,7 @@ export const ArticleContent = ({ article }: { article: any }) => {
         }
       </style>
       <div class="content-wrapper">
+        ${article.title ? `<h1 class="article-main-title">${article.title}</h1>` : ""}
         ${bodyContent}
       </div>
       <div class="document-meta">
@@ -398,6 +412,11 @@ export const ArticleContent = ({ article }: { article: any }) => {
             }
           `}</style>
           <div className="content-wrapper">
+            {article.title && (
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-6">
+                {article.title}
+              </h1>
+            )}
             {article.blocks.map((block: any) => {
               switch (block.type) {
                 case "text":
