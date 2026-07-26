@@ -508,7 +508,7 @@ const CreateArticleForm: React.FC = () => {
 
     const submitData = new FormData();
     submitData.append("title", title);
-    submitData.append("is_published", "false");
+    submitData.append("is_published", "true");
     submitData.append("content_mode", hasDocx ? "docx" : "editor");
 
     if (previewImage) {
@@ -544,7 +544,6 @@ const CreateArticleForm: React.FC = () => {
     try {
       const token = tokenStorage.getAccessToken();
       const headers: Record<string, string> = {
-        "Content-Type": "multipart/form-data",
         Accept: "application/json",
       };
       if (token) {

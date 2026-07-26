@@ -19,10 +19,13 @@ interface ArticleType {
   id: number;
   title: string;
   slug: string;
-  previewImage: string;
-  shortDescription: string;
+  previewImage?: string;
+  preview_image?: string;
+  shortDescription?: string;
+  short_description?: string;
   views: number;
-  createdAt: string;
+  createdAt?: string;
+  created_at?: string;
 }
 interface ApiResponse {
   count: number;
@@ -32,8 +35,9 @@ interface ApiResponse {
 }
 
 const fetchArticles = async (): Promise<ArticleType[]> => {
+  const baseUrl = process.env.NEXT_PUBLIC_SERVER_URL || "https://api.ardi.kg";
   const { data } = await axios.get<ApiResponse>(
-    "https://api.ardi.kg/api/articles/",
+    `${baseUrl}/api/articles/`,
   );
 
   // Проверяем, является ли ответ пагинированным (есть поле results)
@@ -67,8 +71,11 @@ function ArticleContent() {
     queryFn: fetchArticles,
   });
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("ru-RU", {
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return "";
+    const parsed = new Date(dateString);
+    if (isNaN(parsed.getTime())) return "";
+    return parsed.toLocaleDateString("ru-RU", {
       year: "numeric",
       month: "long",
       day: "numeric",
@@ -123,62 +130,70 @@ function ArticleContent() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-          {articles.map((article) => (
-            <Card key={article.id} className="overflow-hidden flex flex-col">
-              <Link
-                href={`/articles/${article.slug}`}
-                className="relative block aspect-video md:aspect-[2/5] overflow-hidden md:max-h-[320px] w-full bg-gray-100 group"
-              >
-                {article.previewImage ? (
-                  <Image
-                    src={`${article.previewImage}`}
-                    alt={article.title}
-                    fill
-                    className="object-cover w-full transition-transform duration-300 group-hover:scale-105"
-                    sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.src = "/placeholder-image.jpg";
-                    }}
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-gray-200">
-                    <span className="text-gray-400">Нет изображения</span>
-                  </div>
-                )}
+          {articles.map((article) => {
+            const previewImg = article.previewImage || article.preview_image;
+            const shortDesc = article.shortDescription || article.short_description;
+            const createdAtDate = article.createdAt || article.created_at;
 
-                <Badge
-                  variant="secondary"
-                  className="absolute bottom-3 right-3 text-[16px] px-7 z-10"
+            return (
+              <Card key={article.id} className="overflow-hidden flex flex-col">
+                <Link
+                  href={`/articles/${article.slug}`}
+                  className="relative block aspect-video md:aspect-[2/5] overflow-hidden md:max-h-[320px] w-full bg-gray-100 group"
                 >
-                  {getCategory(article)}
-                </Badge>
-              </Link>
+                  {previewImg ? (
+                    <Image
+                      src={previewImg}
+                      alt={article.title}
+                      fill
+                      className="object-cover w-full transition-transform duration-300 group-hover:scale-105"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = "/placeholder-image.jpg";
+                      }}
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                      <span className="text-gray-400">Нет изображения</span>
+                    </div>
+                  )}
 
-              <div className="p-4 md:p-6 flex-1">
-                <h2 className="text-lg sm:text-xl md:text-[32px] font-medium leading-tight mb-3 line-clamp-2">
-                  <Link href={`/articles/${article.slug}`} className="hover:text-blue-600 hover:underline transition-colors">
-                    {article.title}
-                  </Link>
-                </h2>
+                  <Badge
+                    variant="secondary"
+                    className="absolute bottom-3 right-3 text-[16px] px-7 z-10"
+                  >
+                    {getCategory(article)}
+                  </Badge>
+                </Link>
 
-                <p className="text-sm md:text-[16px] text-[#6D6D6D] leading-relaxed line-clamp-3 md:line-clamp-4 mb-4">
-                  {stripHtml(article.shortDescription) || "Описание отсутствует"}
-                </p>
+                <div className="p-4 md:p-6 flex-1">
+                  <h2 className="text-lg sm:text-xl md:text-[32px] font-medium leading-tight mb-3 line-clamp-2">
+                    <Link href={`/articles/${article.slug}`} className="hover:text-blue-600 hover:underline transition-colors">
+                      {article.title}
+                    </Link>
+                  </h2>
 
-                <p className="text-xs text-gray-400 mb-2">
-                  {formatDate(article.createdAt)}
-                </p>
-              </div>
+                  <p className="text-sm md:text-[16px] text-[#6D6D6D] leading-relaxed line-clamp-3 md:line-clamp-4 mb-4">
+                    {stripHtml(shortDesc) || "Описание отсутствует"}
+                  </p>
 
-              <Link
-                href={`/articles/${article.slug}`}
-                className="block text-right px-4 md:px-6 pb-4 md:pb-6 font-medium text-[18px] text-blue-600 hover:text-blue-800 transition-colors"
-              >
-                Читать далее →
-              </Link>
-            </Card>
-          ))}
+                  {createdAtDate && (
+                    <p className="text-xs text-gray-400 mb-2">
+                      {formatDate(createdAtDate)}
+                    </p>
+                  )}
+                </div>
+
+                <Link
+                  href={`/articles/${article.slug}`}
+                  className="block text-right px-4 md:px-6 pb-4 md:pb-6 font-medium text-[18px] text-blue-600 hover:text-blue-800 transition-colors"
+                >
+                  Читать далее →
+                </Link>
+              </Card>
+            );
+          })}
         </div>
       )}
     </section>
