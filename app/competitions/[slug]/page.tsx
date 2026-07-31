@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, MapPin, Users, Eye, Award, Building2, CreditCard, Globe } from "lucide-react";
 import { RoleGuard } from "@/components/RoleGuard";
+import RichContent from "@/components/content/RichContent";
 
 export default function CompetitionDetailPage() {
   const params = useParams();
@@ -194,9 +195,9 @@ export default function CompetitionDetailPage() {
           </div>
           <div className="lg:flex-1">
             <h2 className="font-semibold mb-4 text-xl">О конкурсе</h2>
-            <div 
+            <RichContent
               className="ck-content text-sm lg:text-base leading-relaxed"
-              dangerouslySetInnerHTML={{ __html: currentCompetition.description }}
+              html={currentCompetition.description || ""}
             />
           </div>
         </div>

@@ -4,6 +4,7 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import NewsDetail from "@/components/NewsDetail";
 import { stripHtml } from "@/lib/utils";
+import { API_BASE_URL } from "@/lib/api";
 
 interface PageProps {
   params: Promise<{
@@ -18,7 +19,7 @@ export async function generateMetadata({
   try {
     const { slug } = await params;
 
-    const res = await fetch(`https://api.ardi.kg/api/news/${slug}/`, {
+    const res = await fetch(`${API_BASE_URL}/api/news/${slug}/`, {
       next: { revalidate: 60 },
     });
 
@@ -43,7 +44,7 @@ export async function generateMetadata({
 // Для статической генерации (опционально)
 export async function generateStaticParams() {
   try {
-    const res = await fetch("https://api.ardi.kg/api/news/");
+    const res = await fetch(`${API_BASE_URL}/api/news/`);
     const data = await res.json();
 
     // Проверяем структуру ответа

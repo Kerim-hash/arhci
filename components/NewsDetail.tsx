@@ -8,6 +8,7 @@ import {
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { NewsContent } from "./NewsDetailContent";
+import { API_BASE_URL } from "@/lib/api";
 
 interface NewsType {
   id: number;
@@ -27,7 +28,7 @@ interface NewsDetailProps {
 const fetchNewsById = async (slug: string): Promise<NewsType> => {
   console.log("Fetching news with slug:", slug);
   const { data } = await axios.get<NewsType>(
-    `https://api.ardi.kg/api/news/${slug}/`,
+    `${API_BASE_URL}/api/news/${slug}/`,
   );
   return data;
 };

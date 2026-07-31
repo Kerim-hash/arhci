@@ -10,6 +10,7 @@ import { useApiVacanciesRespondCreateMutation } from "@/services/generatedApi";
 import { useState } from "react";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { toast } from "sonner";
+import RichContent from "@/components/content/RichContent";
 
 interface VacancyDetailProps {
   vacancy: VacancyDetail;
@@ -118,9 +119,9 @@ export function VacancyDetailComponent({ vacancy }: VacancyDetailProps) {
 
           {/* Описание */}
           {vacancy.description && (
-            <div 
+            <RichContent
               className="ck-content text-gray-700 leading-relaxed"
-              dangerouslySetInnerHTML={{ __html: vacancy.description }}
+              html={vacancy.description || ""}
             />
           )}
 

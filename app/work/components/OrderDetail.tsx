@@ -18,6 +18,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { OrderCard } from "./OrderCard";
 import Image from "next/image";
+import RichContent from "@/components/content/RichContent";
 
 interface OrderDetailProps {
   order: any;
@@ -92,9 +93,9 @@ export function OrderDetailComponent({ order }: OrderDetailProps) {
               <div className="pt-4 space-y-6">
                 <div>
                   <h2 className="text-xl font-bold mb-4">Описание проекта</h2>
-                  <div 
+                  <RichContent
                     className="ck-content text-gray-700 leading-relaxed text-[15px]"
-                    dangerouslySetInnerHTML={{ __html: order.description }}
+                    html={order.description || ""}
                   />
                 </div>
                 

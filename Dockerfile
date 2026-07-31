@@ -23,6 +23,12 @@ COPY . .
 # Uncomment the following line in case you want to disable telemetry during the build.
 ENV NEXT_TELEMETRY_DISABLED=1
 
+# Адрес бэкенда. NEXT_PUBLIC_* подставляется на этапе СБОРКИ, поэтому переменная
+# обязательна именно здесь: без неё сборка упадёт с понятной ошибкой (lib/api.ts),
+# а не уйдёт молча на прод-домен, как это было с хардкодом.
+ARG NEXT_PUBLIC_SERVER_URL
+ENV NEXT_PUBLIC_SERVER_URL=$NEXT_PUBLIC_SERVER_URL
+
 RUN npm run build
 
 # Production image, copy all the files and run next

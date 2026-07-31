@@ -8,6 +8,7 @@ import {
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { ArticleContent } from "./ArticleDetailContent";
+import { API_BASE_URL } from "@/lib/api";
 
 interface ArticleBlockType {
   id: number;
@@ -42,7 +43,7 @@ interface ArticleDetailProps {
 }
 
 const fetchArticleById = async (slug: string): Promise<ArticleType> => {
-  const baseUrl = process.env.NEXT_PUBLIC_SERVER_URL || "https://api.ardi.kg";
+  const baseUrl = API_BASE_URL;
   console.log("Fetching article with slug:", slug);
   const { data } = await axios.get<ArticleType>(
     `${baseUrl}/api/articles/${slug}/`,

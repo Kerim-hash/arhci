@@ -1,4 +1,9 @@
+"use client";
+
 import { useMemo } from "react";
+
+import RichContent from "./content/RichContent";
+import { API_BASE_URL } from "@/lib/api";
 
 // components/NewsDetailContent.tsx (обновленный NewsContent)
 export const NewsContent = ({ content, title }: { content: string; title?: string }) => {
@@ -50,7 +55,7 @@ export const NewsContent = ({ content, title }: { content: string; title?: strin
 
         // Если путь относительный, добавляем базовый URL
         if (src.startsWith("/")) {
-          return `<img${before}src="https://api.ardi.kg${src}"${after} class="word-image" loading="lazy" />`;
+          return `<img${before}src="${API_BASE_URL}${src}"${after} class="word-image" loading="lazy" />`;
         }
 
         // Если путь уже абсолютный
@@ -317,9 +322,6 @@ export const NewsContent = ({ content, title }: { content: string; title?: strin
   }, [content, title]);
 
   return (
-    <div
-      className="word-news-wrapper w-full my-10"
-      dangerouslySetInnerHTML={{ __html: processedContent }}
-    />
+    <RichContent className="word-news-wrapper w-full my-10" html={processedContent} />
   );
 };

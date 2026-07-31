@@ -1,5 +1,6 @@
 import { TypeEditProfileSchema } from "@/schemas/editProfile";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { API_BASE_URL } from "@/lib/api";
 
 export interface LoginResponse {
   token: string;
@@ -8,7 +9,7 @@ export interface LoginResponse {
 export const editProfileApi = createApi({
   reducerPath: "editProfileApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: process.env.NEXT_PUBLIC_SERVER_URL || "https://api.ardi.kg",
+    baseUrl: API_BASE_URL,
     prepareHeaders: (headers) => {
       const token = localStorage.getItem("access_token");
       if (token) {

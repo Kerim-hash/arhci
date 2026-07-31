@@ -1,8 +1,9 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { tokenStorage } from "@/hooks/storage";
+import { API_BASE_URL } from "@/lib/api";
 
 const baseQuery = fetchBaseQuery({
-  baseUrl: process.env.NEXT_PUBLIC_SERVER_URL || "https://api.ardi.kg",
+  baseUrl: API_BASE_URL,
   prepareHeaders: (headers) => {
     const token = tokenStorage.getAccessToken();
     if (token) {

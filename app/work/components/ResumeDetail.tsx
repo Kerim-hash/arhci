@@ -14,6 +14,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import type { Resume } from "@/app/store/features/resumesSlice";
+import RichContent from "@/components/content/RichContent";
 
 interface ResumeDetailProps {
   resume: Resume;
@@ -134,9 +135,9 @@ export function ResumeDetailComponent({ resume }: ResumeDetailProps) {
           <div>
             <h2 className="text-xl font-semibold mb-4">О себе</h2>
             <Separator className="mb-4" />
-            <div 
+            <RichContent
               className="ck-content text-gray-700 leading-relaxed"
-              dangerouslySetInnerHTML={{ __html: resume.about }}
+              html={resume.about || ""}
             />
           </div>
         )}

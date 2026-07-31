@@ -5,6 +5,11 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        # Адрес бэкенда вшивается в бандл на этапе сборки (NEXT_PUBLIC_*),
+        # поэтому передаётся именно как build-arg, а не через environment.
+        # Переопределяется переменной окружения NEXT_PUBLIC_SERVER_URL.
+        NEXT_PUBLIC_SERVER_URL: ${NEXT_PUBLIC_SERVER_URL:-https://api.ardi.kg}
     image: arhci-frontend:latest
     container_name: arhci-frontend
     restart: unless-stopped

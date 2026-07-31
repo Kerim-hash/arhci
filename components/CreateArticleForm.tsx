@@ -17,6 +17,7 @@ import {
   SheetTitle,
   SheetDescription,
 } from "./ui/sheet";
+import { API_BASE_URL } from "@/lib/api";
 
 const DynamicRichTextBlock = dynamic(
   () => import("@/components/RichTextBlock"),
@@ -551,7 +552,7 @@ const CreateArticleForm: React.FC = () => {
       }
 
       await axios.post(
-        `${process.env.NEXT_PUBLIC_SERVER_URL || "https://api.ardi.kg"}/api/articles/create/`,
+        `${API_BASE_URL}/api/articles/create/`,
         submitData,
         { headers }
       );

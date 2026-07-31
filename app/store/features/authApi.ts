@@ -5,6 +5,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { User } from "@/types/user";
 import { tokenStorage } from "@/hooks/storage";
 import { TypeRecoverSchema } from "@/schemas/recover";
+import { API_BASE_URL } from "@/lib/api";
 
 export interface RequestResetPasswordBody {
   email: string;
@@ -36,7 +37,7 @@ export interface RefreshTokenResponse {
 }
 
 const baseQuery = fetchBaseQuery({
-  baseUrl: process.env.NEXT_PUBLIC_SERVER_URL || "https://api.ardi.kg",
+  baseUrl: API_BASE_URL,
   prepareHeaders: (headers) => {
     const token = tokenStorage.getAccessToken();
     if (token) {
