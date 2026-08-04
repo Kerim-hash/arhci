@@ -1,5 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
+
+import { GALLERY_SELECTOR } from "./content/gallery";
+import { useGalleryPortals } from "./content/useGalleryPortals";
+import { API_BASE_URL } from "@/lib/api";
 
 const getYoutubeEmbedUrl = (url: string): string | null => {
   if (!url) return null;
@@ -14,16 +18,19 @@ export const ArticleContent = ({ article }: { article: any }) => {
   const [zoomIndex, setZoomIndex] = useState<number>(-1);
   const content = article.contentHtml || article.content_html || article.content || "";
   const createdAtDate = article.createdAt || article.created_at;
-  const contentMode = article.contentMode || article.content_mode || "editor";
-  const baseUrl = process.env.NEXT_PUBLIC_SERVER_URL || "https://api.ardi.kg";
+  const baseUrl = API_BASE_URL;
 
   const handleContainerClick = (e: React.MouseEvent<HTMLDivElement>) => {
     const target = e.target as HTMLElement;
+    // Галереи (.ardi-gallery) показывают собственный просмотрщик — не перехватываем.
+    if (target.closest?.(GALLERY_SELECTOR)) return;
     if (target.tagName === "IMG") {
       const src = (target as HTMLImageElement).src;
       if (src) {
         // Collect all images in the container for the slider navigation
-        const allImgs = Array.from(e.currentTarget.querySelectorAll("img"));
+        const allImgs = Array.from(e.currentTarget.querySelectorAll("img")).filter(
+          img => !img.closest(GALLERY_SELECTOR),
+        );
         const allSrcs = allImgs.map(img => img.src).filter(Boolean);
         const idx = allSrcs.indexOf(src);
         if (idx !== -1) {
@@ -327,7 +334,17 @@ export const ArticleContent = ({ article }: { article: any }) => {
     `;
   }, [content]);
 
-  if (contentMode === "editor" || (article.blocks && article.blocks.length > 0)) {
+  const htmlRef = useRef<HTMLDivElement>(null);
+  const galleryPortals = useGalleryPortals(htmlRef, processedContent);
+  // Ссылка должна быть стабильной: React 19 сверяет dangerouslySetInnerHTML по
+  // идентичности объекта и иначе перезаписывал бы innerHTML на каждом рендере,
+  // стирая галереи, которые вставлены порталами.
+  const processedMarkup = useMemo(() => ({ __html: processedContent }), [processedContent]);
+
+  // Блочный редактор используем только когда блоки действительно есть.
+  // Статьи из админки идут с contentMode="editor", но без блоков — их
+  // содержимое лежит в content_html и рендерится HTML-веткой ниже.
+  if (article.blocks && article.blocks.length > 0) {
     return (
       <>
         <div 
@@ -596,10 +613,12 @@ export const ArticleContent = ({ article }: { article: any }) => {
   return (
     <>
       <div
+        ref={htmlRef}
         className="word-article-wrapper w-full my-10 bg-white shadow-sm rounded-xl p-4 sm:p-8"
-        dangerouslySetInnerHTML={{ __html: processedContent }}
+        dangerouslySetInnerHTML={processedMarkup}
         onClick={handleContainerClick}
       />
+      {galleryPortals}
       {zoomIndex >= 0 && zoomImages.length > 0 && (
         <div 
           className="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-4 select-none animate-in fade-in duration-200"

@@ -7,6 +7,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/app/store";
 import { tokenStorage } from "@/hooks/storage";
 import { useRouter } from "next/navigation";
+import { API_BASE_URL } from "@/lib/api";
 
 export const useAuth = () => {
   const dispatch = useDispatch();
@@ -35,7 +36,7 @@ export const useAuth = () => {
   const refreshAuthToken = async (refreshToken: string) => {
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_SERVER_URL || "https://api.ardi.kg"}/auth/refresh-token`,
+        `${API_BASE_URL}/auth/refresh-token`,
         {
           method: "POST",
           headers: {

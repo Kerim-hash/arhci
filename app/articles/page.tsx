@@ -14,6 +14,7 @@ import {
   useQuery,
 } from "@tanstack/react-query";
 import axios from "axios";
+import { API_BASE_URL } from "@/lib/api";
 
 interface ArticleType {
   id: number;
@@ -35,9 +36,8 @@ interface ApiResponse {
 }
 
 const fetchArticles = async (): Promise<ArticleType[]> => {
-  const baseUrl = process.env.NEXT_PUBLIC_SERVER_URL || "https://api.ardi.kg";
   const { data } = await axios.get<ApiResponse>(
-    `${baseUrl}/api/articles/`,
+    `${API_BASE_URL}/api/articles/`,
   );
 
   // Проверяем, является ли ответ пагинированным (есть поле results)

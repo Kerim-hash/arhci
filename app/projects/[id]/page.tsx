@@ -19,6 +19,7 @@ import {
   Heart,
 } from "lucide-react";
 import ShareModal from "../components/ShareModal";
+import RichContent from "@/components/content/RichContent";
 
 export default function ProjectDetailPage() {
   const params = useParams();
@@ -274,9 +275,9 @@ export default function ProjectDetailPage() {
         <div className="mb-8">
           <h2 className="text-xl font-semibold mb-4">Описание проекта</h2>
           <div className="prose max-w-none">
-            <div 
+            <RichContent
               className="ck-content text-[#333333] leading-relaxed"
-              dangerouslySetInnerHTML={{ __html: currentProject.description }}
+              html={currentProject.description || ""}
             />
           </div>
         </div>
