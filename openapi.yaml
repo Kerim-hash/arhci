@@ -9,6 +9,31 @@ paths:
       operationId: apiArticlesList
       description: GET /api/articles/ — List published articles.
       parameters:
+      - in: query
+        name: mine
+        schema:
+          type: boolean
+        description: Только мои
+      - in: query
+        name: moderation_status
+        schema:
+          type: string
+          title: Статус модерации
+          enum:
+          - approved
+          - pending
+          - rejected
+        description: |-
+          Статус модерации
+
+          * `pending` - На модерации
+          * `approved` - Одобрено
+          * `rejected` - Отклонено
+      - in: query
+        name: user
+        schema:
+          type: integer
+        description: ID автора
       - name: ordering
         required: false
         in: query
@@ -375,6 +400,31 @@ paths:
       operationId: apiProjectsList
       description: GET /api/projects/ — List all projects.
       parameters:
+      - in: query
+        name: mine
+        schema:
+          type: boolean
+        description: Только мои
+      - in: query
+        name: moderation_status
+        schema:
+          type: string
+          title: Статус модерации
+          enum:
+          - approved
+          - pending
+          - rejected
+        description: |-
+          Статус модерации
+
+          * `pending` - На модерации
+          * `approved` - Одобрено
+          * `rejected` - Отклонено
+      - in: query
+        name: user
+        schema:
+          type: number
+        description: ID автора
       - name: ordering
         required: false
         in: query
@@ -525,6 +575,26 @@ paths:
         name: experience
         schema:
           type: string
+      - in: query
+        name: mine
+        schema:
+          type: boolean
+        description: Только мои
+      - in: query
+        name: moderation_status
+        schema:
+          type: string
+          title: Статус модерации
+          enum:
+          - approved
+          - pending
+          - rejected
+        description: |-
+          Статус модерации
+
+          * `pending` - На модерации
+          * `approved` - Одобрено
+          * `rejected` - Отклонено
       - name: ordering
         required: false
         in: query
@@ -551,6 +621,11 @@ paths:
         description: A search term.
         schema:
           type: string
+      - in: query
+        name: user
+        schema:
+          type: number
+        description: ID автора
       tags:
       - api
       security:
@@ -735,6 +810,26 @@ paths:
         name: experience
         schema:
           type: string
+      - in: query
+        name: mine
+        schema:
+          type: boolean
+        description: Только мои
+      - in: query
+        name: moderation_status
+        schema:
+          type: string
+          title: Статус модерации
+          enum:
+          - approved
+          - pending
+          - rejected
+        description: |-
+          Статус модерации
+
+          * `pending` - На модерации
+          * `approved` - Одобрено
+          * `rejected` - Отклонено
       - name: ordering
         required: false
         in: query
@@ -765,6 +860,11 @@ paths:
         description: A search term.
         schema:
           type: string
+      - in: query
+        name: user
+        schema:
+          type: number
+        description: ID автора
       tags:
       - api
       security:
@@ -1158,10 +1258,18 @@ components:
           type: string
           format: date-time
           readOnly: true
+        moderationStatus:
+          type: string
+          readOnly: true
+          enum:
+          - approved
+          - pending
+          - rejected
       required:
       - authorName
       - createdAt
       - id
+      - moderationStatus
       - slug
       - title
     CategoryEnum:
@@ -1878,9 +1986,17 @@ components:
           type: string
           format: date-time
           readOnly: true
+        moderationStatus:
+          type: string
+          readOnly: true
+          enum:
+          - approved
+          - pending
+          - rejected
       required:
       - createdAt
       - id
+      - moderationStatus
       - specialistName
       - specialistSlug
       - title
@@ -2066,9 +2182,17 @@ components:
           type: string
           format: date-time
           readOnly: true
+        moderationStatus:
+          type: string
+          readOnly: true
+          enum:
+          - approved
+          - pending
+          - rejected
       required:
       - createdAt
       - id
+      - moderationStatus
       - name
       - userName
     SpecialistDetail:
@@ -2481,11 +2605,19 @@ components:
         isSaved:
           type: string
           readOnly: true
+        moderationStatus:
+          type: string
+          readOnly: true
+          enum:
+          - approved
+          - pending
+          - rejected
       required:
       - companyName
       - createdAt
       - id
       - isSaved
+      - moderationStatus
       - title
     WorkExperience:
       type: object

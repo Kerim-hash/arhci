@@ -8,6 +8,9 @@ const injectedRtkApi = api.injectEndpoints({
       query: (queryArg) => ({
         url: `/api/articles/`,
         params: {
+          mine: queryArg.mine,
+          moderation_status: queryArg.moderationStatus,
+          user: queryArg.user,
           ordering: queryArg.ordering,
           page: queryArg.page,
           search: queryArg.search,
@@ -134,6 +137,9 @@ const injectedRtkApi = api.injectEndpoints({
       query: (queryArg) => ({
         url: `/api/projects/`,
         params: {
+          mine: queryArg.mine,
+          moderation_status: queryArg.moderationStatus,
+          user: queryArg.user,
           ordering: queryArg.ordering,
           page: queryArg.page,
           search: queryArg.search,
@@ -187,11 +193,14 @@ const injectedRtkApi = api.injectEndpoints({
         params: {
           category: queryArg.category,
           experience: queryArg.experience,
+          mine: queryArg.mine,
+          moderation_status: queryArg.moderationStatus,
           ordering: queryArg.ordering,
           page: queryArg.page,
           region: queryArg.region,
           salary_from: queryArg.salaryFrom,
           search: queryArg.search,
+          user: queryArg.user,
         },
       }),
     }),
@@ -261,12 +270,15 @@ const injectedRtkApi = api.injectEndpoints({
         url: `/api/vacancies/`,
         params: {
           experience: queryArg.experience,
+          mine: queryArg.mine,
+          moderation_status: queryArg.moderationStatus,
           ordering: queryArg.ordering,
           page: queryArg.page,
           region: queryArg.region,
           salary_from: queryArg.salaryFrom,
           salary_to: queryArg.salaryTo,
           search: queryArg.search,
+          user: queryArg.user,
         },
       }),
     }),
@@ -405,6 +417,16 @@ export { injectedRtkApi as generatedApi };
 export type ApiArticlesListApiResponse =
   /** status 200  */ PaginatedArticleListListRead;
 export type ApiArticlesListApiArg = {
+  /** Только мои */
+  mine?: boolean;
+  /** Статус модерации
+    
+    * `pending` - На модерации
+    * `approved` - Одобрено
+    * `rejected` - Отклонено */
+  moderationStatus?: "approved" | "pending" | "rejected";
+  /** ID автора */
+  user?: number;
   /** Which field to use when ordering the results. */
   ordering?: string;
   /** A page number within the paginated result set. */
@@ -490,6 +512,16 @@ export type ApiOrdersCreateCreateApiArg = {
 export type ApiProjectsListApiResponse =
   /** status 200  */ PaginatedProjectListListRead;
 export type ApiProjectsListApiArg = {
+  /** Только мои */
+  mine?: boolean;
+  /** Статус модерации
+    
+    * `pending` - На модерации
+    * `approved` - Одобрено
+    * `rejected` - Отклонено */
+  moderationStatus?: "approved" | "pending" | "rejected";
+  /** ID автора */
+  user?: number;
   /** Which field to use when ordering the results. */
   ordering?: string;
   /** A page number within the paginated result set. */
@@ -527,6 +559,14 @@ export type ApiResumesListApiResponse =
 export type ApiResumesListApiArg = {
   category?: string;
   experience?: string;
+  /** Только мои */
+  mine?: boolean;
+  /** Статус модерации
+    
+    * `pending` - На модерации
+    * `approved` - Одобрено
+    * `rejected` - Отклонено */
+  moderationStatus?: "approved" | "pending" | "rejected";
   /** Which field to use when ordering the results. */
   ordering?: string;
   /** A page number within the paginated result set. */
@@ -535,6 +575,8 @@ export type ApiResumesListApiArg = {
   salaryFrom?: number;
   /** A search term. */
   search?: string;
+  /** ID автора */
+  user?: number;
 };
 export type ApiResumesRetrieveApiResponse = /** status 200  */ ResumeDetailRead;
 export type ApiResumesRetrieveApiArg = {
@@ -579,6 +621,14 @@ export type ApiVacanciesListApiResponse =
   /** status 200  */ PaginatedVacancyListListRead;
 export type ApiVacanciesListApiArg = {
   experience?: string;
+  /** Только мои */
+  mine?: boolean;
+  /** Статус модерации
+    
+    * `pending` - На модерации
+    * `approved` - Одобрено
+    * `rejected` - Отклонено */
+  moderationStatus?: "approved" | "pending" | "rejected";
   /** Which field to use when ordering the results. */
   ordering?: string;
   /** A page number within the paginated result set. */
@@ -588,6 +638,8 @@ export type ApiVacanciesListApiArg = {
   salaryTo?: number;
   /** A search term. */
   search?: string;
+  /** ID автора */
+  user?: number;
 };
 export type ApiVacanciesRetrieveApiResponse =
   /** status 200  */ VacancyDetailRead;
@@ -662,6 +714,7 @@ export type ArticleListRead = {
   authorName: string;
   views?: number;
   createdAt: string;
+  moderationStatus: "approved" | "pending" | "rejected";
 };
 export type PaginatedArticleListList = {
   count: number;
@@ -975,6 +1028,7 @@ export type ProjectListRead = {
   views?: number;
   likes?: number;
   createdAt: string;
+  moderationStatus: "approved" | "pending" | "rejected";
 };
 export type PaginatedProjectListList = {
   count: number;
@@ -1055,6 +1109,7 @@ export type ResumeListRead = {
   avatar?: string | null;
   key_skills?: any;
   createdAt: string;
+  moderationStatus: "approved" | "pending" | "rejected";
 };
 export type PaginatedResumeListList = {
   count: number;
@@ -1289,6 +1344,7 @@ export type VacancyListRead = {
   viewsCount?: number;
   createdAt: string;
   isSaved: string;
+  moderationStatus: "approved" | "pending" | "rejected";
 };
 export type PaginatedVacancyListList = {
   count: number;
