@@ -68,7 +68,30 @@ interface WorkExpFieldErrors {
   position?: string;
   startDate?: string;
   endDate?: string;
+  duties?: string;
 }
+
+const REQUIRED_MSG = "Это поле не может быть пустым.";
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+// Maps resumeCreate payload keys to the keys used in fieldErrors below.
+const SERVER_FIELD_MAP: Record<string, string> = {
+  category: "category",
+  specialization: "specialization",
+  salaryFrom: "salaryFrom",
+  salaryTo: "salaryTo",
+  experience: "experience",
+  description: "description",
+  software: "software",
+  employment_type: "employmentType",
+  region: "region",
+  workPlace: "workPlace",
+  employment: "employment",
+  schedule: "schedule",
+  phone: "phone",
+  social_links: "socialLinks",
+  key_skills: "keySkills",
+};
 
 export default function CreateResumePage() {
   const router = useRouter();
@@ -76,9 +99,17 @@ export default function CreateResumePage() {
   const { user, isAuthenticated } = useAuth();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [nameError, setNameError] = useState("");
-  const [emailError, setEmailError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [workExpErrors, setWorkExpErrors] = useState<Record<number, WorkExpFieldErrors>>({});
+
+  const clearError = (key: string) => {
+    setFieldErrors((prev) => {
+      if (!prev[key]) return prev;
+      const next = { ...prev };
+      delete next[key];
+      return next;
+    });
+  };
 
   // Основная информация
   const [name, setName] = useState(user?.name || "");
@@ -130,6 +161,7 @@ export default function CreateResumePage() {
     if (trimmed && !keySkills.includes(trimmed)) {
       setKeySkills([...keySkills, trimmed]);
       setNewSkill("");
+      clearError("keySkills");
     }
   };
 
@@ -138,6 +170,7 @@ export default function CreateResumePage() {
     if (trimmed && !socialLinks.includes(trimmed)) {
       setSocialLinks([...socialLinks, trimmed]);
       setNewSocialLink("");
+      clearError("socialLinks");
     }
   };
 
@@ -198,41 +231,50 @@ export default function CreateResumePage() {
   };
 
   // --- Валидация ---
-
-  const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  const REQUIRED_MSG = "Это поле не может быть пустым.";
+  // Всё обязательно, кроме поля «О себе».
 
   const validate = () => {
-    let isValid = true;
+    const errors: Record<string, string> = {};
 
-    if (!name.trim()) {
-      setNameError(REQUIRED_MSG);
-      isValid = false;
-    } else {
-      setNameError("");
+    if (!name.trim()) errors.name = REQUIRED_MSG;
+    if (!category.trim()) errors.category = REQUIRED_MSG;
+    if (specializations.length === 0) errors.specialization = "Выберите хотя бы одну специализацию.";
+    if (!salaryFrom.trim()) errors.salaryFrom = REQUIRED_MSG;
+    if (!salaryTo.trim()) errors.salaryTo = REQUIRED_MSG;
+    if (!experience) errors.experience = "Выберите опыт работы.";
+    if (!description.trim()) errors.description = REQUIRED_MSG;
+    if (!workPlace.trim()) errors.workPlace = REQUIRED_MSG;
+    if (!employment.trim()) errors.employment = REQUIRED_MSG;
+    if (!schedule.trim()) errors.schedule = REQUIRED_MSG;
+    if (!region) errors.region = "Выберите регион.";
+    if (employmentType.length === 0) errors.employmentType = "Выберите хотя бы один тип занятости.";
+    if (!phone.trim()) errors.phone = REQUIRED_MSG;
+    if (!email.trim()) {
+      errors.email = REQUIRED_MSG;
+    } else if (!EMAIL_PATTERN.test(email.trim())) {
+      errors.email = "Введите правильный адрес электронной почты.";
     }
+    if (socialLinks.length === 0) errors.socialLinks = "Добавьте хотя бы одну ссылку.";
+    if (software.length === 0) errors.software = "Выберите хотя бы одну программу.";
+    if (keySkills.length === 0) errors.keySkills = "Добавьте хотя бы один навык.";
 
-    if (email.trim() && !EMAIL_PATTERN.test(email.trim())) {
-      setEmailError("Введите правильный адрес электронной почты.");
-      isValid = false;
-    } else {
-      setEmailError("");
-    }
+    setFieldErrors(errors);
 
     const nextWorkExpErrors: Record<number, WorkExpFieldErrors> = {};
     workExperiences.forEach((exp, index) => {
-      const errors: WorkExpFieldErrors = {};
-      if (!exp.company.trim()) errors.company = REQUIRED_MSG;
-      if (!exp.startDate.trim()) errors.startDate = REQUIRED_MSG;
-      if (!exp.endDate.trim()) errors.endDate = REQUIRED_MSG;
-      if (Object.keys(errors).length > 0) {
-        nextWorkExpErrors[index] = errors;
-        isValid = false;
+      const expErrors: WorkExpFieldErrors = {};
+      if (!exp.company.trim()) expErrors.company = REQUIRED_MSG;
+      if (!exp.position.trim()) expErrors.position = REQUIRED_MSG;
+      if (!exp.startDate.trim()) expErrors.startDate = REQUIRED_MSG;
+      if (!exp.endDate.trim()) expErrors.endDate = REQUIRED_MSG;
+      if (!exp.duties.some((d) => d.trim())) expErrors.duties = "Укажите хотя бы одну обязанность.";
+      if (Object.keys(expErrors).length > 0) {
+        nextWorkExpErrors[index] = expErrors;
       }
     });
     setWorkExpErrors(nextWorkExpErrors);
 
-    return isValid;
+    return Object.keys(errors).length === 0 && Object.keys(nextWorkExpErrors).length === 0;
   };
 
   // --- Сабмит ---
@@ -291,14 +333,24 @@ export default function CreateResumePage() {
       } else if (error?.data?.message) {
         toast.error(error.data.message);
       } else if (error?.data && typeof error.data === "object") {
-        const { name: nameErr, email, workExperience, ...rest } = error.data;
+        const { name: nameErr, email: emailErr, workExperience, ...rest } = error.data;
 
-        if (Array.isArray(nameErr) && nameErr[0]) {
-          setNameError(nameErr[0]);
-        }
+        const nextFieldErrors: Record<string, string> = {};
+        if (Array.isArray(nameErr) && nameErr[0]) nextFieldErrors.name = nameErr[0];
+        if (Array.isArray(emailErr) && emailErr[0]) nextFieldErrors.email = emailErr[0];
 
-        if (Array.isArray(email) && email[0]) {
-          setEmailError(email[0]);
+        const unmapped: [string, unknown][] = [];
+        Object.entries(rest).forEach(([key, val]) => {
+          const mappedKey = SERVER_FIELD_MAP[key];
+          if (mappedKey && Array.isArray(val) && typeof val[0] === "string") {
+            nextFieldErrors[mappedKey] = val[0];
+          } else {
+            unmapped.push([key, val]);
+          }
+        });
+
+        if (Object.keys(nextFieldErrors).length > 0) {
+          setFieldErrors((prev) => ({ ...prev, ...nextFieldErrors }));
         }
 
         if (Array.isArray(workExperience)) {
@@ -310,19 +362,20 @@ export default function CreateResumePage() {
                 position: entry.position?.[0],
                 startDate: entry.startDate?.[0] || entry.start_date?.[0],
                 endDate: entry.endDate?.[0] || entry.end_date?.[0],
+                duties: entry.duties?.[0],
               };
             }
           });
           setWorkExpErrors(nextWorkExpErrors);
         }
 
-        const remainingMessages = Object.values(rest)
-          .flat()
+        const remainingMessages = unmapped
+          .flatMap(([, val]) => (Array.isArray(val) ? val : [val]))
           .filter((v): v is string => typeof v === "string");
 
         if (remainingMessages.length > 0) {
           toast.error(remainingMessages.join(", "));
-        } else if (nameErr || email || workExperience) {
+        } else if (Object.keys(nextFieldErrors).length > 0 || workExperience) {
           toast.error("Проверьте отмеченные поля в форме.");
         } else {
           toast.error("Не удалось опубликовать резюме.");
@@ -365,12 +418,12 @@ export default function CreateResumePage() {
                 value={name}
                 onChange={(e) => {
                   setName(e.target.value);
-                  if (nameError) setNameError("");
+                  clearError("name");
                 }}
                 placeholder="Иванов Александр Петрович"
-                className={nameError ? "border-red-500 focus-visible:ring-red-500" : ""}
+                className={fieldErrors.name ? "border-red-500 focus-visible:ring-red-500" : ""}
               />
-              {nameError && <p className="text-sm text-red-500 mt-1">{nameError}</p>}
+              {fieldErrors.name && <p className="text-sm text-red-500 mt-1">{fieldErrors.name}</p>}
             </div>
 
             {/* Категория */}
@@ -380,9 +433,14 @@ export default function CreateResumePage() {
               </label>
               <Input
                 value={category}
-                onChange={(e) => setCategory(e.target.value)}
+                onChange={(e) => {
+                  setCategory(e.target.value);
+                  clearError("category");
+                }}
                 placeholder="Например: Архитектор, Инженер, Дизайнер интерьера"
+                className={fieldErrors.category ? "border-red-500 focus-visible:ring-red-500" : ""}
               />
+              {fieldErrors.category && <p className="text-sm text-red-500 mt-1">{fieldErrors.category}</p>}
             </div>
 
             {/* Специализация */}
@@ -396,14 +454,16 @@ export default function CreateResumePage() {
                     key={spec}
                     variant={specializations.includes(spec) ? "default" : "outline"}
                     className="cursor-pointer text-sm py-1 px-3"
-                    onClick={() =>
-                      toggleMultiSelect(specializations, setSpecializations, spec)
-                    }
+                    onClick={() => {
+                      toggleMultiSelect(specializations, setSpecializations, spec);
+                      clearError("specialization");
+                    }}
                   >
                     {spec}
                   </Badge>
                 ))}
               </div>
+              {fieldErrors.specialization && <p className="text-sm text-red-500 mt-1">{fieldErrors.specialization}</p>}
             </div>
 
             {/* Зарплата */}
@@ -412,21 +472,33 @@ export default function CreateResumePage() {
                 Желаемая зарплата (сом)
               </label>
               <div className="flex items-center gap-3">
-                <Input
-                  type="number"
-                  value={salaryFrom}
-                  onChange={(e) => setSalaryFrom(e.target.value)}
-                  placeholder="от"
-                  className="flex-1"
-                />
+                <div className="flex-1">
+                  <Input
+                    type="number"
+                    value={salaryFrom}
+                    onChange={(e) => {
+                      setSalaryFrom(e.target.value);
+                      clearError("salaryFrom");
+                    }}
+                    placeholder="от"
+                    className={fieldErrors.salaryFrom ? "border-red-500 focus-visible:ring-red-500" : ""}
+                  />
+                  {fieldErrors.salaryFrom && <p className="text-sm text-red-500 mt-1">{fieldErrors.salaryFrom}</p>}
+                </div>
                 <span className="text-[#949494]">—</span>
-                <Input
-                  type="number"
-                  value={salaryTo}
-                  onChange={(e) => setSalaryTo(e.target.value)}
-                  placeholder="до"
-                  className="flex-1"
-                />
+                <div className="flex-1">
+                  <Input
+                    type="number"
+                    value={salaryTo}
+                    onChange={(e) => {
+                      setSalaryTo(e.target.value);
+                      clearError("salaryTo");
+                    }}
+                    placeholder="до"
+                    className={fieldErrors.salaryTo ? "border-red-500 focus-visible:ring-red-500" : ""}
+                  />
+                  {fieldErrors.salaryTo && <p className="text-sm text-red-500 mt-1">{fieldErrors.salaryTo}</p>}
+                </div>
               </div>
             </div>
 
@@ -441,12 +513,16 @@ export default function CreateResumePage() {
                     key={exp}
                     variant={experience === exp ? "default" : "outline"}
                     className="cursor-pointer text-sm py-1 px-3"
-                    onClick={() => setExperience(exp)}
+                    onClick={() => {
+                      setExperience(exp);
+                      clearError("experience");
+                    }}
                   >
                     {exp}
                   </Badge>
                 ))}
               </div>
+              {fieldErrors.experience && <p className="text-sm text-red-500 mt-1">{fieldErrors.experience}</p>}
             </div>
 
             {/* Описание */}
@@ -456,9 +532,14 @@ export default function CreateResumePage() {
               </label>
               <Input
                 value={description}
-                onChange={(e) => setDescription(e.target.value)}
+                onChange={(e) => {
+                  setDescription(e.target.value);
+                  clearError("description");
+                }}
                 placeholder="Жилая недвижимость, Проектирование объектов ХоРеКа..."
+                className={fieldErrors.description ? "border-red-500 focus-visible:ring-red-500" : ""}
               />
+              {fieldErrors.description && <p className="text-sm text-red-500 mt-1">{fieldErrors.description}</p>}
             </div>
           </div>
         </div>
@@ -488,9 +569,14 @@ export default function CreateResumePage() {
                 </label>
                 <Input
                   value={workPlace}
-                  onChange={(e) => setWorkPlace(e.target.value)}
+                  onChange={(e) => {
+                    setWorkPlace(e.target.value);
+                    clearError("workPlace");
+                  }}
                   placeholder="Кыргызстан"
+                  className={fieldErrors.workPlace ? "border-red-500 focus-visible:ring-red-500" : ""}
                 />
+                {fieldErrors.workPlace && <p className="text-sm text-red-500 mt-1">{fieldErrors.workPlace}</p>}
               </div>
               <div>
                 <label className="text-sm font-medium text-[#333] mb-2 block">
@@ -498,9 +584,14 @@ export default function CreateResumePage() {
                 </label>
                 <Input
                   value={employment}
-                  onChange={(e) => setEmployment(e.target.value)}
+                  onChange={(e) => {
+                    setEmployment(e.target.value);
+                    clearError("employment");
+                  }}
                   placeholder="Полная, Фриланс..."
+                  className={fieldErrors.employment ? "border-red-500 focus-visible:ring-red-500" : ""}
                 />
+                {fieldErrors.employment && <p className="text-sm text-red-500 mt-1">{fieldErrors.employment}</p>}
               </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -510,9 +601,14 @@ export default function CreateResumePage() {
                 </label>
                 <Input
                   value={schedule}
-                  onChange={(e) => setSchedule(e.target.value)}
+                  onChange={(e) => {
+                    setSchedule(e.target.value);
+                    clearError("schedule");
+                  }}
                   placeholder="5/2, Свободный..."
+                  className={fieldErrors.schedule ? "border-red-500 focus-visible:ring-red-500" : ""}
                 />
+                {fieldErrors.schedule && <p className="text-sm text-red-500 mt-1">{fieldErrors.schedule}</p>}
               </div>
               <div>
                 <label className="text-sm font-medium text-[#333] mb-2 block">
@@ -524,12 +620,16 @@ export default function CreateResumePage() {
                       key={r.value}
                       variant={region === r.value ? "default" : "outline"}
                       className="cursor-pointer text-sm py-1 px-3"
-                      onClick={() => setRegion(r.value)}
+                      onClick={() => {
+                        setRegion(r.value);
+                        clearError("region");
+                      }}
                     >
                       {r.label}
                     </Badge>
                   ))}
                 </div>
+                {fieldErrors.region && <p className="text-sm text-red-500 mt-1">{fieldErrors.region}</p>}
               </div>
             </div>
 
@@ -544,14 +644,16 @@ export default function CreateResumePage() {
                     key={et}
                     variant={employmentType.includes(et) ? "default" : "outline"}
                     className="cursor-pointer text-sm py-1 px-3"
-                    onClick={() =>
-                      toggleMultiSelect(employmentType, setEmploymentType, et)
-                    }
+                    onClick={() => {
+                      toggleMultiSelect(employmentType, setEmploymentType, et);
+                      clearError("employmentType");
+                    }}
                   >
                     {et}
                   </Badge>
                 ))}
               </div>
+              {fieldErrors.employmentType && <p className="text-sm text-red-500 mt-1">{fieldErrors.employmentType}</p>}
             </div>
           </div>
         </div>
@@ -568,9 +670,14 @@ export default function CreateResumePage() {
                 </label>
                 <Input
                   value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
+                  onChange={(e) => {
+                    setPhone(e.target.value);
+                    clearError("phone");
+                  }}
                   placeholder="+996 XXX XXX XXX"
+                  className={fieldErrors.phone ? "border-red-500 focus-visible:ring-red-500" : ""}
                 />
+                {fieldErrors.phone && <p className="text-sm text-red-500 mt-1">{fieldErrors.phone}</p>}
               </div>
               <div>
                 <label className="text-sm font-medium text-[#333] mb-2 block">
@@ -580,12 +687,12 @@ export default function CreateResumePage() {
                   value={email}
                   onChange={(e) => {
                     setEmail(e.target.value);
-                    if (emailError) setEmailError("");
+                    clearError("email");
                   }}
                   placeholder="email@example.com"
-                  className={emailError ? "border-red-500 focus-visible:ring-red-500" : ""}
+                  className={fieldErrors.email ? "border-red-500 focus-visible:ring-red-500" : ""}
                 />
-                {emailError && <p className="text-sm text-red-500 mt-1">{emailError}</p>}
+                {fieldErrors.email && <p className="text-sm text-red-500 mt-1">{fieldErrors.email}</p>}
               </div>
             </div>
 
@@ -610,11 +717,13 @@ export default function CreateResumePage() {
                   onChange={(e) => setNewSocialLink(e.target.value)}
                   placeholder="instagram, telegram, linkedin..."
                   onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addSocialLink())}
+                  className={fieldErrors.socialLinks ? "border-red-500 focus-visible:ring-red-500" : ""}
                 />
                 <Button variant="outline" onClick={addSocialLink} className="rounded-[40px]">
                   <Plus className="w-4 h-4" />
                 </Button>
               </div>
+              {fieldErrors.socialLinks && <p className="text-sm text-red-500 mt-1">{fieldErrors.socialLinks}</p>}
             </div>
           </div>
         </div>
@@ -635,12 +744,16 @@ export default function CreateResumePage() {
                     key={sw}
                     variant={software.includes(sw) ? "default" : "outline"}
                     className="cursor-pointer text-sm py-1 px-3"
-                    onClick={() => toggleMultiSelect(software, setSoftware, sw)}
+                    onClick={() => {
+                      toggleMultiSelect(software, setSoftware, sw);
+                      clearError("software");
+                    }}
                   >
                     {sw}
                   </Badge>
                 ))}
               </div>
+              {fieldErrors.software && <p className="text-sm text-red-500 mt-1">{fieldErrors.software}</p>}
             </div>
 
             {/* Ключевые навыки */}
@@ -664,11 +777,13 @@ export default function CreateResumePage() {
                   onChange={(e) => setNewSkill(e.target.value)}
                   placeholder="Добавить навык..."
                   onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addSkill())}
+                  className={fieldErrors.keySkills ? "border-red-500 focus-visible:ring-red-500" : ""}
                 />
                 <Button variant="outline" onClick={addSkill} className="rounded-[40px]">
                   <Plus className="w-4 h-4" />
                 </Button>
               </div>
+              {fieldErrors.keySkills && <p className="text-sm text-red-500 mt-1">{fieldErrors.keySkills}</p>}
             </div>
           </div>
         </div>
@@ -734,7 +849,15 @@ export default function CreateResumePage() {
                         <label className="text-xs text-[#949494] mb-1 block">Должность</label>
                         <Input
                           value={exp.position}
-                          onChange={(e) => updateWorkExp(exp.id, "position", e.target.value)}
+                          onChange={(e) => {
+                            updateWorkExp(exp.id, "position", e.target.value);
+                            if (workExpErrors[expIndex]?.position) {
+                              setWorkExpErrors((prev) => ({
+                                ...prev,
+                                [expIndex]: { ...prev[expIndex], position: undefined },
+                              }));
+                            }
+                          }}
                           placeholder="Ведущий архитектор"
                           className={workExpErrors[expIndex]?.position ? "border-red-500 focus-visible:ring-red-500" : ""}
                         />
@@ -795,8 +918,17 @@ export default function CreateResumePage() {
                           <div key={dutyIndex} className="flex gap-2">
                             <Input
                               value={duty}
-                              onChange={(e) => updateDuty(exp.id, dutyIndex, e.target.value)}
+                              onChange={(e) => {
+                                updateDuty(exp.id, dutyIndex, e.target.value);
+                                if (workExpErrors[expIndex]?.duties) {
+                                  setWorkExpErrors((prev) => ({
+                                    ...prev,
+                                    [expIndex]: { ...prev[expIndex], duties: undefined },
+                                  }));
+                                }
+                              }}
                               placeholder="Описание обязанности..."
+                              className={workExpErrors[expIndex]?.duties ? "border-red-500 focus-visible:ring-red-500" : ""}
                             />
                             {exp.duties.length > 1 && (
                               <button
@@ -809,6 +941,9 @@ export default function CreateResumePage() {
                           </div>
                         ))}
                       </div>
+                      {workExpErrors[expIndex]?.duties && (
+                        <p className="text-sm text-red-500 mt-1">{workExpErrors[expIndex].duties}</p>
+                      )}
                       <button
                         onClick={() => addDuty(exp.id)}
                         className="text-sm text-[#949494] hover:text-[#333] mt-2 flex items-center gap-1"

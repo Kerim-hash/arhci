@@ -1,37 +1,52 @@
 // components/ProjectCard.tsx
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
 import { Eye, ThumbsUp } from "lucide-react";
 import type { ProjectListRead } from "@/services/generatedApi";
+import { useApiProjectsRetrieveQuery } from "@/services/generatedApi";
 
 interface ProjectCardProps {
   project: ProjectListRead;
   category?: string;
 }
 
-export default function ProjectCard({ project, category }: ProjectCardProps) {
-  const getPlaceholder = (cat?: string, projectId?: number) => {
-    switch (cat) {
-      case "architects": return "/placeholder-architect.png";
-      case "engineers": return "/placeholder-engineer.png";
-      case "interior-designers": return "/placeholder-designer.png";
-      case "visualizers": return "/placeholder-visualizer.png";
-      default:
-        const placeholders = [
-          "/placeholder-architect.png",
-          "/placeholder-engineer.png",
-          "/placeholder-designer.png",
-          "/placeholder-visualizer.png"
-        ];
-        return placeholders[(projectId || 0) % placeholders.length];
+const getPlaceholder = (cat?: string, projectId?: number) => {
+  switch (cat) {
+    case "architects": return "/placeholder-architect.png";
+    case "engineers": return "/placeholder-engineer.png";
+    case "interior-designers": return "/placeholder-designer.png";
+    case "visualizers": return "/placeholder-visualizer.png";
+    default: {
+      const placeholders = [
+        "/placeholder-architect.png",
+        "/placeholder-engineer.png",
+        "/placeholder-designer.png",
+        "/placeholder-visualizer.png"
+      ];
+      return placeholders[(projectId || 0) % placeholders.length];
     }
-  };
+  }
+};
+
+export default function ProjectCard({ project, category }: ProjectCardProps) {
+  // The projects list endpoint doesn't populate previewImage even when the
+  // project has uploaded images, so fall back to fetching the detail once
+  // to read the real image (isPreview one, or the first uploaded image).
+  const { data: detail } = useApiProjectsRetrieveQuery(
+    { id: project.id },
+    { skip: !!project.previewImage }
+  );
+  const fallbackImage = detail?.images?.find((img) => img.isPreview)?.image
+    || detail?.images?.[0]?.image;
+  const imageSrc = project.previewImage || fallbackImage || getPlaceholder(category, project.id);
 
   return (
     <Link href={`/projects/${project.id}`}>
       <div className="relative overflow-hidden max-h-[200px] h-[200px] rounded-lg bg-gray-100">
         <Image
-          src={project.previewImage || getPlaceholder(category, project.id)}
+          src={imageSrc}
           alt={project.title}
           fill
           className="object-cover transition-transform duration-300 hover:scale-105"

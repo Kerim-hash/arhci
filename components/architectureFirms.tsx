@@ -7,7 +7,8 @@ import { useApiSpecialistsTopListQuery } from "@/services/generatedApi";
 
 export default function ArchitectureFirms() {
   const { data, isLoading } = useApiSpecialistsTopListQuery({ page: 1 });
-  const topSpecialists = data?.results || [];
+  // /api/specialists/top/ returns a plain array, not the paginated { results } shape.
+  const topSpecialists = Array.isArray(data) ? data : data?.results || [];
 
   return (
     <div className="sticky top-27.5">

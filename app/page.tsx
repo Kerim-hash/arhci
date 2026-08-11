@@ -7,6 +7,7 @@ import { Separator } from "@/components/ui/separator";
 import { Card } from "@/components/ui/card";
 import ArchitectureFirms from "@/components/architectureFirms";
 import Link from "next/link";
+import { Eye } from "lucide-react";
 import {
   useApiArticlesListQuery,
   useApiNewsListQuery,
@@ -71,7 +72,7 @@ export default function Page() {
             ) : articles.length > 0 ? (
               articles.map((item: any) => (
                 <Link href={`/articles/${item.slug}`} key={item.id} className="group">
-                  <Card className="overflow-hidden mb-4 md:mb-6">
+                  <Card className="overflow-hidden mb-4 md:mb-6 p-0 gap-0">
                     {/* Изображение - меняется пропорция на мобиле */}
                     <div className="relative aspect-video md:aspect-[2/5] overflow-hidden md:max-h-[320px] w-full bg-gray-100">
                       {item.previewImage ? (
@@ -103,9 +104,14 @@ export default function Page() {
                         {item.title}
                       </h2>
 
-                      <p className="text-sm md:text-[16px] text-[#6D6D6D] leading-relaxed line-clamp-3 md:line-clamp-4">
+                      <p className="text-sm md:text-[16px] text-[#6D6D6D] leading-relaxed line-clamp-3 md:line-clamp-4 mb-4">
                         {stripHtml(item.shortDescription) || "Описание отсутствует"}
                       </p>
+
+                      <div className="flex items-center gap-1 text-xs text-gray-400">
+                        <Eye className="w-3.5 h-3.5" />
+                        <span>{item.views || 0}</span>
+                      </div>
                     </div>
                   </Card>
                 </Link>

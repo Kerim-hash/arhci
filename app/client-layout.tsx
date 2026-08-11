@@ -23,7 +23,7 @@ export default function DashboardClientLayout({
   return (
     <Provider store={store}>
       <Header />
-      <div className="mt-23 md:mt-27.5">{children}</div>
+      <div className="mt-23 md:mt-34.5">{children}</div>
       <Footer />
     </Provider>
   );

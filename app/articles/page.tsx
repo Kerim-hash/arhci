@@ -8,6 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
+import { Eye } from "lucide-react";
 import {
   QueryClient,
   QueryClientProvider,
@@ -136,7 +137,7 @@ function ArticleContent() {
             const createdAtDate = article.createdAt || article.created_at;
 
             return (
-              <Card key={article.id} className="overflow-hidden flex flex-col">
+              <Card key={article.id} className="overflow-hidden flex flex-col p-0 gap-0">
                 <Link
                   href={`/articles/${article.slug}`}
                   className="relative block aspect-video md:aspect-[2/5] overflow-hidden md:max-h-[320px] w-full bg-gray-100 group"
@@ -178,11 +179,17 @@ function ArticleContent() {
                     {stripHtml(shortDesc || "") || "Описание отсутствует"}
                   </p>
 
-                  {createdAtDate && (
-                    <p className="text-xs text-gray-400 mb-2">
-                      {formatDate(createdAtDate)}
-                    </p>
-                  )}
+                  <div className="flex items-center justify-between gap-3 mb-2">
+                    {createdAtDate && (
+                      <p className="text-xs text-gray-400">
+                        {formatDate(createdAtDate)}
+                      </p>
+                    )}
+                    <div className="flex items-center gap-1 text-xs text-gray-400">
+                      <Eye className="w-3.5 h-3.5" />
+                      <span>{article.views || 0}</span>
+                    </div>
+                  </div>
                 </div>
 
                 <Link
