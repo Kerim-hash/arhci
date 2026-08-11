@@ -1,0 +1,64 @@
+name: Деплой фронтенда
+
+# Каждый push в main автоматически выкатывается на сервер.
+# Кнопка «Run workflow» на вкладке Actions позволяет выкатить вручную.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Два деплоя одновременно затёрли бы друг друга. Новый ждёт, пока
+# завершится текущий, — прерывать выкатку на середине нельзя.
+concurrency:
+  group: deploy-frontend
+  cancel-in-progress: false
+
+jobs:
+  check:
+    name: Проверка типов
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      # Только типы. Линт намеренно не гейтим: в проекте есть давние
+      # предупреждения no-explicit-any, из-за которых любой деплой падал бы.
+      - name: tsc --noEmit
+        run: npx tsc --noEmit
+
+  deploy:
+    name: Выкатка на сервер
+    needs: check
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Подготовить SSH
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          # Ключ хоста задан заранее, а не через ssh-keyscan:
+          # иначе первый коннект доверял бы любому отвечающему серверу.
+          printf '%s\n' "${{ secrets.DEPLOY_HOST_KEY }}" > ~/.ssh/known_hosts
+
+      - name: Запустить деплой
+        run: |
+          ssh -i ~/.ssh/id_ed25519 \
+              -o IdentitiesOnly=yes \
+              -o StrictHostKeyChecking=yes \
+              -o ServerAliveInterval=30 \
+              "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}"
+          # Команда не передаётся намеренно: ключ на сервере привязан
+          # к /root/deploy-arhci.sh через command= в authorized_keys,
+          # поэтому по нему нельзя выполнить ничего другого.
+
+      - name: Убрать ключ
+        if: always()
+        run: rm -f ~/.ssh/id_ed25519
