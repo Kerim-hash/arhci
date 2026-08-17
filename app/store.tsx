@@ -1,6 +1,7 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { authApi } from "./store/features/authApi";
 import { apiSlice } from "@/services/api";
+import "@/services/apiTags";
 import { authReducer } from "./auth/model/authSlice";
 import { editProfileApi } from "./store/features/editProfileApi";
 import vacanciesReducer from "./work/model/vacanciesSlice";

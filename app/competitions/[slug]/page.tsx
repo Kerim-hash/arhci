@@ -140,7 +140,7 @@ export default function CompetitionDetailPage() {
           <div>
             <div className="text-[#383838] text-sm mb-1">Открыт для</div>
             <div className="flex gap-2 flex-wrap">
-              {(currentCompetition.open_for as string[] || []).map((item: string) => (
+              {(currentCompetition.openFor as string[] || []).map((item: string) => (
                 <Badge key={item} variant="secondary">{item}</Badge>
               ))}
             </div>
@@ -225,7 +225,7 @@ export default function CompetitionDetailPage() {
           <li>
             Проект подаётся в цифровом формате и должен включать:
             <ul className="space-y-2 list-disc pl-5 mt-2">
-              {(currentCompetition.project_composition as string[] || []).map((item: string, index: number) => (
+              {(currentCompetition.projectComposition as string[] || []).map((item: string, index: number) => (
                 <li key={index}>{item}</li>
               ))}
             </ul>
@@ -238,7 +238,7 @@ export default function CompetitionDetailPage() {
           <li>
             Проекты оцениваются по следующим критериям:
             <ul className="space-y-2 list-disc pl-5 mt-2">
-              {(currentCompetition.evaluation_criteria as string[] || []).map((criteria: string, index: number) => (
+              {(currentCompetition.evaluationCriteria as string[] || []).map((criteria: string, index: number) => (
                 <li key={index}>{criteria}</li>
               ))}
             </ul>

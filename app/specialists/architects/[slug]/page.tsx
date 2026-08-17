@@ -12,6 +12,7 @@ import { useApiProjectsSpecialistListQuery } from "@/services/generatedApi";
 import { useApiSpecialistsRetrieveQuery } from "@/services/generatedApi";
 import ProjectCard from "@/app/projects/components/ProjectCard";
 import { Button } from "@/components/ui/button";
+import LikeButton from "@/components/LikeButton";
 
 export default function ArchitectPage() {
   const params = useParams();
@@ -127,6 +128,13 @@ export default function ArchitectPage() {
                     <p>Рейтинг</p>
                     <p>{architect.rating || 0}</p>
                   </div>
+                  <LikeButton
+                    target="specialist"
+                    targetId={architect.id}
+                    initialLikes={architect.likes || 0}
+                    initialIsLiked={architect.isLiked}
+                    className="w-full mt-2"
+                  />
                 </div>
               </div>
             </div>

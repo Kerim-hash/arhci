@@ -1,8 +1,8 @@
 openapi: 3.0.3
 info:
-  title: Ardi Platform API
+  title: Archi Platform API
   version: 1.0.0
-  description: API для архитектурной платформы Ardi
+  description: API для архитектурной платформы Archi
 paths:
   /api/articles/:
     get:
@@ -29,11 +29,6 @@ paths:
           * `pending` - На модерации
           * `approved` - Одобрено
           * `rejected` - Отклонено
-      - in: query
-        name: user
-        schema:
-          type: integer
-        description: ID автора
       - name: ordering
         required: false
         in: query
@@ -52,6 +47,11 @@ paths:
         description: A search term.
         schema:
           type: string
+      - in: query
+        name: user
+        schema:
+          type: number
+        description: ID автора
       tags:
       - api
       security:
@@ -89,18 +89,16 @@ paths:
   /api/articles/create/:
     post:
       operationId: apiArticlesCreateCreate
-      description: POST /api/articles/ — Create article with DOCX upload (authenticated).
+      description: POST /api/articles/create/ — Create article with blocks or DOCX
+        file (authenticated).
       tags:
       - api
       requestBody:
         content:
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/ArticleCreate'
           multipart/form-data:
             schema:
               $ref: '#/components/schemas/ArticleCreate'
-          application/json:
+          application/x-www-form-urlencoded:
             schema:
               $ref: '#/components/schemas/ArticleCreate'
         required: true
@@ -118,6 +116,26 @@ paths:
       operationId: apiCompetitionsList
       description: GET /api/competitions/ — List competitions.
       parameters:
+      - in: query
+        name: mine
+        schema:
+          type: boolean
+        description: Только мои
+      - in: query
+        name: moderation_status
+        schema:
+          type: string
+          title: Статус модерации
+          enum:
+          - approved
+          - pending
+          - rejected
+        description: |-
+          Статус модерации
+
+          * `pending` - На модерации
+          * `approved` - Одобрено
+          * `rejected` - Отклонено
       - name: ordering
         required: false
         in: query
@@ -136,6 +154,11 @@ paths:
         description: A search term.
         schema:
           type: string
+      - in: query
+        name: user
+        schema:
+          type: number
+        description: ID автора
       tags:
       - api
       security:
@@ -299,6 +322,26 @@ paths:
       operationId: apiOrdersList
       description: GET /api/orders/ — List orders with filters.
       parameters:
+      - in: query
+        name: mine
+        schema:
+          type: boolean
+        description: Только мои
+      - in: query
+        name: moderation_status
+        schema:
+          type: string
+          title: Статус модерации
+          enum:
+          - approved
+          - pending
+          - rejected
+        description: |-
+          Статус модерации
+
+          * `pending` - На модерации
+          * `approved` - Одобрено
+          * `rejected` - Отклонено
       - name: ordering
         required: false
         in: query
@@ -317,6 +360,11 @@ paths:
         description: A search term.
         schema:
           type: string
+      - in: query
+        name: user
+        schema:
+          type: number
+        description: ID автора
       tags:
       - api
       security:
@@ -420,11 +468,6 @@ paths:
           * `pending` - На модерации
           * `approved` - Одобрено
           * `rejected` - Отклонено
-      - in: query
-        name: user
-        schema:
-          type: number
-        description: ID автора
       - name: ordering
         required: false
         in: query
@@ -443,6 +486,11 @@ paths:
         description: A search term.
         schema:
           type: string
+      - in: query
+        name: user
+        schema:
+          type: number
+        description: ID автора
       tags:
       - api
       security:
@@ -477,6 +525,23 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProjectDetail'
           description: ''
+  /api/projects/{id}/like/:
+    post:
+      operationId: apiProjectsLikeCreate
+      description: POST /api/projects/:id/like/ — Toggle like (authenticated).
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
   /api/projects/{id}/views/:
     post:
       operationId: apiProjectsViewsCreate
@@ -624,7 +689,7 @@ paths:
       - in: query
         name: user
         schema:
-          type: number
+          type: integer
         description: ID автора
       tags:
       - api
@@ -726,6 +791,23 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedSpecialistListList'
           description: ''
+  /api/specialists/{id}/like/:
+    post:
+      operationId: apiSpecialistsLikeCreate
+      description: POST /api/specialists/:id/like/ — Toggle like (authenticated).
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
   /api/specialists/{id}/views/:
     post:
       operationId: apiSpecialistsViewsCreate
@@ -769,7 +851,7 @@ paths:
   /api/specialists/top/:
     get:
       operationId: apiSpecialistsTopList
-      description: GET /api/specialists/top/ — Top specialists by rating.
+      description: GET /api/specialists/top/ — Top specialists by likes.
       parameters:
       - name: ordering
         required: false
@@ -807,9 +889,17 @@ paths:
       description: GET /api/vacancies/ — List vacancies with filters.
       parameters:
       - in: query
+        name: employment
+        schema:
+          type: string
+      - in: query
         name: experience
         schema:
           type: string
+      - in: query
+        name: has_salary
+        schema:
+          type: boolean
       - in: query
         name: mine
         schema:
@@ -843,6 +933,14 @@ paths:
         schema:
           type: integer
       - in: query
+        name: payout_type
+        schema:
+          type: string
+      - in: query
+        name: programs
+        schema:
+          type: string
+      - in: query
         name: region
         schema:
           type: string
@@ -858,6 +956,10 @@ paths:
         required: false
         in: query
         description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: specialization
         schema:
           type: string
       - in: query
@@ -1165,25 +1267,69 @@ paths:
           description: No response body
 components:
   schemas:
+    ArticleBlock:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        type:
+          allOf:
+          - $ref: '#/components/schemas/TypeEnum'
+          title: Тип блока
+        content:
+          type: string
+          title: Содержимое блока
+        altText:
+          type: string
+          title: Альтернативный текст / Подпись
+          maxLength: 500
+        order:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          title: Порядок
+        images:
+          type: array
+          items:
+            $ref: '#/components/schemas/BlockImage'
+          readOnly: true
+      required:
+      - id
+      - images
+      - type
     ArticleCreate:
       type: object
-      description: Create article with DOCX parsing.
+      description: Create article with DOCX parsing (used for docx compatibility /
+        fallback validation).
       properties:
         title:
           type: string
-          maxLength: 300
+          title: Заголовок
+          maxLength: 500
         previewImage:
           type: string
           format: uri
           nullable: true
+          title: Превью-изображение
         shortDescription:
           type: string
+          title: Краткое описание
         wordFile:
           type: string
           format: uri
           nullable: true
+          title: Документ Word (DOCX)
         isPublished:
           type: boolean
+          title: Опубликовано
+        biography:
+          type: string
+          title: Биография автора
+        contentMode:
+          allOf:
+          - $ref: '#/components/schemas/ContentModeEnum'
+          title: Режим контента
       required:
       - title
     ArticleDetail:
@@ -1195,37 +1341,71 @@ components:
           readOnly: true
         title:
           type: string
-          maxLength: 300
+          title: Заголовок
+          maxLength: 500
         slug:
           type: string
-          maxLength: 50
+          title: Ссылка (slug)
+          maxLength: 500
           pattern: ^[-a-zA-Z0-9_]+$
+        contentMode:
+          allOf:
+          - $ref: '#/components/schemas/ContentModeEnum'
+          title: Режим контента
         previewImage:
           type: string
-          format: uri
-          nullable: true
+          readOnly: true
         shortDescription:
           type: string
+          title: Краткое описание
+        biography:
+          type: string
+          title: Биография автора
         contentHtml:
           type: string
+          title: Содержимое (HTML)
+          description: Фото-галерею или слайдер можно вставить кнопкой «Галерея» на
+            панели редактора. Двойной клик по вставленному блоку открывает его на
+            редактирование.
+        blocks:
+          type: array
+          items:
+            $ref: '#/components/schemas/ArticleBlock'
+          readOnly: true
         isPublished:
           type: boolean
+          title: Опубликовано
         authorName:
           type: string
           readOnly: true
         views:
           type: integer
           maximum: 2147483647
-          minimum: -2147483648
+          minimum: 0
+          title: Просмотры
         createdAt:
           type: string
           format: date-time
           readOnly: true
+          title: Создано
+        moderationStatus:
+          allOf:
+          - $ref: '#/components/schemas/ModerationStatusEnum'
+          readOnly: true
+          title: Статус модерации
+        moderationComment:
+          type: string
+          readOnly: true
+          title: Комментарий модератора
+          description: Причина отклонения. Её видит автор материала.
       required:
       - authorName
+      - blocks
       - createdAt
       - id
-      - slug
+      - moderationComment
+      - moderationStatus
+      - previewImage
       - title
     ArticleList:
       type: object
@@ -1236,42 +1416,74 @@ components:
           readOnly: true
         title:
           type: string
-          maxLength: 300
+          title: Заголовок
+          maxLength: 500
         slug:
           type: string
-          maxLength: 50
+          title: Ссылка (slug)
+          maxLength: 500
           pattern: ^[-a-zA-Z0-9_]+$
+        contentMode:
+          allOf:
+          - $ref: '#/components/schemas/ContentModeEnum'
+          title: Режим контента
         previewImage:
           type: string
-          format: uri
-          nullable: true
+          readOnly: true
         shortDescription:
           type: string
+          title: Краткое описание
         authorName:
           type: string
           readOnly: true
         views:
           type: integer
           maximum: 2147483647
-          minimum: -2147483648
+          minimum: 0
+          title: Просмотры
         createdAt:
           type: string
           format: date-time
           readOnly: true
+          title: Создано
         moderationStatus:
+          allOf:
+          - $ref: '#/components/schemas/ModerationStatusEnum'
+          readOnly: true
+          title: Статус модерации
+        moderationComment:
           type: string
           readOnly: true
-          enum:
-          - approved
-          - pending
-          - rejected
+          title: Комментарий модератора
+          description: Причина отклонения. Её видит автор материала.
       required:
       - authorName
       - createdAt
       - id
+      - moderationComment
       - moderationStatus
-      - slug
+      - previewImage
       - title
+    BlankEnum:
+      enum:
+      - ''
+    BlockImage:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        image:
+          type: string
+          readOnly: true
+        order:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          title: Порядок
+      required:
+      - id
+      - image
     CategoryEnum:
       enum:
       - architects
@@ -1293,71 +1505,98 @@ components:
           readOnly: true
         slug:
           type: string
+          title: Ссылка (slug)
           maxLength: 50
           pattern: ^[-a-zA-Z0-9_]+$
         title:
           type: string
+          title: Название конкурса
           maxLength: 300
         description:
           type: string
+          title: Полное описание
+          description: Фото-галерею или слайдер можно вставить кнопкой «Галерея» на
+            панели редактора. Двойной клик по вставленному блоку открывает его на
+            редактирование.
         shortDescription:
           type: string
+          title: Краткое описание
         image:
           type: string
           format: uri
           nullable: true
-        open_for: {}
+          title: Изображение / Обложка
+        openFor:
+          title: Открыт для (категории)
         country:
           type: string
+          title: Страна проведения
           maxLength: 100
         city:
           type: string
+          title: Город проведения
           maxLength: 100
         registrationFee:
           type: string
+          title: Стоимость участия / Взнос
           maxLength: 100
         prize:
           type: string
+          title: Призовой фонд
           maxLength: 200
         organizer:
           type: string
+          title: Организатор
           maxLength: 200
         organizerLink:
           type: string
           format: uri
+          title: Ссылка на организатора
           maxLength: 200
         startRegistration:
           type: string
           format: date
           nullable: true
+          title: Начало регистрации
         endRegistration:
           type: string
           format: date
           nullable: true
+          title: Окончание регистрации
         submissionDeadline:
           type: string
           format: date
           nullable: true
+          title: Крайний срок подачи работ
         resultsAnnouncement:
           type: string
           format: date
           nullable: true
-        tasks: {}
-        conditions: {}
-        project_composition: {}
-        evaluation_criteria: {}
+          title: Объявление результатов
+        tasks:
+          title: Задачи конкурса
+        conditions:
+          title: Условия участия
+        projectComposition:
+          title: Состав проекта / Материалы
+        evaluationCriteria:
+          title: Критерии оценки
         isActive:
           type: boolean
+          title: Активен
         isFeatured:
           type: boolean
+          title: Рекомендованный конкурс
         createdAt:
           type: string
           format: date-time
           readOnly: true
+          title: Создано
         updatedAt:
           type: string
           format: date-time
           readOnly: true
+          title: Обновлено
       required:
       - createdAt
       - description
@@ -1372,84 +1611,131 @@ components:
         id:
           type: integer
           readOnly: true
+        moderationStatus:
+          allOf:
+          - $ref: '#/components/schemas/ModerationStatusEnum'
+          title: Статус модерации
+        moderationComment:
+          type: string
+          title: Комментарий модератора
+          description: Причина отклонения. Её видит автор материала.
+        moderatedAt:
+          type: string
+          format: date-time
+          nullable: true
+          title: Проверено
         slug:
           type: string
+          title: Ссылка (slug)
           maxLength: 50
           pattern: ^[-a-zA-Z0-9_]+$
         title:
           type: string
+          title: Название конкурса
           maxLength: 300
         description:
           type: string
+          title: Полное описание
+          description: Фото-галерею или слайдер можно вставить кнопкой «Галерея» на
+            панели редактора. Двойной клик по вставленному блоку открывает его на
+            редактирование.
         shortDescription:
           type: string
+          title: Краткое описание
         image:
           type: string
           format: uri
           nullable: true
-        open_for: {}
+          title: Изображение / Обложка
+        openFor:
+          title: Открыт для (категории)
         country:
           type: string
+          title: Страна проведения
           maxLength: 100
         city:
           type: string
+          title: Город проведения
           maxLength: 100
         registrationFee:
           type: string
+          title: Стоимость участия / Взнос
           maxLength: 100
         prize:
           type: string
+          title: Призовой фонд
           maxLength: 200
         organizer:
           type: string
+          title: Организатор
           maxLength: 200
         organizerLink:
           type: string
           format: uri
+          title: Ссылка на организатора
           maxLength: 200
         startRegistration:
           type: string
           format: date
           nullable: true
+          title: Начало регистрации
         endRegistration:
           type: string
           format: date
           nullable: true
+          title: Окончание регистрации
         submissionDeadline:
           type: string
           format: date
           nullable: true
+          title: Крайний срок подачи работ
         resultsAnnouncement:
           type: string
           format: date
           nullable: true
-        tasks: {}
-        conditions: {}
-        project_composition: {}
-        evaluation_criteria: {}
+          title: Объявление результатов
+        tasks:
+          title: Задачи конкурса
+        conditions:
+          title: Условия участия
+        projectComposition:
+          title: Состав проекта / Материалы
+        evaluationCriteria:
+          title: Критерии оценки
         views:
           type: integer
           maximum: 2147483647
           minimum: -2147483648
+          title: Просмотры
         participantsCount:
           type: integer
           maximum: 2147483647
           minimum: -2147483648
+          title: Количество участников
         isActive:
           type: boolean
+          title: Активен
         isFeatured:
           type: boolean
+          title: Рекомендованный конкурс
         createdAt:
           type: string
           format: date-time
           readOnly: true
+          title: Создано
         updatedAt:
           type: string
           format: date-time
           readOnly: true
+          title: Обновлено
+        moderatedBy:
+          type: integer
+          nullable: true
+          title: Модератор
         createdBy:
           type: integer
           nullable: true
+          title: Создатель
       required:
       - createdAt
       - description
@@ -1466,62 +1752,108 @@ components:
           readOnly: true
         slug:
           type: string
+          title: Ссылка (slug)
           maxLength: 50
           pattern: ^[-a-zA-Z0-9_]+$
         title:
           type: string
+          title: Название конкурса
           maxLength: 300
         shortDescription:
           type: string
+          title: Краткое описание
         image:
           type: string
           format: uri
           nullable: true
+          title: Изображение / Обложка
         country:
           type: string
+          title: Страна проведения
           maxLength: 100
         city:
           type: string
+          title: Город проведения
           maxLength: 100
         prize:
           type: string
+          title: Призовой фонд
           maxLength: 200
         organizer:
           type: string
+          title: Организатор
           maxLength: 200
         startRegistration:
           type: string
           format: date
           nullable: true
+          title: Начало регистрации
         endRegistration:
           type: string
           format: date
           nullable: true
+          title: Окончание регистрации
         submissionDeadline:
           type: string
           format: date
           nullable: true
+          title: Крайний срок подачи работ
         views:
           type: integer
           maximum: 2147483647
           minimum: -2147483648
+          title: Просмотры
         participantsCount:
           type: integer
           maximum: 2147483647
           minimum: -2147483648
+          title: Количество участников
         isActive:
           type: boolean
+          title: Активен
         isFeatured:
           type: boolean
+          title: Рекомендованный конкурс
         createdAt:
           type: string
           format: date-time
           readOnly: true
+          title: Создано
+        moderationStatus:
+          allOf:
+          - $ref: '#/components/schemas/ModerationStatusEnum'
+          readOnly: true
+          title: Статус модерации
+        moderationComment:
+          type: string
+          readOnly: true
+          title: Комментарий модератора
+          description: Причина отклонения. Её видит автор материала.
       required:
       - createdAt
       - id
+      - moderationComment
+      - moderationStatus
       - slug
       - title
+    ContentModeEnum:
+      enum:
+      - editor
+      - docx
+      type: string
+      description: |-
+        * `editor` - Редактор
+        * `docx` - DOCX файл
+    ModerationStatusEnum:
+      enum:
+      - pending
+      - approved
+      - rejected
+      type: string
+      description: |-
+        * `pending` - На модерации
+        * `approved` - Одобрено
+        * `rejected` - Отклонено
     NewsDetail:
       type: object
       properties:
@@ -1530,29 +1862,40 @@ components:
           readOnly: true
         title:
           type: string
+          title: Заголовок
           maxLength: 300
         slug:
           type: string
+          title: Ссылка (slug)
           maxLength: 50
           pattern: ^[-a-zA-Z0-9_]+$
         previewImage:
           type: string
           format: uri
           nullable: true
+          title: Превью-изображение
         shortDescription:
           type: string
+          title: Краткое описание
         content:
           type: string
+          title: Содержимое
+          description: Фото-галерею или слайдер можно вставить кнопкой «Галерея» на
+            панели редактора. Двойной клик по вставленному блоку открывает его на
+            редактирование.
         isPublished:
           type: boolean
+          title: Опубликовано
         views:
           type: integer
           maximum: 2147483647
           minimum: -2147483648
+          title: Просмотры
         createdAt:
           type: string
           format: date-time
           readOnly: true
+          title: Создано
       required:
       - createdAt
       - id
@@ -1566,25 +1909,31 @@ components:
           readOnly: true
         title:
           type: string
+          title: Заголовок
           maxLength: 300
         slug:
           type: string
+          title: Ссылка (slug)
           maxLength: 50
           pattern: ^[-a-zA-Z0-9_]+$
         previewImage:
           type: string
           format: uri
           nullable: true
+          title: Превью-изображение
         shortDescription:
           type: string
+          title: Краткое описание
         views:
           type: integer
           maximum: 2147483647
           minimum: -2147483648
+          title: Просмотры
         createdAt:
           type: string
           format: date-time
           readOnly: true
+          title: Создано
       required:
       - createdAt
       - id
@@ -1596,15 +1945,23 @@ components:
       properties:
         title:
           type: string
+          title: Название заказа / задачи
           maxLength: 300
         budget:
           type: integer
           maximum: 2147483647
           minimum: -2147483648
+          title: Бюджет (сом)
         description:
           type: string
-        property_type: {}
-        software: {}
+          title: Описание задачи
+          description: Фото-галерею или слайдер можно вставить кнопкой «Галерея» на
+            панели редактора. Двойной клик по вставленному блоку открывает его на
+            редактирование.
+        propertyType:
+          title: Тип недвижимости
+        software:
+          title: Требуемое ПО
       required:
       - description
       - title
@@ -1617,15 +1974,23 @@ components:
           readOnly: true
         title:
           type: string
+          title: Название заказа / задачи
           maxLength: 300
         budget:
           type: integer
           maximum: 2147483647
           minimum: -2147483648
+          title: Бюджет (сом)
         description:
           type: string
-        property_type: {}
-        software: {}
+          title: Описание задачи
+          description: Фото-галерею или слайдер можно вставить кнопкой «Галерея» на
+            панели редактора. Двойной клик по вставленному блоку открывает его на
+            редактирование.
+        propertyType:
+          title: Тип недвижимости
+        software:
+          title: Требуемое ПО
         createdByName:
           type: string
           readOnly: true
@@ -1636,11 +2001,24 @@ components:
           type: string
           format: date-time
           readOnly: true
+          title: Создано в
+        moderationStatus:
+          allOf:
+          - $ref: '#/components/schemas/ModerationStatusEnum'
+          readOnly: true
+          title: Статус модерации
+        moderationComment:
+          type: string
+          readOnly: true
+          title: Комментарий модератора
+          description: Причина отклонения. Её видит автор материала.
       required:
       - createdAt
       - createdByName
       - description
       - id
+      - moderationComment
+      - moderationStatus
       - responsesCount
       - title
     OrderList:
@@ -1652,13 +2030,17 @@ components:
           readOnly: true
         title:
           type: string
+          title: Название заказа / задачи
           maxLength: 300
         budget:
           type: integer
           maximum: 2147483647
           minimum: -2147483648
-        property_type: {}
-        software: {}
+          title: Бюджет (сом)
+        propertyType:
+          title: Тип недвижимости
+        software:
+          title: Требуемое ПО
         createdByName:
           type: string
           readOnly: true
@@ -1669,10 +2051,23 @@ components:
           type: string
           format: date-time
           readOnly: true
+          title: Создано в
+        moderationStatus:
+          allOf:
+          - $ref: '#/components/schemas/ModerationStatusEnum'
+          readOnly: true
+          title: Статус модерации
+        moderationComment:
+          type: string
+          readOnly: true
+          title: Комментарий модератора
+          description: Причина отклонения. Её видит автор материала.
       required:
       - createdAt
       - createdByName
       - id
+      - moderationComment
+      - moderationStatus
       - responsesCount
       - title
     PaginatedArticleListList:
@@ -1865,13 +2260,19 @@ components:
       properties:
         title:
           type: string
+          title: Название
           maxLength: 300
         description:
           type: string
+          title: Описание
+          description: Фото-галерею или слайдер можно вставить кнопкой «Галерея» на
+            панели редактора. Двойной клик по вставленному блоку открывает его на
+            редактирование.
         previewImage:
           type: string
           format: uri
           nullable: true
+          title: Превью-изображение
         images:
           type: array
           items:
@@ -1890,13 +2291,19 @@ components:
           readOnly: true
         title:
           type: string
+          title: Название
           maxLength: 300
         description:
           type: string
+          title: Описание
+          description: Фото-галерею или слайдер можно вставить кнопкой «Галерея» на
+            панели редактора. Двойной клик по вставленному блоку открывает его на
+            редактирование.
         previewImage:
           type: string
           format: uri
           nullable: true
+          title: Превью-изображение
         specialistId:
           type: integer
           readOnly: true
@@ -1915,23 +2322,43 @@ components:
           type: integer
           maximum: 2147483647
           minimum: -2147483648
+          title: Просмотры
         likes:
           type: integer
           maximum: 2147483647
           minimum: -2147483648
+          title: Лайки
+        isLiked:
+          type: boolean
+          readOnly: true
         createdAt:
           type: string
           format: date-time
           readOnly: true
+          title: Создано
         updatedAt:
           type: string
           format: date-time
           readOnly: true
+          title: Обновлено
+        moderationStatus:
+          allOf:
+          - $ref: '#/components/schemas/ModerationStatusEnum'
+          readOnly: true
+          title: Статус модерации
+        moderationComment:
+          type: string
+          readOnly: true
+          title: Комментарий модератора
+          description: Причина отклонения. Её видит автор материала.
       required:
       - createdAt
       - description
       - id
       - images
+      - isLiked
+      - moderationComment
+      - moderationStatus
       - specialistId
       - specialistName
       - specialistSlug
@@ -1946,10 +2373,13 @@ components:
         image:
           type: string
           format: uri
+          title: Изображение
         isPreview:
           type: boolean
+          title: Является превью
         alt:
           type: string
+          title: Альтернативный текст
           maxLength: 200
       required:
       - id
@@ -1963,11 +2393,13 @@ components:
           readOnly: true
         title:
           type: string
+          title: Название
           maxLength: 300
         previewImage:
           type: string
           format: uri
           nullable: true
+          title: Превью-изображение
         specialistName:
           type: string
           readOnly: true
@@ -1978,24 +2410,31 @@ components:
           type: integer
           maximum: 2147483647
           minimum: -2147483648
+          title: Просмотры
         likes:
           type: integer
           maximum: 2147483647
           minimum: -2147483648
+          title: Лайки
         createdAt:
           type: string
           format: date-time
           readOnly: true
+          title: Создано
         moderationStatus:
+          allOf:
+          - $ref: '#/components/schemas/ModerationStatusEnum'
+          readOnly: true
+          title: Статус модерации
+        moderationComment:
           type: string
           readOnly: true
-          enum:
-          - approved
-          - pending
-          - rejected
+          title: Комментарий модератора
+          description: Причина отклонения. Её видит автор материала.
       required:
       - createdAt
       - id
+      - moderationComment
       - moderationStatus
       - specialistName
       - specialistSlug
@@ -2013,57 +2452,80 @@ components:
             $ref: '#/components/schemas/WorkExperience'
         name:
           type: string
+          title: ФИО / Название резюме
           maxLength: 200
         salaryFrom:
           type: integer
           maximum: 2147483647
           minimum: -2147483648
+          title: Желаемая зарплата от
         salaryTo:
           type: integer
           maximum: 2147483647
           minimum: -2147483648
+          title: Желаемая зарплата до
         experience:
           type: string
+          title: Опыт работы
           maxLength: 100
-        specialization: {}
+        specialization:
+          title: Специализация
         category:
           type: string
+          title: Категория
           maxLength: 100
         description:
           type: string
+          title: Желаемая должность / Описание
         about:
           type: string
-        software: {}
-        employment_type: {}
+          title: О себе
+          description: Фото-галерею или слайдер можно вставить кнопкой «Галерея» на
+            панели редактора. Двойной клик по вставленному блоку открывает его на
+            редактирование.
+        software:
+          title: Владение ПО
+        employmentType:
+          title: Тип занятости (список)
         region:
           type: string
+          title: Регион проживания
           maxLength: 100
         avatar:
           type: string
           format: uri
           nullable: true
+          title: Фотография / Аватар
         workPlace:
           type: string
+          title: Место работы (город)
           maxLength: 200
         employment:
           type: string
+          title: Занятость (текст)
           maxLength: 100
         schedule:
           type: string
+          title: График работы
           maxLength: 100
         phone:
           type: string
+          title: Контактный телефон
           maxLength: 30
         email:
           type: string
           format: email
+          title: Контактный Email
           maxLength: 254
-        social_links: {}
-        key_skills: {}
+        socialLinks:
+          title: Ссылки на соц. сети / Портфолио
+        keySkills:
+          title: Ключевые навыки
         createdAt:
           type: string
           format: date-time
           readOnly: true
+          title: Создано
       required:
       - createdAt
       - id
@@ -2077,6 +2539,7 @@ components:
           readOnly: true
         name:
           type: string
+          title: ФИО / Название резюме
           maxLength: 200
         userName:
           type: string
@@ -2085,48 +2548,69 @@ components:
           type: integer
           maximum: 2147483647
           minimum: -2147483648
+          title: Желаемая зарплата от
         salaryTo:
           type: integer
           maximum: 2147483647
           minimum: -2147483648
+          title: Желаемая зарплата до
         experience:
           type: string
+          title: Опыт работы
           maxLength: 100
-        specialization: {}
+        specialization:
+          title: Специализация
         category:
           type: string
+          title: Категория
           maxLength: 100
         description:
           type: string
+          title: Желаемая должность / Описание
         about:
           type: string
-        software: {}
-        employment_type: {}
+          title: О себе
+          description: Фото-галерею или слайдер можно вставить кнопкой «Галерея» на
+            панели редактора. Двойной клик по вставленному блоку открывает его на
+            редактирование.
+        software:
+          title: Владение ПО
+        employmentType:
+          title: Тип занятости (список)
         region:
           type: string
+          title: Регион проживания
           maxLength: 100
         avatar:
           type: string
           format: uri
           nullable: true
+          title: Фотография / Аватар
         workPlace:
           type: string
+          title: Место работы (город)
           maxLength: 200
         employment:
           type: string
+          title: Занятость (текст)
           maxLength: 100
         schedule:
           type: string
+          title: График работы
           maxLength: 100
         phone:
           type: string
+          title: Контактный телефон
           maxLength: 30
         email:
           type: string
           format: email
+          title: Контактный Email
           maxLength: 254
-        social_links: {}
-        key_skills: {}
+        socialLinks:
+          title: Ссылки на соц. сети / Портфолио
+        keySkills:
+          title: Ключевые навыки
         workExperience:
           type: array
           items:
@@ -2136,9 +2620,22 @@ components:
           type: string
           format: date-time
           readOnly: true
+          title: Создано
+        moderationStatus:
+          allOf:
+          - $ref: '#/components/schemas/ModerationStatusEnum'
+          readOnly: true
+          title: Статус модерации
+        moderationComment:
+          type: string
+          readOnly: true
+          title: Комментарий модератора
+          description: Причина отклонения. Её видит автор материала.
       required:
       - createdAt
       - id
+      - moderationComment
+      - moderationStatus
       - name
       - userName
       - workExperience
@@ -2151,6 +2648,7 @@ components:
           readOnly: true
         name:
           type: string
+          title: ФИО / Название резюме
           maxLength: 200
         userName:
           type: string
@@ -2159,39 +2657,52 @@ components:
           type: integer
           maximum: 2147483647
           minimum: -2147483648
+          title: Желаемая зарплата от
         salaryTo:
           type: integer
           maximum: 2147483647
           minimum: -2147483648
+          title: Желаемая зарплата до
         experience:
           type: string
+          title: Опыт работы
           maxLength: 100
-        specialization: {}
+        specialization:
+          title: Специализация
         category:
           type: string
+          title: Категория
           maxLength: 100
         region:
           type: string
+          title: Регион проживания
           maxLength: 100
         avatar:
           type: string
           format: uri
           nullable: true
-        key_skills: {}
+          title: Фотография / Аватар
+        keySkills:
+          title: Ключевые навыки
         createdAt:
           type: string
           format: date-time
           readOnly: true
+          title: Создано
         moderationStatus:
+          allOf:
+          - $ref: '#/components/schemas/ModerationStatusEnum'
+          readOnly: true
+          title: Статус модерации
+        moderationComment:
           type: string
           readOnly: true
-          enum:
-          - approved
-          - pending
-          - rejected
+          title: Комментарий модератора
+          description: Причина отклонения. Её видит автор материала.
       required:
       - createdAt
       - id
+      - moderationComment
       - moderationStatus
       - name
       - userName
@@ -2204,6 +2715,7 @@ components:
           readOnly: true
         slug:
           type: string
+          title: Ссылка (slug)
           maxLength: 50
           pattern: ^[-a-zA-Z0-9_]+$
         name:
@@ -2226,15 +2738,20 @@ components:
           type: string
           readOnly: true
         category:
-          $ref: '#/components/schemas/CategoryEnum'
+          allOf:
+          - $ref: '#/components/schemas/CategoryEnum'
+          title: Категория
         categoryName:
           type: string
+          title: Название категории
           maxLength: 100
         firm:
           type: string
+          title: Компания / Студия
           maxLength: 200
         description:
           type: string
+          title: Описание / О себе
         specialization:
           type: string
           readOnly: true
@@ -2247,14 +2764,20 @@ components:
           type: string
           format: decimal
           pattern: ^-?\d{0,2}(?:\.\d{0,1})?$
+          title: Рейтинг
         views:
           type: integer
           maximum: 2147483647
           minimum: -2147483648
+          title: Просмотры
         likes:
           type: integer
           maximum: 2147483647
           minimum: -2147483648
+          title: Лайки
+        isLiked:
+          type: boolean
+          readOnly: true
         instagram:
           type: string
           readOnly: true
@@ -2285,6 +2808,7 @@ components:
       - experienceYears
       - id
       - instagram
+      - isLiked
       - linkedin
       - name
       - phone
@@ -2304,6 +2828,7 @@ components:
           readOnly: true
         slug:
           type: string
+          title: Ссылка (slug)
           maxLength: 50
           pattern: ^[-a-zA-Z0-9_]+$
         name:
@@ -2313,12 +2838,16 @@ components:
           type: string
           readOnly: true
         category:
-          $ref: '#/components/schemas/CategoryEnum'
+          allOf:
+          - $ref: '#/components/schemas/CategoryEnum'
+          title: Категория
         categoryName:
           type: string
+          title: Название категории
           maxLength: 100
         firm:
           type: string
+          title: Компания / Студия
           maxLength: 200
         specialization:
           type: string
@@ -2330,14 +2859,17 @@ components:
           type: string
           format: decimal
           pattern: ^-?\d{0,2}(?:\.\d{0,1})?$
+          title: Рейтинг
         views:
           type: integer
           maximum: 2147483647
           minimum: -2147483648
+          title: Просмотры
         likes:
           type: integer
           maximum: 2147483647
           minimum: -2147483648
+          title: Лайки
       required:
       - avatar
       - category
@@ -2346,6 +2878,30 @@ components:
       - name
       - slug
       - specialization
+    SpecializationEnum:
+      enum:
+      - architects
+      - engineers
+      - interior-designers
+      - visualizers
+      type: string
+      description: |-
+        * `architects` - Архитекторы
+        * `engineers` - Инженеры
+        * `interior-designers` - Дизайнеры интерьера
+        * `visualizers` - Визуализаторы
+    TypeEnum:
+      enum:
+      - text
+      - image
+      - video
+      - gallery
+      type: string
+      description: |-
+        * `text` - Текст
+        * `image` - Картинка
+        * `video` - Видео
+        * `gallery` - Галерея
     VacancyCreate:
       type: object
       description: Create vacancy serializer.
@@ -2355,82 +2911,128 @@ components:
           readOnly: true
         title:
           type: string
+          title: Название вакансии
           maxLength: 300
         salaryFrom:
           type: integer
           maximum: 2147483647
           minimum: -2147483648
+          title: Зарплата от
         salaryTo:
           type: integer
           maximum: 2147483647
           minimum: -2147483648
+          title: Зарплата до
         currency:
           type: string
+          title: Валюта
           maxLength: 10
         experience:
           type: string
+          title: Опыт работы
           maxLength: 100
         rating:
           type: string
           format: decimal
           pattern: ^-?\d{0,2}(?:\.\d{0,1})?$
-        work_tags: {}
+          title: Рейтинг
+        workTags:
+          title: Теги работы
         description:
           type: string
-        responsibilities: {}
-        requirements: {}
-        offers: {}
-        key_skills: {}
+          title: Описание вакансии
+          description: Фото-галерею или слайдер можно вставить кнопкой «Галерея» на
+            панели редактора. Двойной клик по вставленному блоку открывает его на
+            редактирование.
+        responsibilities:
+          title: Обязанности (список)
+        requirements:
+          title: Требования (список)
+        offers:
+          title: Мы предлагаем (список)
+        keySkills:
+          title: Ключевые навыки (список)
         workPlace:
           type: string
+          title: Место работы (город/страна)
           maxLength: 200
         employment:
           type: string
+          title: Занятость (текст)
           maxLength: 100
         schedule:
           type: string
+          title: График работы
           maxLength: 100
         workingHours:
           type: string
+          title: Рабочие часы
           maxLength: 50
         workFormat:
           type: string
+          title: Формат работы (офис/удаленка)
           maxLength: 100
+        specialization:
+          title: Специализация
+          oneOf:
+          - $ref: '#/components/schemas/SpecializationEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        programs:
+          title: Программы / ПО
+        payoutType:
+          type: string
+          title: Периодичность выплат
+          maxLength: 50
         companyName:
           type: string
+          title: Название компании
           maxLength: 300
+        companyType:
+          type: string
+          title: Тип компании (деятельность)
+          maxLength: 200
         companyLogo:
           type: string
           format: uri
           nullable: true
+          title: Логотип компании
         companyAddress:
           type: string
+          title: Адрес компании
           maxLength: 300
         companyWebsite:
           type: string
           format: uri
+          title: Сайт компании
           maxLength: 200
         companyPhone:
           type: string
+          title: Телефон компании
           maxLength: 30
         companyEmail:
           type: string
           format: email
+          title: Email компании
           maxLength: 254
         companyDescription:
           type: string
+          title: Описание компании
         publisherName:
           type: string
+          title: Имя контактного лица
           maxLength: 200
         publisherPosition:
           type: string
+          title: Должность контактного лица
           maxLength: 200
         publisherPhone:
           type: string
+          title: Телефон контактного лица
           maxLength: 30
         publisherEmail:
           type: string
           format: email
+          title: Email контактного лица
           maxLength: 254
       required:
       - companyName
@@ -2445,102 +3047,162 @@ components:
           readOnly: true
         title:
           type: string
+          title: Название вакансии
           maxLength: 300
         salaryFrom:
           type: integer
           maximum: 2147483647
           minimum: -2147483648
+          title: Зарплата от
         salaryTo:
           type: integer
           maximum: 2147483647
           minimum: -2147483648
+          title: Зарплата до
         currency:
           type: string
+          title: Валюта
           maxLength: 10
         experience:
           type: string
+          title: Опыт работы
           maxLength: 100
         rating:
           type: string
           format: decimal
           pattern: ^-?\d{0,2}(?:\.\d{0,1})?$
-        work_tags: {}
+          title: Рейтинг
+        workTags:
+          title: Теги работы
         description:
           type: string
-        responsibilities: {}
-        requirements: {}
-        offers: {}
-        key_skills: {}
+          title: Описание вакансии
+          description: Фото-галерею или слайдер можно вставить кнопкой «Галерея» на
+            панели редактора. Двойной клик по вставленному блоку открывает его на
+            редактирование.
+        responsibilities:
+          title: Обязанности (список)
+        requirements:
+          title: Требования (список)
+        offers:
+          title: Мы предлагаем (список)
+        keySkills:
+          title: Ключевые навыки (список)
         workPlace:
           type: string
+          title: Место работы (город/страна)
           maxLength: 200
         employment:
           type: string
+          title: Занятость (текст)
           maxLength: 100
         schedule:
           type: string
+          title: График работы
           maxLength: 100
         workingHours:
           type: string
+          title: Рабочие часы
           maxLength: 50
         workFormat:
           type: string
+          title: Формат работы (офис/удаленка)
           maxLength: 100
+        specialization:
+          title: Специализация
+          oneOf:
+          - $ref: '#/components/schemas/SpecializationEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        programs:
+          title: Программы / ПО
+        payoutType:
+          type: string
+          title: Периодичность выплат
+          maxLength: 50
         companyName:
           type: string
+          title: Название компании
           maxLength: 300
+        companyType:
+          type: string
+          title: Тип компании (деятельность)
+          maxLength: 200
         companyLogo:
           type: string
           format: uri
           nullable: true
+          title: Логотип компании
         companyAddress:
           type: string
+          title: Адрес компании
           maxLength: 300
         companyWebsite:
           type: string
           format: uri
+          title: Сайт компании
           maxLength: 200
         companyPhone:
           type: string
+          title: Телефон компании
           maxLength: 30
         companyEmail:
           type: string
           format: email
+          title: Email компании
           maxLength: 254
         companyDescription:
           type: string
+          title: Описание компании
         publisherName:
           type: string
+          title: Имя контактного лица
           maxLength: 200
         publisherPosition:
           type: string
+          title: Должность контактного лица
           maxLength: 200
         publisherPhone:
           type: string
+          title: Телефон контактного лица
           maxLength: 30
         publisherEmail:
           type: string
           format: email
+          title: Email контактного лица
           maxLength: 254
         viewsCount:
           type: integer
           maximum: 2147483647
           minimum: -2147483648
+          title: Количество просмотров
         createdAt:
           type: string
           format: date-time
           readOnly: true
+          title: Создано в
         isSaved:
           type: string
           readOnly: true
         responsesCount:
           type: string
           readOnly: true
+        moderationStatus:
+          allOf:
+          - $ref: '#/components/schemas/ModerationStatusEnum'
+          readOnly: true
+          title: Статус модерации
+        moderationComment:
+          type: string
+          readOnly: true
+          title: Комментарий модератора
+          description: Причина отклонения. Её видит автор материала.
       required:
       - companyName
       - createdAt
       - id
       - isSaved
+      - moderationComment
+      - moderationStatus
       - responsesCount
       - title
     VacancyList:
@@ -2552,71 +3214,106 @@ components:
           readOnly: true
         title:
           type: string
+          title: Название вакансии
           maxLength: 300
         salaryFrom:
           type: integer
           maximum: 2147483647
           minimum: -2147483648
+          title: Зарплата от
         salaryTo:
           type: integer
           maximum: 2147483647
           minimum: -2147483648
+          title: Зарплата до
         currency:
           type: string
+          title: Валюта
           maxLength: 10
         experience:
           type: string
+          title: Опыт работы
           maxLength: 100
         rating:
           type: string
           format: decimal
           pattern: ^-?\d{0,2}(?:\.\d{0,1})?$
-        work_tags: {}
+          title: Рейтинг
+        workTags:
+          title: Теги работы
         companyName:
           type: string
+          title: Название компании
           maxLength: 300
+        companyType:
+          type: string
+          title: Тип компании (деятельность)
+          maxLength: 200
         companyLogo:
           type: string
           format: uri
           nullable: true
+          title: Логотип компании
         companyAddress:
           type: string
+          title: Адрес компании
           maxLength: 300
         workPlace:
           type: string
+          title: Место работы (город/страна)
           maxLength: 200
         employment:
           type: string
+          title: Занятость (текст)
           maxLength: 100
         schedule:
           type: string
+          title: График работы
           maxLength: 100
         workFormat:
           type: string
+          title: Формат работы (офис/удаленка)
           maxLength: 100
+        specialization:
+          title: Специализация
+          oneOf:
+          - $ref: '#/components/schemas/SpecializationEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        programs:
+          title: Программы / ПО
+        payoutType:
+          type: string
+          title: Периодичность выплат
+          maxLength: 50
         viewsCount:
           type: integer
           maximum: 2147483647
           minimum: -2147483648
+          title: Количество просмотров
         createdAt:
           type: string
           format: date-time
           readOnly: true
+          title: Создано в
         isSaved:
           type: string
           readOnly: true
         moderationStatus:
+          allOf:
+          - $ref: '#/components/schemas/ModerationStatusEnum'
+          readOnly: true
+          title: Статус модерации
+        moderationComment:
           type: string
           readOnly: true
-          enum:
-          - approved
-          - pending
-          - rejected
+          title: Комментарий модератора
+          description: Причина отклонения. Её видит автор материала.
       required:
       - companyName
       - createdAt
       - id
       - isSaved
+      - moderationComment
       - moderationStatus
       - title
     WorkExperience:
@@ -2627,19 +3324,25 @@ components:
           readOnly: true
         company:
           type: string
+          title: Компания / Организация
           maxLength: 200
         position:
           type: string
+          title: Должность
           maxLength: 200
         startDate:
           type: string
+          title: Дата начала
           maxLength: 50
         endDate:
           type: string
+          title: Дата окончания
           maxLength: 50
-        duties: {}
+        duties:
+          title: Обязанности
         achievement:
           type: string
+          title: Достижения
       required:
       - company
       - endDate

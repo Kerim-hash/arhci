@@ -18,6 +18,7 @@ export interface Project {
   updatedAt: string;
   views: number;
   likes: number;
+  isLiked?: boolean; // Лайкнул ли текущий пользователь
   specialistName: string; // Имя специалиста для отображения
   specialistAvatar: string; // Аватар специалиста для отображения
 }

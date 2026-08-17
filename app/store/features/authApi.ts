@@ -18,6 +18,7 @@ export interface CheckCodeBody {
 
 export interface ChangePasswordBody {
   email: string;
+  code: string;
   password: string;
 }
 
@@ -34,6 +35,11 @@ export interface RegisterResponse {
 export interface RefreshTokenResponse {
   access_token: string;
   refresh_token: string;
+}
+
+export interface ToggleLikeResponse {
+  likes: number;
+  isLiked: boolean;
 }
 
 const baseQuery = fetchBaseQuery({
@@ -165,6 +171,20 @@ export const authApi = createApi({
         body,
       }),
     }),
+
+    toggleProjectLike: builder.mutation<ToggleLikeResponse, number>({
+      query: (id) => ({
+        url: `/projects/${id}/like/`,
+        method: "POST",
+      }),
+    }),
+
+    toggleSpecialistLike: builder.mutation<ToggleLikeResponse, number>({
+      query: (id) => ({
+        url: `/specialists/${id}/like/`,
+        method: "POST",
+      }),
+    }),
   }),
 });
 
@@ -179,4 +199,6 @@ export const {
   useRefreshTokensMutation,
   useEventsMutation,
   useRestoreAccountMutation,
+  useToggleProjectLikeMutation,
+  useToggleSpecialistLikeMutation,
 } = authApi;

@@ -12,6 +12,7 @@ import {
   useApiProjectsSpecialistListQuery,
 } from "@/services/generatedApi";
 import ProjectCard from "@/app/projects/components/ProjectCard";
+import LikeButton from "@/components/LikeButton";
 
 export default function InteriorDesignerPage() {
   const params = useParams();
@@ -108,6 +109,13 @@ export default function InteriorDesignerPage() {
                     <p>Рейтинг</p>
                     <p>{designer.rating || 0}</p>
                   </div>
+                  <LikeButton
+                    target="specialist"
+                    targetId={designer.id}
+                    initialLikes={designer.likes || 0}
+                    initialIsLiked={designer.isLiked}
+                    className="w-full mt-2"
+                  />
                 </div>
               </div>
             </div>

@@ -20,6 +20,7 @@ export interface Specialist {
   rating?: number;
   views?: number;
   likes?: number;
+  isLiked?: boolean;
 }
 
 export interface CategoryInfo {

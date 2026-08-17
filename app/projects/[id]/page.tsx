@@ -16,10 +16,10 @@ import {
   Eye,
   Calendar,
   Share2,
-  Heart,
 } from "lucide-react";
 import ShareModal from "../components/ShareModal";
 import RichContent from "@/components/content/RichContent";
+import LikeButton from "@/components/LikeButton";
 
 export default function ProjectDetailPage() {
   const params = useParams();
@@ -32,8 +32,6 @@ export default function ProjectDetailPage() {
   );
   const [incrementViews] = useApiProjectsViewsCreateMutation();
 
-  const [isLiked, setIsLiked] = useState(false);
-  const [likesCount, setLikesCount] = useState(0);
   const [isOwner, setIsOwner] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -45,15 +43,6 @@ export default function ProjectDetailPage() {
       incrementViews({ id: projectId });
     }
   }, [currentProject, projectId, incrementViews]);
-
-  const handleLike = () => {
-    if (isLiked) {
-      setLikesCount((prev) => prev - 1);
-    } else {
-      setLikesCount((prev) => prev + 1);
-    }
-    setIsLiked(!isLiked);
-  };
 
   const handleShare = () => {
     setIsShareModalOpen(true);
@@ -286,20 +275,12 @@ export default function ProjectDetailPage() {
 
         {/* Кнопка лайк */}
         <div className="flex justify-center">
-          <Button
-            onClick={handleLike}
-            variant={isLiked ? "default" : "outline"}
-            size="lg"
-            className={`gap-2 ${isLiked ? "bg-red-500 hover:bg-red-600" : ""}`}
-          >
-            <Heart className={`w-5 h-5 ${isLiked ? "fill-white" : ""}`} />
-            {likesCount}{" "}
-            {likesCount === 1
-              ? "лайк"
-              : likesCount > 1 && likesCount < 5
-                ? "лайка"
-                : "лайков"}
-          </Button>
+          <LikeButton
+            target="project"
+            targetId={projectId}
+            initialLikes={currentProject.likes || 0}
+            initialIsLiked={currentProject.isLiked}
+          />
         </div>
       </section>
 

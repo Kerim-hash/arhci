@@ -119,6 +119,13 @@ export default function LoginPage() {
             </Button>
 
             <Link
+              href="/auth/recover"
+              className="text-[14px] text-center text-[#5b5b5b] block hover:text-primary transition-colors"
+            >
+              Забыли пароль? Восстановить
+            </Link>
+
+            <Link
               href="/auth/register"
               className="text-[14px] text-center text-[#5b5b5b] block hover:text-primary transition-colors"
             >

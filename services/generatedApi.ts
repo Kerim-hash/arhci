@@ -10,10 +10,10 @@ const injectedRtkApi = api.injectEndpoints({
         params: {
           mine: queryArg.mine,
           moderation_status: queryArg.moderationStatus,
-          user: queryArg.user,
           ordering: queryArg.ordering,
           page: queryArg.page,
           search: queryArg.search,
+          user: queryArg.user,
         },
       }),
     }),
@@ -40,9 +40,12 @@ const injectedRtkApi = api.injectEndpoints({
       query: (queryArg) => ({
         url: `/api/competitions/`,
         params: {
+          mine: queryArg.mine,
+          moderation_status: queryArg.moderationStatus,
           ordering: queryArg.ordering,
           page: queryArg.page,
           search: queryArg.search,
+          user: queryArg.user,
         },
       }),
     }),
@@ -99,9 +102,12 @@ const injectedRtkApi = api.injectEndpoints({
       query: (queryArg) => ({
         url: `/api/orders/`,
         params: {
+          mine: queryArg.mine,
+          moderation_status: queryArg.moderationStatus,
           ordering: queryArg.ordering,
           page: queryArg.page,
           search: queryArg.search,
+          user: queryArg.user,
         },
       }),
     }),
@@ -139,10 +145,10 @@ const injectedRtkApi = api.injectEndpoints({
         params: {
           mine: queryArg.mine,
           moderation_status: queryArg.moderationStatus,
-          user: queryArg.user,
           ordering: queryArg.ordering,
           page: queryArg.page,
           search: queryArg.search,
+          user: queryArg.user,
         },
       }),
     }),
@@ -151,6 +157,15 @@ const injectedRtkApi = api.injectEndpoints({
       ApiProjectsRetrieveApiArg
     >({
       query: (queryArg) => ({ url: `/api/projects/${queryArg.id}/` }),
+    }),
+    apiProjectsLikeCreate: build.mutation<
+      ApiProjectsLikeCreateApiResponse,
+      ApiProjectsLikeCreateApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/projects/${queryArg.id}/like/`,
+        method: "POST",
+      }),
     }),
     apiProjectsViewsCreate: build.mutation<
       ApiProjectsViewsCreateApiResponse,
@@ -234,6 +249,15 @@ const injectedRtkApi = api.injectEndpoints({
         },
       }),
     }),
+    apiSpecialistsLikeCreate: build.mutation<
+      ApiSpecialistsLikeCreateApiResponse,
+      ApiSpecialistsLikeCreateApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/specialists/${queryArg.id}/like/`,
+        method: "POST",
+      }),
+    }),
     apiSpecialistsViewsCreate: build.mutation<
       ApiSpecialistsViewsCreateApiResponse,
       ApiSpecialistsViewsCreateApiArg
@@ -269,15 +293,20 @@ const injectedRtkApi = api.injectEndpoints({
       query: (queryArg) => ({
         url: `/api/vacancies/`,
         params: {
+          employment: queryArg.employment,
           experience: queryArg.experience,
+          has_salary: queryArg.hasSalary,
           mine: queryArg.mine,
           moderation_status: queryArg.moderationStatus,
           ordering: queryArg.ordering,
           page: queryArg.page,
+          payout_type: queryArg.payoutType,
+          programs: queryArg.programs,
           region: queryArg.region,
           salary_from: queryArg.salaryFrom,
           salary_to: queryArg.salaryTo,
           search: queryArg.search,
+          specialization: queryArg.specialization,
           user: queryArg.user,
         },
       }),
@@ -425,14 +454,14 @@ export type ApiArticlesListApiArg = {
     * `approved` - Одобрено
     * `rejected` - Отклонено */
   moderationStatus?: "approved" | "pending" | "rejected";
-  /** ID автора */
-  user?: number;
   /** Which field to use when ordering the results. */
   ordering?: string;
   /** A page number within the paginated result set. */
   page?: number;
   /** A search term. */
   search?: string;
+  /** ID автора */
+  user?: number;
 };
 export type ApiArticlesRetrieveApiResponse =
   /** status 200  */ ArticleDetailRead;
@@ -447,12 +476,22 @@ export type ApiArticlesCreateCreateApiArg = {
 export type ApiCompetitionsListApiResponse =
   /** status 200  */ PaginatedCompetitionListListRead;
 export type ApiCompetitionsListApiArg = {
+  /** Только мои */
+  mine?: boolean;
+  /** Статус модерации
+    
+    * `pending` - На модерации
+    * `approved` - Одобрено
+    * `rejected` - Отклонено */
+  moderationStatus?: "approved" | "pending" | "rejected";
   /** Which field to use when ordering the results. */
   ordering?: string;
   /** A page number within the paginated result set. */
   page?: number;
   /** A search term. */
   search?: string;
+  /** ID автора */
+  user?: number;
 };
 export type ApiCompetitionsRetrieveApiResponse =
   /** status 200  */ CompetitionDetailRead;
@@ -490,12 +529,22 @@ export type ApiNewsRetrieveApiArg = {
 export type ApiOrdersListApiResponse =
   /** status 200  */ PaginatedOrderListListRead;
 export type ApiOrdersListApiArg = {
+  /** Только мои */
+  mine?: boolean;
+  /** Статус модерации
+    
+    * `pending` - На модерации
+    * `approved` - Одобрено
+    * `rejected` - Отклонено */
+  moderationStatus?: "approved" | "pending" | "rejected";
   /** Which field to use when ordering the results. */
   ordering?: string;
   /** A page number within the paginated result set. */
   page?: number;
   /** A search term. */
   search?: string;
+  /** ID автора */
+  user?: number;
 };
 export type ApiOrdersRetrieveApiResponse = /** status 200  */ OrderDetailRead;
 export type ApiOrdersRetrieveApiArg = {
@@ -520,18 +569,22 @@ export type ApiProjectsListApiArg = {
     * `approved` - Одобрено
     * `rejected` - Отклонено */
   moderationStatus?: "approved" | "pending" | "rejected";
-  /** ID автора */
-  user?: number;
   /** Which field to use when ordering the results. */
   ordering?: string;
   /** A page number within the paginated result set. */
   page?: number;
   /** A search term. */
   search?: string;
+  /** ID автора */
+  user?: number;
 };
 export type ApiProjectsRetrieveApiResponse =
   /** status 200  */ ProjectDetailRead;
 export type ApiProjectsRetrieveApiArg = {
+  id: number;
+};
+export type ApiProjectsLikeCreateApiResponse = unknown;
+export type ApiProjectsLikeCreateApiArg = {
   id: number;
 };
 export type ApiProjectsViewsCreateApiResponse = unknown;
@@ -598,6 +651,10 @@ export type ApiSpecialistsListApiArg = {
   /** A search term. */
   search?: string;
 };
+export type ApiSpecialistsLikeCreateApiResponse = unknown;
+export type ApiSpecialistsLikeCreateApiArg = {
+  id: number;
+};
 export type ApiSpecialistsViewsCreateApiResponse = unknown;
 export type ApiSpecialistsViewsCreateApiArg = {
   id: number;
@@ -620,7 +677,9 @@ export type ApiSpecialistsTopListApiArg = {
 export type ApiVacanciesListApiResponse =
   /** status 200  */ PaginatedVacancyListListRead;
 export type ApiVacanciesListApiArg = {
+  employment?: string;
   experience?: string;
+  hasSalary?: boolean;
   /** Только мои */
   mine?: boolean;
   /** Статус модерации
@@ -633,11 +692,14 @@ export type ApiVacanciesListApiArg = {
   ordering?: string;
   /** A page number within the paginated result set. */
   page?: number;
+  payoutType?: string;
+  programs?: string;
   region?: string;
   salaryFrom?: number;
   salaryTo?: number;
   /** A search term. */
   search?: string;
+  specialization?: string;
   /** ID автора */
   user?: number;
 };
@@ -698,23 +760,28 @@ export type UsersChangeEmailCreateApiResponse = unknown;
 export type UsersChangeEmailCreateApiArg = void;
 export type UsersRestoreCreateApiResponse = unknown;
 export type UsersRestoreCreateApiArg = void;
+export type ContentModeEnum = "editor" | "docx";
 export type ArticleList = {
   title: string;
-  slug: string;
-  previewImage?: string | null;
+  slug?: string;
+  contentMode?: ContentModeEnum;
   shortDescription?: string;
   views?: number;
 };
+export type ModerationStatusEnum = "pending" | "approved" | "rejected";
 export type ArticleListRead = {
   id: number;
   title: string;
-  slug: string;
-  previewImage?: string | null;
+  slug?: string;
+  contentMode?: ContentModeEnum;
+  previewImage: string;
   shortDescription?: string;
   authorName: string;
   views?: number;
   createdAt: string;
-  moderationStatus: "approved" | "pending" | "rejected";
+  moderationStatus: ModerationStatusEnum;
+  /** Причина отклонения. Её видит автор материала. */
+  moderationComment: string;
 };
 export type PaginatedArticleListList = {
   count: number;
@@ -730,24 +797,56 @@ export type PaginatedArticleListListRead = {
 };
 export type ArticleDetail = {
   title: string;
-  slug: string;
-  previewImage?: string | null;
+  slug?: string;
+  contentMode?: ContentModeEnum;
   shortDescription?: string;
+  biography?: string;
+  /** Фото-галерею или слайдер можно вставить кнопкой «Галерея» на панели редактора. Двойной клик по вставленному блоку открывает его на редактирование. */
   contentHtml?: string;
   isPublished?: boolean;
   views?: number;
 };
+export type TypeEnum = "text" | "image" | "video" | "gallery";
+export type ArticleBlock = {
+  type: TypeEnum;
+  content?: string;
+  altText?: string;
+  order?: number;
+};
+export type BlockImage = {
+  order?: number;
+};
+export type BlockImageRead = {
+  id: number;
+  image: string;
+  order?: number;
+};
+export type ArticleBlockRead = {
+  id: number;
+  type: TypeEnum;
+  content?: string;
+  altText?: string;
+  order?: number;
+  images: BlockImageRead[];
+};
 export type ArticleDetailRead = {
   id: number;
   title: string;
-  slug: string;
-  previewImage?: string | null;
+  slug?: string;
+  contentMode?: ContentModeEnum;
+  previewImage: string;
   shortDescription?: string;
+  biography?: string;
+  /** Фото-галерею или слайдер можно вставить кнопкой «Галерея» на панели редактора. Двойной клик по вставленному блоку открывает его на редактирование. */
   contentHtml?: string;
+  blocks: ArticleBlockRead[];
   isPublished?: boolean;
   authorName: string;
   views?: number;
   createdAt: string;
+  moderationStatus: ModerationStatusEnum;
+  /** Причина отклонения. Её видит автор материала. */
+  moderationComment: string;
 };
 export type ArticleCreate = {
   title: string;
@@ -755,6 +854,8 @@ export type ArticleCreate = {
   shortDescription?: string;
   wordFile?: string | null;
   isPublished?: boolean;
+  biography?: string;
+  contentMode?: ContentModeEnum;
 };
 export type CompetitionList = {
   slug: string;
@@ -791,6 +892,9 @@ export type CompetitionListRead = {
   isActive?: boolean;
   isFeatured?: boolean;
   createdAt: string;
+  moderationStatus: ModerationStatusEnum;
+  /** Причина отклонения. Её видит автор материала. */
+  moderationComment: string;
 };
 export type PaginatedCompetitionListList = {
   count: number;
@@ -805,12 +909,17 @@ export type PaginatedCompetitionListListRead = {
   results: CompetitionListRead[];
 };
 export type CompetitionDetail = {
+  moderationStatus?: ModerationStatusEnum;
+  /** Причина отклонения. Её видит автор материала. */
+  moderationComment?: string;
+  moderatedAt?: string | null;
   slug: string;
   title: string;
+  /** Фото-галерею или слайдер можно вставить кнопкой «Галерея» на панели редактора. Двойной клик по вставленному блоку открывает его на редактирование. */
   description: string;
   shortDescription?: string;
   image?: string | null;
-  open_for?: any;
+  openFor?: any;
   country?: string;
   city?: string;
   registrationFee?: string;
@@ -823,22 +932,28 @@ export type CompetitionDetail = {
   resultsAnnouncement?: string | null;
   tasks?: any;
   conditions?: any;
-  project_composition?: any;
-  evaluation_criteria?: any;
+  projectComposition?: any;
+  evaluationCriteria?: any;
   views?: number;
   participantsCount?: number;
   isActive?: boolean;
   isFeatured?: boolean;
+  moderatedBy?: number | null;
   createdBy?: number | null;
 };
 export type CompetitionDetailRead = {
   id: number;
+  moderationStatus?: ModerationStatusEnum;
+  /** Причина отклонения. Её видит автор материала. */
+  moderationComment?: string;
+  moderatedAt?: string | null;
   slug: string;
   title: string;
+  /** Фото-галерею или слайдер можно вставить кнопкой «Галерея» на панели редактора. Двойной клик по вставленному блоку открывает его на редактирование. */
   description: string;
   shortDescription?: string;
   image?: string | null;
-  open_for?: any;
+  openFor?: any;
   country?: string;
   city?: string;
   registrationFee?: string;
@@ -851,23 +966,25 @@ export type CompetitionDetailRead = {
   resultsAnnouncement?: string | null;
   tasks?: any;
   conditions?: any;
-  project_composition?: any;
-  evaluation_criteria?: any;
+  projectComposition?: any;
+  evaluationCriteria?: any;
   views?: number;
   participantsCount?: number;
   isActive?: boolean;
   isFeatured?: boolean;
   createdAt: string;
   updatedAt: string;
+  moderatedBy?: number | null;
   createdBy?: number | null;
 };
 export type CompetitionCreate = {
   slug: string;
   title: string;
+  /** Фото-галерею или слайдер можно вставить кнопкой «Галерея» на панели редактора. Двойной клик по вставленному блоку открывает его на редактирование. */
   description: string;
   shortDescription?: string;
   image?: string | null;
-  open_for?: any;
+  openFor?: any;
   country?: string;
   city?: string;
   registrationFee?: string;
@@ -880,8 +997,8 @@ export type CompetitionCreate = {
   resultsAnnouncement?: string | null;
   tasks?: any;
   conditions?: any;
-  project_composition?: any;
-  evaluation_criteria?: any;
+  projectComposition?: any;
+  evaluationCriteria?: any;
   isActive?: boolean;
   isFeatured?: boolean;
 };
@@ -889,10 +1006,11 @@ export type CompetitionCreateRead = {
   id: number;
   slug: string;
   title: string;
+  /** Фото-галерею или слайдер можно вставить кнопкой «Галерея» на панели редактора. Двойной клик по вставленному блоку открывает его на редактирование. */
   description: string;
   shortDescription?: string;
   image?: string | null;
-  open_for?: any;
+  openFor?: any;
   country?: string;
   city?: string;
   registrationFee?: string;
@@ -905,8 +1023,8 @@ export type CompetitionCreateRead = {
   resultsAnnouncement?: string | null;
   tasks?: any;
   conditions?: any;
-  project_composition?: any;
-  evaluation_criteria?: any;
+  projectComposition?: any;
+  evaluationCriteria?: any;
   isActive?: boolean;
   isFeatured?: boolean;
   createdAt: string;
@@ -945,6 +1063,7 @@ export type NewsDetail = {
   slug: string;
   previewImage?: string | null;
   shortDescription?: string;
+  /** Фото-галерею или слайдер можно вставить кнопкой «Галерея» на панели редактора. Двойной клик по вставленному блоку открывает его на редактирование. */
   content?: string;
   isPublished?: boolean;
   views?: number;
@@ -955,6 +1074,7 @@ export type NewsDetailRead = {
   slug: string;
   previewImage?: string | null;
   shortDescription?: string;
+  /** Фото-галерею или слайдер можно вставить кнопкой «Галерея» на панели редактора. Двойной клик по вставленному блоку открывает его на редактирование. */
   content?: string;
   isPublished?: boolean;
   views?: number;
@@ -963,18 +1083,21 @@ export type NewsDetailRead = {
 export type OrderList = {
   title: string;
   budget?: number;
-  property_type?: any;
+  propertyType?: any;
   software?: any;
 };
 export type OrderListRead = {
   id: number;
   title: string;
   budget?: number;
-  property_type?: any;
+  propertyType?: any;
   software?: any;
   createdByName: string;
   responsesCount: string;
   createdAt: string;
+  moderationStatus: ModerationStatusEnum;
+  /** Причина отклонения. Её видит автор материала. */
+  moderationComment: string;
 };
 export type PaginatedOrderListList = {
   count: number;
@@ -991,26 +1114,32 @@ export type PaginatedOrderListListRead = {
 export type OrderDetail = {
   title: string;
   budget?: number;
+  /** Фото-галерею или слайдер можно вставить кнопкой «Галерея» на панели редактора. Двойной клик по вставленному блоку открывает его на редактирование. */
   description: string;
-  property_type?: any;
+  propertyType?: any;
   software?: any;
 };
 export type OrderDetailRead = {
   id: number;
   title: string;
   budget?: number;
+  /** Фото-галерею или слайдер можно вставить кнопкой «Галерея» на панели редактора. Двойной клик по вставленному блоку открывает его на редактирование. */
   description: string;
-  property_type?: any;
+  propertyType?: any;
   software?: any;
   createdByName: string;
   responsesCount: string;
   createdAt: string;
+  moderationStatus: ModerationStatusEnum;
+  /** Причина отклонения. Её видит автор материала. */
+  moderationComment: string;
 };
 export type OrderCreate = {
   title: string;
   budget?: number;
+  /** Фото-галерею или слайдер можно вставить кнопкой «Галерея» на панели редактора. Двойной клик по вставленному блоку открывает его на редактирование. */
   description: string;
-  property_type?: any;
+  propertyType?: any;
   software?: any;
 };
 export type ProjectList = {
@@ -1028,7 +1157,9 @@ export type ProjectListRead = {
   views?: number;
   likes?: number;
   createdAt: string;
-  moderationStatus: "approved" | "pending" | "rejected";
+  moderationStatus: ModerationStatusEnum;
+  /** Причина отклонения. Её видит автор материала. */
+  moderationComment: string;
 };
 export type PaginatedProjectListList = {
   count: number;
@@ -1044,6 +1175,7 @@ export type PaginatedProjectListListRead = {
 };
 export type ProjectDetail = {
   title: string;
+  /** Фото-галерею или слайдер можно вставить кнопкой «Галерея» на панели редактора. Двойной клик по вставленному блоку открывает его на редактирование. */
   description: string;
   previewImage?: string | null;
   views?: number;
@@ -1063,6 +1195,7 @@ export type ProjectImageRead = {
 export type ProjectDetailRead = {
   id: number;
   title: string;
+  /** Фото-галерею или слайдер можно вставить кнопкой «Галерея» на панели редактора. Двойной клик по вставленному блоку открывает его на редактирование. */
   description: string;
   previewImage?: string | null;
   specialistId: number;
@@ -1071,16 +1204,22 @@ export type ProjectDetailRead = {
   images: ProjectImageRead[];
   views?: number;
   likes?: number;
+  isLiked: boolean;
   createdAt: string;
   updatedAt: string;
+  moderationStatus: ModerationStatusEnum;
+  /** Причина отклонения. Её видит автор материала. */
+  moderationComment: string;
 };
 export type ProjectCreate = {
   title: string;
+  /** Фото-галерею или слайдер можно вставить кнопкой «Галерея» на панели редактора. Двойной клик по вставленному блоку открывает его на редактирование. */
   description: string;
   previewImage?: string | null;
 };
 export type ProjectCreateWrite = {
   title: string;
+  /** Фото-галерею или слайдер можно вставить кнопкой «Галерея» на панели редактора. Двойной клик по вставленному блоку открывает его на редактирование. */
   description: string;
   previewImage?: string | null;
   images?: string[];
@@ -1094,7 +1233,7 @@ export type ResumeList = {
   category?: string;
   region?: string;
   avatar?: string | null;
-  key_skills?: any;
+  keySkills?: any;
 };
 export type ResumeListRead = {
   id: number;
@@ -1107,9 +1246,11 @@ export type ResumeListRead = {
   category?: string;
   region?: string;
   avatar?: string | null;
-  key_skills?: any;
+  keySkills?: any;
   createdAt: string;
-  moderationStatus: "approved" | "pending" | "rejected";
+  moderationStatus: ModerationStatusEnum;
+  /** Причина отклонения. Её видит автор материала. */
+  moderationComment: string;
 };
 export type PaginatedResumeListList = {
   count: number;
@@ -1131,9 +1272,10 @@ export type ResumeDetail = {
   specialization?: any;
   category?: string;
   description?: string;
+  /** Фото-галерею или слайдер можно вставить кнопкой «Галерея» на панели редактора. Двойной клик по вставленному блоку открывает его на редактирование. */
   about?: string;
   software?: any;
-  employment_type?: any;
+  employmentType?: any;
   region?: string;
   avatar?: string | null;
   workPlace?: string;
@@ -1141,8 +1283,8 @@ export type ResumeDetail = {
   schedule?: string;
   phone?: string;
   email?: string;
-  social_links?: any;
-  key_skills?: any;
+  socialLinks?: any;
+  keySkills?: any;
 };
 export type WorkExperience = {
   company: string;
@@ -1171,9 +1313,10 @@ export type ResumeDetailRead = {
   specialization?: any;
   category?: string;
   description?: string;
+  /** Фото-галерею или слайдер можно вставить кнопкой «Галерея» на панели редактора. Двойной клик по вставленному блоку открывает его на редактирование. */
   about?: string;
   software?: any;
-  employment_type?: any;
+  employmentType?: any;
   region?: string;
   avatar?: string | null;
   workPlace?: string;
@@ -1181,10 +1324,13 @@ export type ResumeDetailRead = {
   schedule?: string;
   phone?: string;
   email?: string;
-  social_links?: any;
-  key_skills?: any;
+  socialLinks?: any;
+  keySkills?: any;
   workExperience: WorkExperienceRead[];
   createdAt: string;
+  moderationStatus: ModerationStatusEnum;
+  /** Причина отклонения. Её видит автор материала. */
+  moderationComment: string;
 };
 export type ResumeCreate = {
   workExperience?: WorkExperience[];
@@ -1195,9 +1341,10 @@ export type ResumeCreate = {
   specialization?: any;
   category?: string;
   description?: string;
+  /** Фото-галерею или слайдер можно вставить кнопкой «Галерея» на панели редактора. Двойной клик по вставленному блоку открывает его на редактирование. */
   about?: string;
   software?: any;
-  employment_type?: any;
+  employmentType?: any;
   region?: string;
   avatar?: string | null;
   workPlace?: string;
@@ -1205,8 +1352,8 @@ export type ResumeCreate = {
   schedule?: string;
   phone?: string;
   email?: string;
-  social_links?: any;
-  key_skills?: any;
+  socialLinks?: any;
+  keySkills?: any;
 };
 export type ResumeCreateRead = {
   id: number;
@@ -1218,9 +1365,10 @@ export type ResumeCreateRead = {
   specialization?: any;
   category?: string;
   description?: string;
+  /** Фото-галерею или слайдер можно вставить кнопкой «Галерея» на панели редактора. Двойной клик по вставленному блоку открывает его на редактирование. */
   about?: string;
   software?: any;
-  employment_type?: any;
+  employmentType?: any;
   region?: string;
   avatar?: string | null;
   workPlace?: string;
@@ -1228,8 +1376,8 @@ export type ResumeCreateRead = {
   schedule?: string;
   phone?: string;
   email?: string;
-  social_links?: any;
-  key_skills?: any;
+  socialLinks?: any;
+  keySkills?: any;
   createdAt: string;
 };
 export type CategoryEnum =
@@ -1301,6 +1449,7 @@ export type SpecialistDetailRead = {
   rating?: string;
   views?: number;
   likes?: number;
+  isLiked: boolean;
   instagram: string;
   telegram: string;
   linkedin: string;
@@ -1308,6 +1457,12 @@ export type SpecialistDetailRead = {
   website: string;
   projects: string;
 };
+export type SpecializationEnum =
+  | "architects"
+  | "engineers"
+  | "interior-designers"
+  | "visualizers";
+export type BlankEnum = "";
 export type VacancyList = {
   title: string;
   salaryFrom?: number;
@@ -1315,14 +1470,18 @@ export type VacancyList = {
   currency?: string;
   experience?: string;
   rating?: string;
-  work_tags?: any;
+  workTags?: any;
   companyName: string;
+  companyType?: string;
   companyLogo?: string | null;
   companyAddress?: string;
   workPlace?: string;
   employment?: string;
   schedule?: string;
   workFormat?: string;
+  specialization?: SpecializationEnum | BlankEnum;
+  programs?: any;
+  payoutType?: string;
   viewsCount?: number;
 };
 export type VacancyListRead = {
@@ -1333,18 +1492,24 @@ export type VacancyListRead = {
   currency?: string;
   experience?: string;
   rating?: string;
-  work_tags?: any;
+  workTags?: any;
   companyName: string;
+  companyType?: string;
   companyLogo?: string | null;
   companyAddress?: string;
   workPlace?: string;
   employment?: string;
   schedule?: string;
   workFormat?: string;
+  specialization?: SpecializationEnum | BlankEnum;
+  programs?: any;
+  payoutType?: string;
   viewsCount?: number;
   createdAt: string;
   isSaved: string;
-  moderationStatus: "approved" | "pending" | "rejected";
+  moderationStatus: ModerationStatusEnum;
+  /** Причина отклонения. Её видит автор материала. */
+  moderationComment: string;
 };
 export type PaginatedVacancyListList = {
   count: number;
@@ -1365,18 +1530,23 @@ export type VacancyDetail = {
   currency?: string;
   experience?: string;
   rating?: string;
-  work_tags?: any;
+  workTags?: any;
+  /** Фото-галерею или слайдер можно вставить кнопкой «Галерея» на панели редактора. Двойной клик по вставленному блоку открывает его на редактирование. */
   description?: string;
   responsibilities?: any;
   requirements?: any;
   offers?: any;
-  key_skills?: any;
+  keySkills?: any;
   workPlace?: string;
   employment?: string;
   schedule?: string;
   workingHours?: string;
   workFormat?: string;
+  specialization?: SpecializationEnum | BlankEnum;
+  programs?: any;
+  payoutType?: string;
   companyName: string;
+  companyType?: string;
   companyLogo?: string | null;
   companyAddress?: string;
   companyWebsite?: string;
@@ -1397,18 +1567,23 @@ export type VacancyDetailRead = {
   currency?: string;
   experience?: string;
   rating?: string;
-  work_tags?: any;
+  workTags?: any;
+  /** Фото-галерею или слайдер можно вставить кнопкой «Галерея» на панели редактора. Двойной клик по вставленному блоку открывает его на редактирование. */
   description?: string;
   responsibilities?: any;
   requirements?: any;
   offers?: any;
-  key_skills?: any;
+  keySkills?: any;
   workPlace?: string;
   employment?: string;
   schedule?: string;
   workingHours?: string;
   workFormat?: string;
+  specialization?: SpecializationEnum | BlankEnum;
+  programs?: any;
+  payoutType?: string;
   companyName: string;
+  companyType?: string;
   companyLogo?: string | null;
   companyAddress?: string;
   companyWebsite?: string;
@@ -1423,6 +1598,9 @@ export type VacancyDetailRead = {
   createdAt: string;
   isSaved: string;
   responsesCount: string;
+  moderationStatus: ModerationStatusEnum;
+  /** Причина отклонения. Её видит автор материала. */
+  moderationComment: string;
 };
 export type VacancyCreate = {
   title: string;
@@ -1431,18 +1609,23 @@ export type VacancyCreate = {
   currency?: string;
   experience?: string;
   rating?: string;
-  work_tags?: any;
+  workTags?: any;
+  /** Фото-галерею или слайдер можно вставить кнопкой «Галерея» на панели редактора. Двойной клик по вставленному блоку открывает его на редактирование. */
   description?: string;
   responsibilities?: any;
   requirements?: any;
   offers?: any;
-  key_skills?: any;
+  keySkills?: any;
   workPlace?: string;
   employment?: string;
   schedule?: string;
   workingHours?: string;
   workFormat?: string;
+  specialization?: SpecializationEnum | BlankEnum;
+  programs?: any;
+  payoutType?: string;
   companyName: string;
+  companyType?: string;
   companyLogo?: string | null;
   companyAddress?: string;
   companyWebsite?: string;
@@ -1462,18 +1645,23 @@ export type VacancyCreateRead = {
   currency?: string;
   experience?: string;
   rating?: string;
-  work_tags?: any;
+  workTags?: any;
+  /** Фото-галерею или слайдер можно вставить кнопкой «Галерея» на панели редактора. Двойной клик по вставленному блоку открывает его на редактирование. */
   description?: string;
   responsibilities?: any;
   requirements?: any;
   offers?: any;
-  key_skills?: any;
+  keySkills?: any;
   workPlace?: string;
   employment?: string;
   schedule?: string;
   workingHours?: string;
   workFormat?: string;
+  specialization?: SpecializationEnum | BlankEnum;
+  programs?: any;
+  payoutType?: string;
   companyName: string;
+  companyType?: string;
   companyLogo?: string | null;
   companyAddress?: string;
   companyWebsite?: string;
@@ -1502,6 +1690,7 @@ export const {
   useApiOrdersCreateCreateMutation,
   useApiProjectsListQuery,
   useApiProjectsRetrieveQuery,
+  useApiProjectsLikeCreateMutation,
   useApiProjectsViewsCreateMutation,
   useApiProjectsCreateCreateMutation,
   useApiProjectsSpecialistListQuery,
@@ -1509,6 +1698,7 @@ export const {
   useApiResumesRetrieveQuery,
   useApiResumesCreateCreateMutation,
   useApiSpecialistsListQuery,
+  useApiSpecialistsLikeCreateMutation,
   useApiSpecialistsViewsCreateMutation,
   useApiSpecialistsRetrieveQuery,
   useApiSpecialistsTopListQuery,

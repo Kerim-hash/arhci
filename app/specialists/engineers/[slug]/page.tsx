@@ -12,6 +12,7 @@ import {
   useApiProjectsSpecialistListQuery,
 } from "@/services/generatedApi";
 import ProjectCard from "@/app/projects/components/ProjectCard";
+import LikeButton from "@/components/LikeButton";
 
 export default function EngineerPage() {
   const params = useParams();
@@ -105,6 +106,13 @@ export default function EngineerPage() {
                     <p>Рейтинг</p>
                     <p>{engineer.rating || 0}</p>
                   </div>
+                  <LikeButton
+                    target="specialist"
+                    targetId={engineer.id}
+                    initialLikes={engineer.likes || 0}
+                    initialIsLiked={engineer.isLiked}
+                    className="w-full mt-2"
+                  />
                 </div>
               </div>
             </div>
