@@ -174,14 +174,14 @@ export const authApi = createApi({
 
     toggleProjectLike: builder.mutation<ToggleLikeResponse, number>({
       query: (id) => ({
-        url: `/projects/${id}/like/`,
+        url: `/api/projects/${id}/like/`,
         method: "POST",
       }),
     }),
 
     toggleSpecialistLike: builder.mutation<ToggleLikeResponse, number>({
       query: (id) => ({
-        url: `/specialists/${id}/like/`,
+        url: `/api/specialists/${id}/like/`,
         method: "POST",
       }),
     }),
