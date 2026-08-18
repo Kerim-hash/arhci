@@ -1407,6 +1407,7 @@ export type SpecialistListRead = {
   rating?: string;
   views?: number;
   likes?: number;
+  totalLikes: number;
 };
 export type PaginatedSpecialistListList = {
   count: number;

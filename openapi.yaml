@@ -851,7 +851,10 @@ paths:
   /api/specialists/top/:
     get:
       operationId: apiSpecialistsTopList
-      description: GET /api/specialists/top/ — Top specialists by likes.
+      description: |-
+        GET /api/specialists/top/ — Top specialists by combined likes.
+
+        Рейтинг топа = лайки профиля + лайки всех одобренных проектов специалиста.
       parameters:
       - name: ordering
         required: false
@@ -2870,6 +2873,9 @@ components:
           maximum: 2147483647
           minimum: -2147483648
           title: Лайки
+        totalLikes:
+          type: integer
+          readOnly: true
       required:
       - avatar
       - category
@@ -2878,6 +2884,7 @@ components:
       - name
       - slug
       - specialization
+      - totalLikes
     SpecializationEnum:
       enum:
       - architects
