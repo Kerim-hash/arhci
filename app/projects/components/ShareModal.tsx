@@ -6,13 +6,20 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Eye, ThumbsUp, Copy, Check, X } from "lucide-react";
 import Image from "next/image";
-import { Project } from "@/types/project";
 import { Specialist } from "@/types/specialists";
+
+/** Минимум, который нужен модалке: подходит и ProjectDetailRead из API. */
+interface ShareModalProject {
+  title: string;
+  previewImage?: string | null;
+  views?: number;
+  likes?: number;
+}
 
 interface ShareModalProps {
   isOpen: boolean;
   onClose: () => void;
-  project: Project;
+  project: ShareModalProject;
   specialist: Specialist | null;
 }
 
@@ -73,12 +80,15 @@ export default function ShareModal({
 
         {/* Картинка 620x400 */}
         <div className="relative w-full h-[400px] bg-gray-900">
-          <Image
-            src={project.previewImage}
-            alt={project.title}
-            fill
-            className="object-cover"
-          />
+          {project.previewImage && (
+            <Image
+              src={project.previewImage}
+              alt={project.title}
+              fill
+              sizes="620px"
+              className="object-cover"
+            />
+          )}
 
           {/* Затемнение снизу только для текста */}
           <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />

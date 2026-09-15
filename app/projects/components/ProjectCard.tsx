@@ -5,42 +5,29 @@ import Link from "next/link";
 import Image from "next/image";
 import { Eye, ThumbsUp } from "lucide-react";
 import type { ProjectListRead } from "@/services/generatedApi";
-import { useApiProjectsRetrieveQuery } from "@/services/generatedApi";
 
 interface ProjectCardProps {
   project: ProjectListRead;
   category?: string;
 }
 
-const getPlaceholder = (cat?: string, projectId?: number) => {
-  switch (cat) {
-    case "architects": return "/placeholder-architect.png";
-    case "engineers": return "/placeholder-engineer.png";
-    case "interior-designers": return "/placeholder-designer.png";
-    case "visualizers": return "/placeholder-visualizer.png";
-    default: {
-      const placeholders = [
-        "/placeholder-architect.png",
-        "/placeholder-engineer.png",
-        "/placeholder-designer.png",
-        "/placeholder-visualizer.png"
-      ];
-      return placeholders[(projectId || 0) % placeholders.length];
-    }
-  }
+const PLACEHOLDERS: Record<string, string> = {
+  architects: "/placeholder-architect.png",
+  engineers: "/placeholder-engineer.png",
+  "interior-designers": "/placeholder-designer.png",
+  visualizers: "/placeholder-visualizer.png",
+};
+
+const getPlaceholder = (category?: string, projectId?: number) => {
+  if (category && PLACEHOLDERS[category]) return PLACEHOLDERS[category];
+  const all = Object.values(PLACEHOLDERS);
+  return all[(projectId || 0) % all.length];
 };
 
 export default function ProjectCard({ project, category }: ProjectCardProps) {
-  // The projects list endpoint doesn't populate previewImage even when the
-  // project has uploaded images, so fall back to fetching the detail once
-  // to read the real image (isPreview one, or the first uploaded image).
-  const { data: detail } = useApiProjectsRetrieveQuery(
-    { id: project.id },
-    { skip: !!project.previewImage }
-  );
-  const fallbackImage = detail?.images?.find((img) => img.isPreview)?.image
-    || detail?.images?.[0]?.image;
-  const imageSrc = project.previewImage || fallbackImage || getPlaceholder(category, project.id);
+  // Обложку отдаёт сам список: бэкенд подставляет первую картинку проекта,
+  // поэтому отдельный запрос детали на каждую карточку больше не нужен.
+  const imageSrc = project.previewImage || getPlaceholder(category, project.id);
 
   return (
     <Link href={`/projects/${project.id}`}>
@@ -49,6 +36,7 @@ export default function ProjectCard({ project, category }: ProjectCardProps) {
           src={imageSrc}
           alt={project.title}
           fill
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
           className="object-cover transition-transform duration-300 hover:scale-105"
         />
       </div>

@@ -1,28 +1,31 @@
 // app/projects/create/page.tsx
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { ImageIcon, Type, X, GripVertical, ArrowLeft, Eye, Calendar } from "lucide-react";
+import { ImageIcon, Type, ArrowLeft, Eye, Calendar } from "lucide-react";
 import { useAppSelector } from "@/app/store/hooks";
-import { useApiProjectsCreateCreateMutation } from "@/services/generatedApi";
+import {
+  useApiProjectsCreateCreateMutation,
+  type ProjectCreateWrite,
+} from "@/services/generatedApi";
+import { stripHtml } from "@/lib/utils";
 import Link from "next/link";
 import dynamic from "next/dynamic";
+import { ProjectImageDropzone, useUploadedImages } from "../components/ProjectImageDropzone";
+import { formatProjectApiError } from "../components/projectFormErrors";
 
 const BlockNoteEditor = dynamic(
   () => import("@/components/BlockNoteEditor"),
   { ssr: false }
 );
 
-interface UploadedImage {
-  id: string;
-  file: File;
-  preview: string;
-}
+const EMPTY_DESCRIPTION_ERROR =
+  "Описание проекта обязательно для заполнения. Пожалуйста, откройте текстовый блок и добавьте описание.";
 
 export default function CreateProjectPage() {
   const router = useRouter();
@@ -32,66 +35,19 @@ export default function CreateProjectPage() {
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [images, setImages] = useState<UploadedImage[]>([]);
-  const [isDragging, setIsDragging] = useState(false);
+  const { images, addFiles, removeImage } = useUploadedImages();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeBlock, setActiveBlock] = useState<"image" | "text" | null>(null);
   const [showPreview, setShowPreview] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const handleFiles = useCallback((files: FileList | null) => {
-    if (!files) return;
-
-    const newImages: UploadedImage[] = Array.from(files)
-      .filter((file) => file.type.startsWith("image/"))
-      .map((file) => ({
-        id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
-        file,
-        preview: URL.createObjectURL(file),
-      }));
-
-    setImages((prev) => [...prev, ...newImages]);
-
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-  }, []);
-
-  const handleDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(true);
-  }, []);
-
-  const handleDragLeave = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-  }, []);
-
-  const handleDrop = useCallback(
-    (e: React.DragEvent) => {
-      e.preventDefault();
-      setIsDragging(false);
-      handleFiles(e.dataTransfer.files);
-    },
-    [handleFiles]
-  );
-
-  const removeImage = useCallback((id: string) => {
-    setImages((prev) => {
-      const img = prev.find((i) => i.id === id);
-      if (img) URL.revokeObjectURL(img.preview);
-      return prev.filter((i) => i.id !== id);
-    });
-  }, []);
 
   const handleSubmit = async () => {
     if (!title.trim() || !user) return;
 
     setError(null);
 
-    const cleanText = description.replace(/<[^>]*>/g, "").trim();
-    if (!cleanText) {
-      setError("Описание проекта обязательно для заполнения. Пожалуйста, откройте текстовый блок и добавьте описание.");
+    if (!stripHtml(description)) {
+      setError(EMPTY_DESCRIPTION_ERROR);
       setActiveBlock("text");
       setShowPreview(false);
       return;
@@ -103,32 +59,19 @@ export default function CreateProjectPage() {
       const formData = new FormData();
       formData.append("title", title);
       formData.append("description", description);
-      
+
       images.forEach((img) => {
-        if (img.file) {
-          formData.append("images", img.file);
-        }
+        formData.append("images", img.file);
       });
 
       await createProject({
-        projectCreate: formData as any,
+        // Файлы уходят multipart'ом, поэтому тело — FormData, а не JSON из схемы
+        projectCreate: formData as unknown as ProjectCreateWrite,
       }).unwrap();
       router.push(`/specialists/architects/${user.specialistSlug}`);
-    } catch (err: any) {
+    } catch (err) {
       console.error("Ошибка создания проекта:", err);
-      const errorData = err?.data;
-      if (errorData && typeof errorData === "object") {
-        const messages = Object.entries(errorData)
-          .map(([field, errors]) => {
-            const fieldName = field === "description" ? "Описание" : field === "title" ? "Заголовок" : field === "images" ? "Изображения" : field;
-            const errMsgs = Array.isArray(errors) ? errors.join(", ") : String(errors);
-            return `${fieldName}: ${errMsgs}`;
-          })
-          .join("\n");
-        setError(messages || "Произошла ошибка при создании проекта");
-      } else {
-        setError(err?.message || "Произошла ошибка при создании проекта");
-      }
+      setError(formatProjectApiError(err, "Произошла ошибка при создании проекта"));
     } finally {
       setIsSubmitting(false);
     }
@@ -214,7 +157,7 @@ export default function CreateProjectPage() {
           <div className="mb-8">
             <h2 className="text-xl font-semibold mb-4">Описание проекта</h2>
             <div className="prose max-w-none">
-              <div 
+              <div
                 className="text-[#333333] leading-relaxed"
                 dangerouslySetInnerHTML={{ __html: description }}
               />
@@ -225,8 +168,8 @@ export default function CreateProjectPage() {
         <Separator className="mb-6" />
 
         {error && (
-          <div className="max-w-md mx-auto text-red-500 text-sm bg-red-50 border border-red-200 rounded-lg p-3 mb-6">
-            {error.split('\n').map((line, i) => <div key={i}>{line}</div>)}
+          <div className="max-w-md mx-auto text-red-500 text-sm bg-red-50 border border-red-200 rounded-lg p-3 mb-6 whitespace-pre-line">
+            {error}
           </div>
         )}
 
@@ -286,82 +229,12 @@ export default function CreateProjectPage() {
           </div>
 
           {/* Область загрузки изображений */}
-          <div
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-            className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-              isDragging
-                ? "border-[#333] bg-gray-50"
-                : "border-[#E0E0E0] bg-white"
-            }`}
-          >
-            {images.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-8">
-                <p className="text-[#949494] mb-6">
-                  Перетащите изображения сюда или нажмите, чтобы загрузить
-                </p>
-                <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center mb-6">
-                  <ImageIcon className="w-8 h-8 text-[#949494]" />
-                </div>
-                <Button
-                  variant="outline"
-                  className="rounded-[40px]"
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  Загрузить
-                </Button>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {/* Превью загруженных изображений */}
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                  {images.map((img, index) => (
-                    <div
-                      key={img.id}
-                      className="relative group rounded-lg overflow-hidden aspect-video"
-                    >
-                      <Image
-                        src={img.preview}
-                        alt={`Uploaded ${index + 1}`}
-                        fill
-                        unoptimized
-                        className="object-cover"
-                      />
-                      {index === 0 && (
-                        <span className="absolute top-2 left-2 bg-black/60 text-white text-[10px] px-2 py-0.5 rounded">
-                          Обложка
-                        </span>
-                      )}
-                      <button
-                        onClick={() => removeImage(img.id)}
-                        className="absolute top-2 right-2 w-6 h-6 bg-black/60 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <X className="w-3 h-3 text-white" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-
-                <Button
-                  variant="outline"
-                  className="rounded-[40px]"
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  Добавить ещё
-                </Button>
-              </div>
-            )}
-
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              multiple
-              className="hidden"
-              onChange={(e) => handleFiles(e.target.files)}
-            />
-          </div>
+          <ProjectImageDropzone
+            images={images}
+            onAddFiles={addFiles}
+            onRemove={removeImage}
+            inputRef={fileInputRef}
+          />
 
           {/* Описание */}
           {activeBlock === "text" && (
@@ -409,8 +282,8 @@ export default function CreateProjectPage() {
           {/* Действия */}
           <div className="space-y-3 pt-4">
             {error && (
-              <div className="text-red-500 text-sm bg-red-50 border border-red-200 rounded-lg p-3">
-                {error.split('\n').map((line, i) => <div key={i}>{line}</div>)}
+              <div className="text-red-500 text-sm bg-red-50 border border-red-200 rounded-lg p-3 whitespace-pre-line">
+                {error}
               </div>
             )}
             <Button
@@ -419,9 +292,8 @@ export default function CreateProjectPage() {
               disabled={!title.trim() || images.length === 0}
               onClick={() => {
                 setError(null);
-                const cleanText = description.replace(/<[^>]*>/g, "").trim();
-                if (!cleanText) {
-                  setError("Описание проекта обязательно для заполнения. Пожалуйста, откройте текстовый блок и добавьте описание.");
+                if (!stripHtml(description)) {
+                  setError(EMPTY_DESCRIPTION_ERROR);
                   setActiveBlock("text");
                   return;
                 }

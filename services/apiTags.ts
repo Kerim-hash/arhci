@@ -12,5 +12,7 @@ generatedApi.enhanceEndpoints({
     apiProjectsList: { providesTags: ["Projects"] },
     apiProjectsRetrieve: { providesTags: ["Projects"] },
     apiProjectsSpecialistList: { providesTags: ["Projects"] },
+    apiProjectsCreateCreate: { invalidatesTags: ["Projects"] },
+    apiProjectsPartialUpdate: { invalidatesTags: ["Projects"] },
   },
 });

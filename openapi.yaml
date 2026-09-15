@@ -506,7 +506,7 @@ paths:
   /api/projects/{id}/:
     get:
       operationId: apiProjectsRetrieve
-      description: GET /api/projects/:id/ — Project detail.
+      description: GET /api/projects/:id/ — Project detail. PATCH — edit by the author.
       parameters:
       - in: path
         name: id
@@ -517,7 +517,37 @@ paths:
       - api
       security:
       - jwtAuth: []
-      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectDetail'
+          description: ''
+    patch:
+      operationId: apiProjectsPartialUpdate
+      description: GET /api/projects/:id/ — Project detail. PATCH — edit by the author.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedProjectUpdate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedProjectUpdate'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedProjectUpdate'
+      security:
+      - jwtAuth: []
       responses:
         '200':
           content:
@@ -1159,7 +1189,6 @@ paths:
       tags:
       - auth
       security:
-      - jwtAuth: []
       - {}
       responses:
         '200':
@@ -1194,7 +1223,6 @@ paths:
       tags:
       - auth
       security:
-      - jwtAuth: []
       - {}
       responses:
         '200':
@@ -2257,6 +2285,44 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/VacancyList'
+    PatchedProjectUpdate:
+      type: object
+      description: |-
+        Редактирование проекта автором (multipart, PATCH).
+
+        * ``images`` — новые файлы, добавляются к уже загруженным;
+        * ``remove_image_ids`` — id картинок проекта, которые нужно удалить;
+        * ``preview_image_id`` — id картинки, которая станет обложкой.
+
+        После любого изменения проект снова отправляется на модерацию: содержимое
+        поменялось, и одобрение старой версии на новую не распространяется.
+      properties:
+        title:
+          type: string
+          title: Название
+          maxLength: 300
+        description:
+          type: string
+          title: Описание
+          description: Фото-галерею или слайдер можно вставить кнопкой «Галерея» на
+            панели редактора. Двойной клик по вставленному блоку открывает его на
+            редактирование.
+        images:
+          type: array
+          items:
+            type: string
+            format: uri
+          writeOnly: true
+        removeImageIds:
+          type: array
+          items:
+            type: integer
+            minimum: 1
+          writeOnly: true
+        previewImageId:
+          type: integer
+          writeOnly: true
+          nullable: true
     ProjectCreate:
       type: object
       description: Create project with multipart image upload.
@@ -2304,9 +2370,8 @@ components:
             редактирование.
         previewImage:
           type: string
-          format: uri
           nullable: true
-          title: Превью-изображение
+          readOnly: true
         specialistId:
           type: integer
           readOnly: true
@@ -2362,6 +2427,7 @@ components:
       - isLiked
       - moderationComment
       - moderationStatus
+      - previewImage
       - specialistId
       - specialistName
       - specialistSlug
@@ -2400,9 +2466,8 @@ components:
           maxLength: 300
         previewImage:
           type: string
-          format: uri
           nullable: true
-          title: Превью-изображение
+          readOnly: true
         specialistName:
           type: string
           readOnly: true
@@ -2439,6 +2504,7 @@ components:
       - id
       - moderationComment
       - moderationStatus
+      - previewImage
       - specialistName
       - specialistSlug
       - title

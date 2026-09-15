@@ -28,15 +28,63 @@ const sortOptions = [
 export default function ProjectsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("-created_at");
-  const [page, setPage] = useState(1);
+  const [page] = useState(1);
 
-  const { data, isLoading } = useApiProjectsListQuery({
+  const { data, isLoading, isError, refetch } = useApiProjectsListQuery({
     search: searchTerm || undefined,
     ordering: sortBy,
     page,
   });
 
   const results = data?.results || [];
+
+  const renderResults = () => {
+    if (isLoading) {
+      return (
+        <div className="text-center py-12">
+          <p className="text-[#666666]">Загрузка проектов...</p>
+        </div>
+      );
+    }
+
+    if (isError) {
+      return (
+        <div className="text-center py-12">
+          <p className="text-lg font-medium text-[#666666]">
+            Не удалось загрузить проекты
+          </p>
+          <p className="text-sm text-[#666666] mt-2">
+            Проверьте соединение и попробуйте ещё раз
+          </p>
+          <Button className="mt-6 rounded-[40px]" onClick={() => refetch()}>
+            Повторить
+          </Button>
+        </div>
+      );
+    }
+
+    if (results.length === 0) {
+      return (
+        <div className="text-center py-12">
+          <Search className="w-12 h-12 mx-auto mb-4 text-[#666666] opacity-50" />
+          <p className="text-lg font-medium text-[#666666]">
+            Проекты не найдены
+          </p>
+          <p className="text-sm text-[#666666] mt-2">
+            Попробуйте изменить параметры поиска
+          </p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {results.map((project) => (
+          <ProjectCard key={project.id} project={project} />
+        ))}
+      </div>
+    );
+  };
 
   return (
     <section className="container mx-auto relative px-4 sm:px-6 py-8">
@@ -50,7 +98,7 @@ export default function ProjectsPage() {
           </p>
         </div>
         <RoleGuard role="specialist">
-          <Link href="/projects/create" passHref legacyBehavior>
+          <Link href="/projects/create">
             <Button className="w-full sm:w-auto rounded-[40px] gap-2">
               <Plus className="w-4 h-4" />
               Создать проект
@@ -92,27 +140,7 @@ export default function ProjectsPage() {
         </p>
       </div>
 
-      {isLoading ? (
-        <div className="text-center py-12">
-          <p className="text-[#666666]">Загрузка проектов...</p>
-        </div>
-      ) : results.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {results.map((project) => (
-            <ProjectCard key={project.id} project={project} />
-          ))}
-        </div>
-      ) : (
-        <div className="text-center py-12">
-          <Search className="w-12 h-12 mx-auto mb-4 text-[#666666] opacity-50" />
-          <p className="text-lg font-medium text-[#666666]">
-            Проекты не найдены
-          </p>
-          <p className="text-sm text-[#666666] mt-2">
-            Попробуйте изменить параметры поиска
-          </p>
-        </div>
-      )}
+      {renderResults()}
     </section>
   );
 }

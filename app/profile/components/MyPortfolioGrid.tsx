@@ -1,17 +1,30 @@
 "use client";
 
 import Link from "next/link";
-import { Plus } from "lucide-react";
+import { Pencil, Plus } from "lucide-react";
 import { useApiProjectsListQuery } from "@/services/generatedApi";
 import ProjectCard from "@/app/projects/components/ProjectCard";
 import { EmptyState } from "@/components/EmptyState";
+import { ModerationStatusBadge } from "@/components/ModerationStatusBadge";
+import { Button } from "@/components/ui/button";
 
 export function MyPortfolioGrid() {
-  const { data, isLoading } = useApiProjectsListQuery({ mine: true });
+  const { data, isLoading, isError, refetch } = useApiProjectsListQuery({ mine: true });
   const projects = data?.results || [];
 
   if (isLoading) {
     return <div className="text-center py-8 text-gray-500">Загрузка...</div>;
+  }
+
+  if (isError) {
+    return (
+      <div className="text-center py-8 text-gray-500">
+        <p>Не удалось загрузить проекты.</p>
+        <Button variant="outline" className="mt-4 rounded-[40px]" onClick={() => refetch()}>
+          Повторить
+        </Button>
+      </div>
+    );
   }
 
   if (projects.length === 0) {
@@ -28,7 +41,22 @@ export function MyPortfolioGrid() {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
       {projects.map((project) => (
-        <ProjectCard key={project.id} project={project} />
+        <div key={project.id} className="flex flex-col gap-2">
+          <ProjectCard project={project} />
+          <div className="flex items-center justify-between gap-2">
+            <ModerationStatusBadge status={project.moderationStatus} />
+            <Link
+              href={`/projects/${project.id}/edit`}
+              className="inline-flex items-center gap-1 text-sm text-[#333] hover:underline"
+            >
+              <Pencil className="w-3.5 h-3.5" />
+              Редактировать
+            </Link>
+          </div>
+          {project.moderationStatus === "rejected" && project.moderationComment && (
+            <p className="text-xs text-red-600">Причина: {project.moderationComment}</p>
+          )}
+        </div>
       ))}
 
       <Link href="/projects/create" className="block">

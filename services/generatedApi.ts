@@ -158,6 +158,16 @@ const injectedRtkApi = api.injectEndpoints({
     >({
       query: (queryArg) => ({ url: `/api/projects/${queryArg.id}/` }),
     }),
+    apiProjectsPartialUpdate: build.mutation<
+      ApiProjectsPartialUpdateApiResponse,
+      ApiProjectsPartialUpdateApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/projects/${queryArg.id}/`,
+        method: "PATCH",
+        body: queryArg.patchedProjectUpdate,
+      }),
+    }),
     apiProjectsLikeCreate: build.mutation<
       ApiProjectsLikeCreateApiResponse,
       ApiProjectsLikeCreateApiArg
@@ -582,6 +592,12 @@ export type ApiProjectsRetrieveApiResponse =
   /** status 200  */ ProjectDetailRead;
 export type ApiProjectsRetrieveApiArg = {
   id: number;
+};
+export type ApiProjectsPartialUpdateApiResponse =
+  /** status 200  */ ProjectDetailRead;
+export type ApiProjectsPartialUpdateApiArg = {
+  id: number;
+  patchedProjectUpdate: PatchedProjectUpdateWrite;
 };
 export type ApiProjectsLikeCreateApiResponse = unknown;
 export type ApiProjectsLikeCreateApiArg = {
@@ -1144,14 +1160,13 @@ export type OrderCreate = {
 };
 export type ProjectList = {
   title: string;
-  previewImage?: string | null;
   views?: number;
   likes?: number;
 };
 export type ProjectListRead = {
   id: number;
   title: string;
-  previewImage?: string | null;
+  previewImage: string | null;
   specialistName: string;
   specialistSlug: string;
   views?: number;
@@ -1177,7 +1192,6 @@ export type ProjectDetail = {
   title: string;
   /** Фото-галерею или слайдер можно вставить кнопкой «Галерея» на панели редактора. Двойной клик по вставленному блоку открывает его на редактирование. */
   description: string;
-  previewImage?: string | null;
   views?: number;
   likes?: number;
 };
@@ -1197,7 +1211,7 @@ export type ProjectDetailRead = {
   title: string;
   /** Фото-галерею или слайдер можно вставить кнопкой «Галерея» на панели редактора. Двойной клик по вставленному блоку открывает его на редактирование. */
   description: string;
-  previewImage?: string | null;
+  previewImage: string | null;
   specialistId: number;
   specialistName: string;
   specialistSlug: string;
@@ -1210,6 +1224,19 @@ export type ProjectDetailRead = {
   moderationStatus: ModerationStatusEnum;
   /** Причина отклонения. Её видит автор материала. */
   moderationComment: string;
+};
+export type PatchedProjectUpdate = {
+  title?: string;
+  /** Фото-галерею или слайдер можно вставить кнопкой «Галерея» на панели редактора. Двойной клик по вставленному блоку открывает его на редактирование. */
+  description?: string;
+};
+export type PatchedProjectUpdateWrite = {
+  title?: string;
+  /** Фото-галерею или слайдер можно вставить кнопкой «Галерея» на панели редактора. Двойной клик по вставленному блоку открывает его на редактирование. */
+  description?: string;
+  images?: string[];
+  removeImageIds?: number[];
+  previewImageId?: number | null;
 };
 export type ProjectCreate = {
   title: string;
@@ -1691,6 +1718,7 @@ export const {
   useApiOrdersCreateCreateMutation,
   useApiProjectsListQuery,
   useApiProjectsRetrieveQuery,
+  useApiProjectsPartialUpdateMutation,
   useApiProjectsLikeCreateMutation,
   useApiProjectsViewsCreateMutation,
   useApiProjectsCreateCreateMutation,

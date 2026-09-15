@@ -1,28 +1,17 @@
 "use client";
 
-import Image from "next/image";
-import { Badge } from "@/components/ui/badge";
-import { cn, stripHtml } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
 import { Card } from "@/components/ui/card";
 import ArchitectureFirms from "@/components/architectureFirms";
+import HomeFeedTabs from "@/components/home/HomeFeedTabs";
 import Link from "next/link";
-import { Eye } from "lucide-react";
-import {
-  useApiArticlesListQuery,
-  useApiNewsListQuery,
-} from "@/services/generatedApi";
-
-const filters = ["Статьи", "Конкурсы", "Личности", "Объект"];
+import { useApiNewsListQuery } from "@/services/generatedApi";
 
 export default function Page() {
-  const { data: articlesData, isLoading: articlesLoading } =
-    useApiArticlesListQuery({ page: 1 });
   const { data: newsData, isLoading: newsLoading } = useApiNewsListQuery({
     page: 1,
   });
 
-  const articles = articlesData?.results?.slice(0, 3) || [];
   const news = newsData?.results?.slice(0, 3) || [];
 
   const formatDate = (dateString: string) => {
@@ -30,11 +19,6 @@ export default function Page() {
       month: "long",
       day: "numeric",
     });
-  };
-
-  const getCategory = (id: number) => {
-    const categories = ["Личности", "Архитектура", "Дизайн", "Искусство"];
-    return categories[id % categories.length];
   };
 
   return (
@@ -47,79 +31,8 @@ export default function Page() {
           </h1>
           <Separator className="bg-[#333333] mb-6 md:mb-10" />
 
-          {/* Фильтры - адаптивное отображение */}
-          <div className="flex overflow-x-auto gap-6 mb-4">
-            {filters.map((item, i) => (
-              <Link
-                href={i === 0 ? "/articles" : i === 1 ? "/competitions" : i === 2 ? "/specialists" : "/projects"}
-                key={item}
-                className={cn(
-                  "text-[16px] transition-colors cursor-pointer",
-                  i === 0
-                    ? "font-medium text-foreground"
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                {item}
-              </Link>
-            ))}
-          </div>
-
-          {/* Карточки статей */}
-          <div className="space-y-4 md:space-y-6">
-            {articlesLoading ? (
-              <div className="text-center py-8 text-gray-500">Загрузка...</div>
-            ) : articles.length > 0 ? (
-              articles.map((item: any) => (
-                <Link href={`/articles/${item.slug}`} key={item.id} className="group">
-                  <Card className="overflow-hidden mb-4 md:mb-6 p-0 gap-0">
-                    {/* Изображение - меняется пропорция на мобиле */}
-                    <div className="relative aspect-video md:aspect-[2/5] overflow-hidden md:max-h-[320px] w-full bg-gray-100">
-                      {item.previewImage ? (
-                        <Image
-                          src={item.previewImage}
-                          alt={item.title}
-                          fill
-                          className="object-cover w-full transition-transform duration-300 group-hover:scale-105"
-                          sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-gray-200">
-                          <span className="text-gray-400">Нет изображения</span>
-                        </div>
-                      )}
-
-                      {/* Бейдж */}
-                      <Badge
-                        variant="secondary"
-                        className="absolute bottom-3 right-3 text-xs"
-                      >
-                        {getCategory(item.id)}
-                      </Badge>
-                    </div>
-
-                    {/* Контент карточки */}
-                    <div className="p-4 md:p-6">
-                      <h2 className="text-lg sm:text-xl md:text-[32px] font-medium leading-tight group-hover:underline mb-3">
-                        {item.title}
-                      </h2>
-
-                      <p className="text-sm md:text-[16px] text-[#6D6D6D] leading-relaxed line-clamp-3 md:line-clamp-4 mb-4">
-                        {stripHtml(item.shortDescription) || "Описание отсутствует"}
-                      </p>
-
-                      <div className="flex items-center gap-1 text-xs text-gray-400">
-                        <Eye className="w-3.5 h-3.5" />
-                        <span>{item.views || 0}</span>
-                      </div>
-                    </div>
-                  </Card>
-                </Link>
-              ))
-            ) : (
-              <p className="text-gray-500 py-4">Нет доступных статей.</p>
-            )}
-          </div>
+          {/* Рубрики: табы переключают контент прямо здесь, без перехода */}
+          <HomeFeedTabs />
         </div>
 
         {/* Колонка новостей - скрывается на маленьких экранах, появляется на средних */}
@@ -133,7 +46,7 @@ export default function Page() {
             {newsLoading ? (
               <div className="text-center py-8 text-gray-500">Загрузка...</div>
             ) : news.length > 0 ? (
-              news.map((item: any) => (
+              news.map((item) => (
                 <Link href={`/news/${item.slug}`} key={item.id} className="block mb-4 md:mb-6">
                   <Card className="p-4 md:p-6 hover:bg-gray-50 transition-colors">
                     <time

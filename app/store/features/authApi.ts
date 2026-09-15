@@ -1,11 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { TypeLoginSchema } from "@/schemas/login";
 import { TypeRegisterSchema } from "@/schemas/register";
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi } from "@reduxjs/toolkit/query/react";
 import { User } from "@/types/user";
-import { tokenStorage } from "@/hooks/storage";
 import { TypeRecoverSchema } from "@/schemas/recover";
-import { API_BASE_URL } from "@/lib/api";
+import { baseQueryWithReauth } from "@/services/baseQuery";
 
 export interface RequestResetPasswordBody {
   email: string;
@@ -41,59 +40,6 @@ export interface ToggleLikeResponse {
   likes: number;
   isLiked: boolean;
 }
-
-const baseQuery = fetchBaseQuery({
-  baseUrl: API_BASE_URL,
-  prepareHeaders: (headers) => {
-    const token = tokenStorage.getAccessToken();
-    if (token) {
-      headers.set("Authorization", `Bearer ${token}`);
-    }
-    return headers;
-  },
-});
-
-const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
-  let result = await baseQuery(args, api, extraOptions);
-
-  if (result.error && result.error.status === 401) {
-    const refreshToken = tokenStorage.getRefreshToken();
-
-    if (refreshToken) {
-      const refreshResult = await baseQuery(
-        {
-          url: "/auth/refresh-token",
-          method: "POST",
-          body: { refresh_token: refreshToken },
-        },
-        api,
-        extraOptions,
-      );
-
-      if (refreshResult.data) {
-        const tokens = refreshResult.data as any;
-        const access =
-          tokens.accessToken || tokens.access_token || tokens.access;
-        const refresh =
-          tokens.refreshToken || tokens.refresh_token || tokens.refresh;
-        if (access && refresh) {
-          tokenStorage.setTokens(access, refresh);
-          result = await baseQuery(args, api, extraOptions);
-        } else {
-          tokenStorage.clearTokens();
-        }
-      } else {
-        tokenStorage.clearTokens();
-        console.warn("Refresh token failed, user should be logged out");
-      }
-    } else {
-      tokenStorage.clearTokens();
-      console.warn("No refresh token available, user should be logged out");
-    }
-  }
-
-  return result;
-};
 
 export const authApi = createApi({
   reducerPath: "authApi",

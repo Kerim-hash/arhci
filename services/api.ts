@@ -1,21 +1,9 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { tokenStorage } from "@/hooks/storage";
-import { API_BASE_URL } from "@/lib/api";
-
-const baseQuery = fetchBaseQuery({
-  baseUrl: API_BASE_URL,
-  prepareHeaders: (headers) => {
-    const token = tokenStorage.getAccessToken();
-    if (token) {
-      headers.set("Authorization", `Bearer ${token}`);
-    }
-    return headers;
-  },
-});
+import { createApi } from "@reduxjs/toolkit/query/react";
+import { baseQueryWithReauth } from "./baseQuery";
 
 export const apiSlice = createApi({
   reducerPath: "api",
-  baseQuery,
+  baseQuery: baseQueryWithReauth,
   tagTypes: [
     "Articles",
     "Competitions",

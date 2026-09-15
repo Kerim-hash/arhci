@@ -32,6 +32,7 @@ export function MyProjectsList() {
           title={project.title}
           createdAt={project.createdAt}
           status={project.moderationStatus}
+          editHref={`/projects/${project.id}/edit`}
           onDelete={() => { toast.error("Удаление проектов скоро будет доступно"); }}
         />
       ))}
