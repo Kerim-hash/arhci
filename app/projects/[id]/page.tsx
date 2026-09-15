@@ -174,12 +174,13 @@ export default function ProjectDetailPage() {
           <h1 className="text-2xl md:text-3xl font-bold mb-4">
             {currentProject.title}
           </h1>
-          {isOwner && (
+          {/* Неодобренный проект API отдаёт только автору и сотрудникам — пометка нужна обоим */}
+          {currentProject.moderationStatus !== "approved" && (
             <div className="flex flex-wrap items-center gap-3 mb-4">
               <ModerationStatusBadge status={currentProject.moderationStatus} />
               {currentProject.moderationStatus === "pending" && (
                 <span className="text-sm text-[#666666]">
-                  Другие увидят проект после проверки модератором.
+                  Сейчас проект видят только автор и модераторы. Для всех он появится после проверки.
                 </span>
               )}
               {currentProject.moderationStatus === "rejected" &&

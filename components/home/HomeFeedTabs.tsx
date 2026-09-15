@@ -6,12 +6,14 @@ import Link from "next/link";
 import { Eye } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import { ModerationStatusBadge } from "@/components/ModerationStatusBadge";
 import { cn, stripHtml } from "@/lib/utils";
 import {
   useApiArticlesListQuery,
   useApiCompetitionsListQuery,
   useApiProjectsListQuery,
   useApiSpecialistsListQuery,
+  type ModerationStatusEnum,
 } from "@/services/generatedApi";
 import SpecialistCard from "@/app/specialists/components/SpecialistCard";
 
@@ -44,9 +46,21 @@ interface FeedCardProps {
   badge?: string;
   description?: string;
   views?: number;
+  /** API отдаёт неодобренные материалы только автору и сотрудникам — им и нужна пометка. */
+  moderationStatus?: ModerationStatusEnum;
 }
 
-function FeedCard({ href, title, image, badge, description, views }: FeedCardProps) {
+function FeedCard({
+  href,
+  title,
+  image,
+  badge,
+  description,
+  views,
+  moderationStatus,
+}: FeedCardProps) {
+  const isUnderModeration = moderationStatus !== undefined && moderationStatus !== "approved";
+
   return (
     <Link href={href} className="group">
       <Card className="overflow-hidden mb-4 md:mb-6 p-0 gap-0">
@@ -68,6 +82,11 @@ function FeedCard({ href, title, image, badge, description, views }: FeedCardPro
             <Badge variant="secondary" className="absolute bottom-3 right-3 text-xs">
               {badge}
             </Badge>
+          )}
+          {isUnderModeration && (
+            <div className="absolute top-3 left-3">
+              <ModerationStatusBadge status={moderationStatus} />
+            </div>
           )}
         </div>
 
@@ -159,6 +178,7 @@ export default function HomeFeedTabs() {
                 title={item.title}
                 image={item.previewImage}
                 badge={articleCategory(item.id)}
+                moderationStatus={item.moderationStatus}
                 description={stripHtml(item.shortDescription ?? "")}
                 views={item.views}
               />
@@ -180,6 +200,7 @@ export default function HomeFeedTabs() {
                 title={item.title}
                 image={item.image}
                 badge={item.isActive ? "Активный" : "Завершён"}
+                moderationStatus={item.moderationStatus}
                 description={stripHtml(item.shortDescription ?? "")}
                 views={item.views}
               />
@@ -216,6 +237,7 @@ export default function HomeFeedTabs() {
                 title={item.title}
                 image={item.previewImage}
                 badge="Объект"
+                moderationStatus={item.moderationStatus}
                 description={item.specialistName}
                 views={item.views}
               />

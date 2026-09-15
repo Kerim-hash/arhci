@@ -1,81 +1,34 @@
 "use client";
 
-import {
-  QueryClient,
-  QueryClientProvider,
-  useQuery,
-} from "@tanstack/react-query";
-import axios from "axios";
 import { useRouter } from "next/navigation";
+import { useApiArticlesRetrieveQuery } from "@/services/generatedApi";
+import { ModerationStatusBadge } from "@/components/ModerationStatusBadge";
 import { ArticleContent } from "./ArticleDetailContent";
-import { API_BASE_URL } from "@/lib/api";
-
-interface ArticleBlockType {
-  id: number;
-  type: "text" | "image" | "video" | "gallery";
-  content: string;
-  altText: string;
-  order: number;
-  images: Array<{
-    id: number;
-    image: string;
-    order: number;
-  }>;
-}
-
-interface ArticleType {
-  id: number;
-  title: string;
-  slug: string;
-  previewImage: string;
-  shortDescription: string;
-  content?: string;
-  contentHtml?: string;
-  views: number;
-  createdAt: string;
-  contentMode?: "editor" | "docx";
-  biography?: string;
-  blocks?: ArticleBlockType[];
-}
 
 interface ArticleDetailProps {
   slug: string;
 }
 
-const fetchArticleById = async (slug: string): Promise<ArticleType> => {
-  const baseUrl = API_BASE_URL;
-  console.log("Fetching article with slug:", slug);
-  const { data } = await axios.get<ArticleType>(
-    `${baseUrl}/api/articles/${slug}/`,
-  );
-  return data;
-};
+function unavailableMessage(status: unknown): string {
+  if (status === 404) {
+    return "Статья не найдена или ещё не прошла модерацию.";
+  }
+  return "Не удалось загрузить статью. Проверьте соединение и попробуйте ещё раз.";
+}
 
-// Создаем локальный queryClient
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 5 * 60 * 1000,
-      retry: 2,
-    },
-  },
-});
-
-// Компонент для отображения HTML контента
-
-// Основной компонент с логикой
-function ArticleDetailContent({ slug }: ArticleDetailProps) {
+/**
+ * Деталь статьи. Запрос идёт через общий API-слайс с токеном: так автор видит
+ * свою статью ещё до одобрения (с пометкой о модерации), а не «не найдено».
+ */
+export default function ArticleDetail({ slug }: ArticleDetailProps) {
   const router = useRouter();
-
   const {
     data: article,
     isLoading,
+    isError,
     error,
     refetch,
-  } = useQuery({
-    queryKey: ["article", slug],
-    queryFn: () => fetchArticleById(slug),
-  });
+  } = useApiArticlesRetrieveQuery({ slug }, { skip: !slug });
 
   if (isLoading) {
     return (
@@ -87,23 +40,23 @@ function ArticleDetailContent({ slug }: ArticleDetailProps) {
     );
   }
 
-  if (error || !article) {
+  if (isError || !article) {
+    const status = isError && error && "status" in error ? error.status : undefined;
     return (
       <section className="container mx-auto relative px-4 sm:px-6 py-12">
-        <div className="text-center">
-          <div className="text-red-600 mb-4">
-            <p className="text-xl">Ошибка при загрузке статьи</p>
-          </div>
+        <div className="text-center max-w-md mx-auto">
+          <p className="text-xl font-semibold text-[#333] mb-2">Статья недоступна</p>
+          <p className="text-[#666666] mb-6">{unavailableMessage(status)}</p>
           <div className="flex gap-4 justify-center">
             <button
               onClick={() => refetch()}
-              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+              className="px-4 py-2 bg-[#333] text-white rounded-[40px] hover:bg-black transition-colors"
             >
               Попробовать снова
             </button>
             <button
               onClick={() => router.back()}
-              className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
+              className="px-4 py-2 border border-gray-300 text-[#333] rounded-[40px] hover:bg-gray-50 transition-colors"
             >
               Вернуться назад
             </button>
@@ -112,6 +65,8 @@ function ArticleDetailContent({ slug }: ArticleDetailProps) {
       </section>
     );
   }
+
+  const isUnderModeration = article.moderationStatus !== "approved";
 
   return (
     <section className="container mx-auto relative px-4 sm:px-6 py-12">
@@ -136,19 +91,25 @@ function ArticleDetailContent({ slug }: ArticleDetailProps) {
         Назад к списку
       </button>
 
+      {/* Неодобренную статью API отдаёт только автору и сотрудникам — им и нужна пометка */}
+      {isUnderModeration && (
+        <div className="mb-6 flex flex-wrap items-center gap-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-[#333]">
+          <ModerationStatusBadge status={article.moderationStatus} />
+          {article.moderationStatus === "pending" ? (
+            <span>
+              Статья на модерации. Сейчас её видят только автор и модераторы, для всех она
+              появится после проверки.
+            </span>
+          ) : (
+            <span>
+              Статья отклонена модератором.
+              {article.moderationComment ? ` Причина: ${article.moderationComment}` : ""}
+            </span>
+          )}
+        </div>
+      )}
+
       <ArticleContent article={article} />
     </section>
   );
 }
-
-
-// Оборачиваем в провайдер
-const ArticleDetail = ({ slug }: ArticleDetailProps) => {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <ArticleDetailContent slug={slug} />
-    </QueryClientProvider>
-  );
-};
-
-export default ArticleDetail;
