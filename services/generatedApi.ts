@@ -994,7 +994,6 @@ export type CompetitionDetailRead = {
   createdBy?: number | null;
 };
 export type CompetitionCreate = {
-  slug: string;
   title: string;
   /** Фото-галерею или слайдер можно вставить кнопкой «Галерея» на панели редактора. Двойной клик по вставленному блоку открывает его на редактирование. */
   description: string;
@@ -1015,8 +1014,6 @@ export type CompetitionCreate = {
   conditions?: any;
   projectComposition?: any;
   evaluationCriteria?: any;
-  isActive?: boolean;
-  isFeatured?: boolean;
 };
 export type CompetitionCreateRead = {
   id: number;
@@ -1041,8 +1038,8 @@ export type CompetitionCreateRead = {
   conditions?: any;
   projectComposition?: any;
   evaluationCriteria?: any;
-  isActive?: boolean;
-  isFeatured?: boolean;
+  isActive: boolean;
+  isFeatured: boolean;
   createdAt: string;
   updatedAt: string;
 };
@@ -1410,8 +1407,10 @@ export type ResumeCreateRead = {
 export type CategoryEnum =
   | "architects"
   | "engineers"
+  | "constructors"
   | "interior-designers"
-  | "visualizers";
+  | "visualizers"
+  | "companies";
 export type SpecialistList = {
   slug: string;
   category: CategoryEnum;
@@ -1488,6 +1487,7 @@ export type SpecialistDetailRead = {
 export type SpecializationEnum =
   | "architects"
   | "engineers"
+  | "constructors"
   | "interior-designers"
   | "visualizers";
 export type BlankEnum = "";

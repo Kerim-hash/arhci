@@ -114,6 +114,7 @@ export default function LoginPage() {
   const specializations = [
     { id: "architects", label: "Архитектор", icon: "/achteck.svg" },
     { id: "engineers", label: "Инженер", icon: "/engineer.svg" },
+    { id: "constructors", label: "Конструктор", icon: "/engineer.svg" },
     { id: "visualizers", label: "Визуализатор", icon: "/design.svg" },
     {
       id: "interior-designers",

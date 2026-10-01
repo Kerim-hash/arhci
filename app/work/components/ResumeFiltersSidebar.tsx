@@ -24,6 +24,7 @@ export function ResumeFiltersSidebar() {
   const specializations = [
     "Архитекторы",
     "Инженеры",
+    "Конструкторы",
     "Дизайнеры интерьер",
     "Визуализаторы",
   ];

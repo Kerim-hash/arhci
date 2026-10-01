@@ -19,6 +19,7 @@ import { toast } from "sonner";
 const SPECIALIZATION_OPTIONS = [
   "Архитекторы",
   "Инженеры",
+  "Конструкторы",
   "Визуализаторы",
   "Дизайнеры интерьер",
 ];

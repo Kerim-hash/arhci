@@ -7,8 +7,9 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { ImageIcon, Type, ArrowLeft, Eye, Calendar } from "lucide-react";
-import { useAppSelector } from "@/app/store/hooks";
+import { ImageIcon, Type, ArrowLeft, Eye, Calendar, FileDown } from "lucide-react";
+import { useAppDispatch, useAppSelector } from "@/app/store/hooks";
+import { authApi } from "@/app/store/features/authApi";
 import {
   useApiProjectsCreateCreateMutation,
   type ProjectCreateWrite,
@@ -27,8 +28,12 @@ const BlockNoteEditor = dynamic(
 const EMPTY_DESCRIPTION_ERROR =
   "Описание проекта обязательно для заполнения. Пожалуйста, откройте текстовый блок и добавьте описание.";
 
+const PUBLICATION_RULES_PDF = "/docs/ardi-pravila-publikacii-proektov.pdf";
+const PROFILE_HREF = "/profile";
+
 export default function CreateProjectPage() {
   const router = useRouter();
+  const dispatch = useAppDispatch();
   const [createProject] = useApiProjectsCreateCreateMutation();
   const user = useAppSelector((state) => state.authSlice.user);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -68,7 +73,12 @@ export default function CreateProjectPage() {
         // Файлы уходят multipart'ом, поэтому тело — FormData, а не JSON из схемы
         projectCreate: formData as unknown as ProjectCreateWrite,
       }).unwrap();
-      router.push(`/specialists/architects/${user.specialistSlug}`);
+      // Первый проект компании заводит ей профиль-портфолио на бэкенде —
+      // перезапрашиваем профиль, чтобы подтянуть его id и slug.
+      dispatch(authApi.util.invalidateTags(["UserProfile"]));
+      // В портфолио кабинета новый проект виден сразу, со статусом модерации.
+      // Публичная страница зависит от специальности, а у компании её нет.
+      router.push(PROFILE_HREF);
     } catch (err) {
       console.error("Ошибка создания проекта:", err);
       setError(formatProjectApiError(err, "Произошла ошибка при создании проекта"));
@@ -109,7 +119,9 @@ export default function CreateProjectPage() {
             />
             <div>
               <h2 className="font-semibold text-lg">{user?.name}</h2>
-              <p className="text-sm text-[#666666]">Архитектор</p>
+              <p className="text-sm text-[#666666]">
+                {user?.position || (user?.role === "company" ? "Компания" : "Специалист")}
+              </p>
             </div>
           </div>
         </div>
@@ -204,7 +216,7 @@ export default function CreateProjectPage() {
             Главная
           </Link>
           <span className="mx-2">/</span>
-          <Link href={`/specialists/architects/${user?.specialistSlug}`} className="hover:text-gray-700">
+          <Link href={PROFILE_HREF} className="hover:text-gray-700">
             Мой профиль
           </Link>
           <span className="mx-2">/</span>
@@ -309,6 +321,15 @@ export default function CreateProjectPage() {
             >
               {isSubmitting ? "Создание..." : "Продолжить"}
             </Button>
+            <a
+              href={PUBLICATION_RULES_PDF}
+              download="ARDI — правила публикации проектов.pdf"
+              className="flex items-center justify-center gap-2 pt-1 text-sm text-[#666] underline underline-offset-4 transition-colors hover:text-[#333]"
+            >
+              <FileDown className="w-4 h-4 shrink-0" aria-hidden="true" />
+              Правила публикации проекта
+              <span className="sr-only">(скачать PDF)</span>
+            </a>
           </div>
         </div>
       </div>

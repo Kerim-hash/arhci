@@ -14,6 +14,7 @@ interface ProjectCardProps {
 const PLACEHOLDERS: Record<string, string> = {
   architects: "/placeholder-architect.png",
   engineers: "/placeholder-engineer.png",
+  constructors: "/placeholder-engineer.png",
   "interior-designers": "/placeholder-designer.png",
   visualizers: "/placeholder-visualizer.png",
 };

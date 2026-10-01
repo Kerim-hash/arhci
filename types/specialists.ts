@@ -2,6 +2,7 @@
 export type SpecialistCategory =
   | "architects"
   | "engineers"
+  | "constructors"
   | "interior-designers"
   | "visualizers";
 

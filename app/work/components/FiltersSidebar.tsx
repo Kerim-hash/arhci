@@ -28,6 +28,7 @@ export function FiltersSidebar() {
   const specializations = [
     "Архитекторы",
     "Инженеры",
+    "Конструкторы",
     "Дизайнеры интерьер",
     "Визуализаторы",
   ];

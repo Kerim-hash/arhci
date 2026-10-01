@@ -1,17 +1,20 @@
 // app/work/competitions/create/page.tsx
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Plus, X, ImageIcon } from "lucide-react";
 import { useAppSelector } from "@/app/store/hooks";
-import { useApiCompetitionsCreateCreateMutation } from "@/services/generatedApi";
+import {
+  useApiCompetitionsCreateCreateMutation,
+  type CompetitionCreate,
+} from "@/services/generatedApi";
+import { formatApiError } from "@/lib/formatApiError";
 import Link from "next/link";
 
 const OPEN_FOR_OPTIONS = [
@@ -20,6 +23,27 @@ const OPEN_FOR_OPTIONS = [
   "Все желающие",
 ];
 
+// Подписи полей для ошибок валидации с бэкенда
+const FIELD_LABELS: Record<string, string> = {
+  title: "Название конкурса",
+  shortDescription: "Краткое описание",
+  description: "Полное описание",
+  image: "Обложка конкурса",
+  openFor: "Открыт для",
+  organizer: "Организатор",
+  organizerLink: "Сайт организатора",
+  prize: "Награда",
+  startRegistration: "Начало регистрации",
+  endRegistration: "Дедлайн регистрации",
+  submissionDeadline: "Дедлайн подачи проектов",
+  resultsAnnouncement: "Объявление результатов",
+  tasks: "Задачи конкурса",
+  conditions: "Условия участия",
+  projectComposition: "Состав конкурсного проекта",
+};
+
+const nonEmpty = (items: string[]) => items.filter((item) => item.trim() !== "");
+
 export default function CreateCompetitionPage() {
   const router = useRouter();
   const [createCompetition] = useApiCompetitionsCreateCreateMutation();
@@ -27,10 +51,10 @@ export default function CreateCompetitionPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Основная информация
   const [title, setTitle] = useState("");
-  const [slug, setSlug] = useState("");
   const [shortDescription, setShortDescription] = useState("");
   const [description, setDescription] = useState("");
   const [imagePreview, setImagePreview] = useState("");
@@ -39,9 +63,6 @@ export default function CreateCompetitionPage() {
   // Организация
   const [organizer, setOrganizer] = useState("");
   const [organizerLink, setOrganizerLink] = useState("");
-  const [country, setCountry] = useState("");
-  const [city, setCity] = useState("");
-  const [registrationFee, setRegistrationFee] = useState("");
   const [prize, setPrize] = useState("");
   const [openFor, setOpenFor] = useState<string[]>([]);
 
@@ -55,11 +76,6 @@ export default function CreateCompetitionPage() {
   const [tasks, setTasks] = useState<string[]>([""]);
   const [conditions, setConditions] = useState<string[]>([""]);
   const [projectComposition, setProjectComposition] = useState<string[]>([""]);
-  const [evaluationCriteria, setEvaluationCriteria] = useState<string[]>([""]);
-
-  // Статус
-  const [isActive, setIsActive] = useState(true);
-  const [isFeatured, setIsFeatured] = useState(false);
 
   // --- Хелперы ---
 
@@ -69,22 +85,6 @@ export default function CreateCompetitionPage() {
         ? openFor.filter((v) => v !== value)
         : [...openFor, value]
     );
-  };
-
-  const generateSlug = (text: string) => {
-    return text
-      .toLowerCase()
-      .replace(/[^a-zа-яё0-9\s-]/gi, "")
-      .replace(/\s+/g, "-")
-      .replace(/-+/g, "-")
-      .trim();
-  };
-
-  const handleTitleChange = (value: string) => {
-    setTitle(value);
-    if (!slug || slug === generateSlug(title)) {
-      setSlug(generateSlug(value));
-    }
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -126,38 +126,42 @@ export default function CreateCompetitionPage() {
 
   const handleSubmit = async () => {
     if (!title.trim() || !user) return;
+    setError(null);
     setIsSubmitting(true);
 
     try {
+      // Обложка уходит файлом, поэтому тело — multipart, а не JSON из схемы.
+      // Списки в multipart передаются JSON-строками, бэкенд разбирает их сам;
+      // пустые поля не отправляем, чтобы не затирать значения по умолчанию.
+      const formData = new FormData();
+      const fields: Record<string, string> = {
+        title,
+        description,
+        shortDescription,
+        prize,
+        organizer,
+        organizerLink,
+        startRegistration,
+        endRegistration,
+        submissionDeadline,
+        resultsAnnouncement,
+      };
+      Object.entries(fields).forEach(([key, value]) => {
+        if (value) formData.append(key, value);
+      });
+      if (imageFile) formData.append("image", imageFile);
+      formData.append("openFor", JSON.stringify(openFor));
+      formData.append("tasks", JSON.stringify(nonEmpty(tasks)));
+      formData.append("conditions", JSON.stringify(nonEmpty(conditions)));
+      formData.append("projectComposition", JSON.stringify(nonEmpty(projectComposition)));
+
       await createCompetition({
-        competitionCreate: {
-          slug: slug || generateSlug(title),
-          title,
-          description,
-          shortDescription: shortDescription,
-          image: imagePreview || undefined,
-          openFor,
-          country,
-          city,
-          registrationFee: registrationFee || "Бесплатно",
-          prize,
-          organizer,
-          organizerLink: organizerLink || undefined,
-          startRegistration: startRegistration || undefined,
-          endRegistration: endRegistration || undefined,
-          submissionDeadline: submissionDeadline || undefined,
-          resultsAnnouncement: resultsAnnouncement || undefined,
-          tasks: tasks.filter((t) => t.trim() !== ""),
-          conditions: conditions.filter((c) => c.trim() !== ""),
-          projectComposition: projectComposition.filter((p) => p.trim() !== ""),
-          evaluationCriteria: evaluationCriteria.filter((e) => e.trim() !== ""),
-          isActive: isActive,
-          isFeatured: isFeatured,
-        },
+        competitionCreate: formData as unknown as CompetitionCreate,
       }).unwrap();
       router.push("/work");
-    } catch (error) {
-      console.error("Ошибка создания конкурса:", error);
+    } catch (err) {
+      console.error("Ошибка создания конкурса:", err);
+      setError(formatApiError(err, "Не удалось создать конкурс. Попробуйте ещё раз.", FIELD_LABELS));
     } finally {
       setIsSubmitting(false);
     }
@@ -234,20 +238,8 @@ export default function CreateCompetitionPage() {
               </label>
               <Input
                 value={title}
-                onChange={(e) => handleTitleChange(e.target.value)}
+                onChange={(e) => setTitle(e.target.value)}
                 placeholder="Проект здания музей современного искусства..."
-              />
-            </div>
-
-            <div>
-              <label className="text-sm font-medium text-[#333] mb-2 block">
-                URL-slug
-              </label>
-              <Input
-                value={slug}
-                onChange={(e) => setSlug(e.target.value)}
-                placeholder="museum-of-modern-art"
-                className="text-sm text-[#949494]"
               />
             </div>
 
@@ -357,43 +349,13 @@ export default function CreateCompetitionPage() {
                 />
               </div>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-medium text-[#333] mb-2 block">Страна</label>
-                <Input
-                  value={country}
-                  onChange={(e) => setCountry(e.target.value)}
-                  placeholder="Кыргызстан"
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-[#333] mb-2 block">Город</label>
-                <Input
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                  placeholder="Бишкек"
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-medium text-[#333] mb-2 block">
-                  Регистрационный взнос
-                </label>
-                <Input
-                  value={registrationFee}
-                  onChange={(e) => setRegistrationFee(e.target.value)}
-                  placeholder="Бесплатно / Да (100€)"
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-[#333] mb-2 block">Награда</label>
-                <Input
-                  value={prize}
-                  onChange={(e) => setPrize(e.target.value)}
-                  placeholder="$50 000 + реализация"
-                />
-              </div>
+            <div>
+              <label className="text-sm font-medium text-[#333] mb-2 block">Награда</label>
+              <Input
+                value={prize}
+                onChange={(e) => setPrize(e.target.value)}
+                placeholder="$50 000 + реализация"
+              />
             </div>
           </div>
         </div>
@@ -469,39 +431,16 @@ export default function CreateCompetitionPage() {
               setItems={setProjectComposition}
               placeholder="Элемент проекта..."
             />
-            <DynamicList
-              label="Критерии оценки"
-              items={evaluationCriteria}
-              setItems={setEvaluationCriteria}
-              placeholder="Критерий..."
-            />
-          </div>
-        </div>
-
-        {/* ===== Статус ===== */}
-        <div>
-          <h2 className="text-lg font-semibold mb-4">Статус</h2>
-          <Separator className="mb-4" />
-          <div className="flex flex-wrap gap-3">
-            <Badge
-              variant={isActive ? "default" : "outline"}
-              className="cursor-pointer text-sm py-1 px-3"
-              onClick={() => setIsActive(!isActive)}
-            >
-              {isActive ? "✓ Активный" : "Неактивный"}
-            </Badge>
-            <Badge
-              variant={isFeatured ? "default" : "outline"}
-              className="cursor-pointer text-sm py-1 px-3"
-              onClick={() => setIsFeatured(!isFeatured)}
-            >
-              {isFeatured ? "✓ Избранный" : "Обычный"}
-            </Badge>
           </div>
         </div>
 
         {/* ===== Кнопки действий ===== */}
         <Separator />
+        {error && (
+          <div className="text-red-500 text-sm bg-red-50 border border-red-200 rounded-lg p-3 whitespace-pre-line">
+            {error}
+          </div>
+        )}
         <div className="flex flex-col sm:flex-row gap-3 justify-end">
           <Link href="/work">
             <Button variant="outline" className="rounded-[40px] w-full sm:w-auto">

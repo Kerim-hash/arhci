@@ -40,10 +40,12 @@ export default function CompetitionCard({ competition }: CompetitionCardProps) {
           </p>
           
           <div className="flex items-center gap-3 text-xs text-[#666666] mb-3">
-            <div className="flex items-center gap-1">
-              <MapPin className="w-3 h-3" />
-              <span>{competition.city}</span>
-            </div>
+            {competition.city && (
+              <div className="flex items-center gap-1">
+                <MapPin className="w-3 h-3" />
+                <span>{competition.city}</span>
+              </div>
+            )}
             <div className="flex items-center gap-1">
               <Calendar className="w-3 h-3" />
               <span>

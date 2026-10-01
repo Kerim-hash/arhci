@@ -15,7 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { RoleGuard } from "@/components/RoleGuard";
+import { useRole } from "@/hooks/use-role";
 import Link from "next/link";
 
 const sortOptions = [
@@ -29,6 +29,7 @@ export default function ProjectsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("-created_at");
   const [page] = useState(1);
+  const { isAuthenticated } = useRole();
 
   const { data, isLoading, isError, refetch } = useApiProjectsListQuery({
     search: searchTerm || undefined,
@@ -97,14 +98,15 @@ export default function ProjectsPage() {
             Портфолио работ наших архитекторов и дизайнеров
           </p>
         </div>
-        <RoleGuard role="specialist">
+        {/* Проекты публикуют и специалисты, и компании */}
+        {isAuthenticated && (
           <Link href="/projects/create">
             <Button className="w-full sm:w-auto rounded-[40px] gap-2">
               <Plus className="w-4 h-4" />
               Создать проект
             </Button>
           </Link>
-        </RoleGuard>
+        )}
       </div>
       <Separator className="bg-[#333333] mb-6" />
 

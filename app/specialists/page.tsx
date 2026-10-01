@@ -7,6 +7,7 @@ import SpecialistCategorySection from "./components/SpecialistCategorySection";
 const categories = [
   { id: "architects" as const, title: "Архитекторы" },
   { id: "engineers" as const, title: "Инженеры" },
+  { id: "constructors" as const, title: "Конструкторы" },
   { id: "interior-designers" as const, title: "Дизайнеры интерьера" },
   { id: "visualizers" as const, title: "Визуализаторы" },
 ];

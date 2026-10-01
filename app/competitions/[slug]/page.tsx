@@ -59,6 +59,8 @@ export default function CompetitionDetailPage() {
     });
   };
 
+  const evaluationCriteria = (currentCompetition.evaluationCriteria as string[]) || [];
+
   return (
     <section className="container mx-auto relative px-4 sm:px-6 py-8">
       {/* Навигация */}
@@ -146,20 +148,27 @@ export default function CompetitionDetailPage() {
             </div>
           </div>
 
-          <div>
-            <div className="text-[#383838] text-sm mb-1">Страна</div>
-            <div className="font-semibold">{currentCompetition.country}</div>
-          </div>
+          {/* Этих полей больше нет в форме создания — показываем, только если заполнены в админке */}
+          {currentCompetition.country && (
+            <div>
+              <div className="text-[#383838] text-sm mb-1">Страна</div>
+              <div className="font-semibold">{currentCompetition.country}</div>
+            </div>
+          )}
 
-          <div>
-            <div className="text-[#383838] text-sm mb-1">Город</div>
-            <div className="font-semibold">{currentCompetition.city}</div>
-          </div>
+          {currentCompetition.city && (
+            <div>
+              <div className="text-[#383838] text-sm mb-1">Город</div>
+              <div className="font-semibold">{currentCompetition.city}</div>
+            </div>
+          )}
 
-          <div>
-            <div className="text-[#383838] text-sm mb-1">Регистрационный взнос</div>
-            <div className="font-semibold">{currentCompetition.registrationFee}</div>
-          </div>
+          {currentCompetition.registrationFee && (
+            <div>
+              <div className="text-[#383838] text-sm mb-1">Регистрационный взнос</div>
+              <div className="font-semibold">{currentCompetition.registrationFee}</div>
+            </div>
+          )}
 
           <div>
             <div className="text-[#383838] text-sm mb-1">Награда</div>
@@ -233,17 +242,21 @@ export default function CompetitionDetailPage() {
         </ul>
 
         {/* Критерии оценки */}
-        <h2 className="font-semibold mt-8 text-xl mb-4">Критерии оценки</h2>
-        <ul className="space-y-2 list-disc pl-5 text-sm lg:text-base">
-          <li>
-            Проекты оцениваются по следующим критериям:
-            <ul className="space-y-2 list-disc pl-5 mt-2">
-              {(currentCompetition.evaluationCriteria as string[] || []).map((criteria: string, index: number) => (
-                <li key={index}>{criteria}</li>
-              ))}
+        {evaluationCriteria.length > 0 && (
+          <>
+            <h2 className="font-semibold mt-8 text-xl mb-4">Критерии оценки</h2>
+            <ul className="space-y-2 list-disc pl-5 text-sm lg:text-base">
+              <li>
+                Проекты оцениваются по следующим критериям:
+                <ul className="space-y-2 list-disc pl-5 mt-2">
+                  {evaluationCriteria.map((criteria: string, index: number) => (
+                    <li key={index}>{criteria}</li>
+                  ))}
+                </ul>
+              </li>
             </ul>
-          </li>
-        </ul>
+          </>
+        )}
       </div>
     </section>
   );

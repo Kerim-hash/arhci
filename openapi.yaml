@@ -1519,14 +1519,18 @@ components:
       enum:
       - architects
       - engineers
+      - constructors
       - interior-designers
       - visualizers
+      - companies
       type: string
       description: |-
         * `architects` - Архитекторы
         * `engineers` - Инженеры
+        * `constructors` - Конструкторы
         * `interior-designers` - Дизайнеры интерьера
         * `visualizers` - Визуализаторы
+        * `companies` - Компании
     CompetitionCreate:
       type: object
       description: Create competition serializer.
@@ -1536,8 +1540,8 @@ components:
           readOnly: true
         slug:
           type: string
+          readOnly: true
           title: Ссылка (slug)
-          maxLength: 50
           pattern: ^[-a-zA-Z0-9_]+$
         title:
           type: string
@@ -1614,9 +1618,11 @@ components:
           title: Критерии оценки
         isActive:
           type: boolean
+          readOnly: true
           title: Активен
         isFeatured:
           type: boolean
+          readOnly: true
           title: Рекомендованный конкурс
         createdAt:
           type: string
@@ -1632,6 +1638,8 @@ components:
       - createdAt
       - description
       - id
+      - isActive
+      - isFeatured
       - slug
       - title
       - updatedAt
@@ -2955,12 +2963,14 @@ components:
       enum:
       - architects
       - engineers
+      - constructors
       - interior-designers
       - visualizers
       type: string
       description: |-
         * `architects` - Архитекторы
         * `engineers` - Инженеры
+        * `constructors` - Конструкторы
         * `interior-designers` - Дизайнеры интерьера
         * `visualizers` - Визуализаторы
     TypeEnum:
