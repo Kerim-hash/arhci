@@ -1241,12 +1241,26 @@ export type ProjectCreate = {
   description: string;
   previewImage?: string | null;
 };
+export type SpecialtyEnum =
+  | "architects"
+  | "engineers"
+  | "constructors"
+  | "interior-designers"
+  | "visualizers";
 export type ProjectCreateWrite = {
   title: string;
   /** Фото-галерею или слайдер можно вставить кнопкой «Галерея» на панели редактора. Двойной клик по вставленному блоку открывает его на редактирование. */
   description: string;
   previewImage?: string | null;
   images?: string[];
+  /** Специальность — только если у аккаунта ещё нет профиля специалиста.
+    
+    * `architects` - Архитекторы
+    * `engineers` - Инженеры
+    * `constructors` - Конструкторы
+    * `interior-designers` - Дизайнеры интерьера
+    * `visualizers` - Визуализаторы */
+  category?: SpecialtyEnum;
 };
 export type ResumeList = {
   name: string;
@@ -1404,7 +1418,7 @@ export type ResumeCreateRead = {
   keySkills?: any;
   createdAt: string;
 };
-export type CategoryEnum =
+export type SpecialistCategoryEnum =
   | "architects"
   | "engineers"
   | "constructors"
@@ -1413,7 +1427,7 @@ export type CategoryEnum =
   | "companies";
 export type SpecialistList = {
   slug: string;
-  category: CategoryEnum;
+  category: SpecialistCategoryEnum;
   categoryName?: string;
   firm?: string;
   rating?: string;
@@ -1425,7 +1439,7 @@ export type SpecialistListRead = {
   slug: string;
   name: string;
   avatar: string;
-  category: CategoryEnum;
+  category: SpecialistCategoryEnum;
   categoryName?: string;
   firm?: string;
   specialization: string;
@@ -1449,7 +1463,7 @@ export type PaginatedSpecialistListListRead = {
 };
 export type SpecialistDetail = {
   slug: string;
-  category: CategoryEnum;
+  category: SpecialistCategoryEnum;
   categoryName?: string;
   firm?: string;
   description?: string;
@@ -1466,7 +1480,7 @@ export type SpecialistDetailRead = {
   phone: string;
   bio: string;
   position: string;
-  category: CategoryEnum;
+  category: SpecialistCategoryEnum;
   categoryName?: string;
   firm?: string;
   description?: string;
@@ -1484,12 +1498,6 @@ export type SpecialistDetailRead = {
   website: string;
   projects: string;
 };
-export type SpecializationEnum =
-  | "architects"
-  | "engineers"
-  | "constructors"
-  | "interior-designers"
-  | "visualizers";
 export type BlankEnum = "";
 export type VacancyList = {
   title: string;
@@ -1507,7 +1515,7 @@ export type VacancyList = {
   employment?: string;
   schedule?: string;
   workFormat?: string;
-  specialization?: SpecializationEnum | BlankEnum;
+  specialization?: SpecialtyEnum | BlankEnum;
   programs?: any;
   payoutType?: string;
   viewsCount?: number;
@@ -1529,7 +1537,7 @@ export type VacancyListRead = {
   employment?: string;
   schedule?: string;
   workFormat?: string;
-  specialization?: SpecializationEnum | BlankEnum;
+  specialization?: SpecialtyEnum | BlankEnum;
   programs?: any;
   payoutType?: string;
   viewsCount?: number;
@@ -1570,7 +1578,7 @@ export type VacancyDetail = {
   schedule?: string;
   workingHours?: string;
   workFormat?: string;
-  specialization?: SpecializationEnum | BlankEnum;
+  specialization?: SpecialtyEnum | BlankEnum;
   programs?: any;
   payoutType?: string;
   companyName: string;
@@ -1607,7 +1615,7 @@ export type VacancyDetailRead = {
   schedule?: string;
   workingHours?: string;
   workFormat?: string;
-  specialization?: SpecializationEnum | BlankEnum;
+  specialization?: SpecialtyEnum | BlankEnum;
   programs?: any;
   payoutType?: string;
   companyName: string;
@@ -1649,7 +1657,7 @@ export type VacancyCreate = {
   schedule?: string;
   workingHours?: string;
   workFormat?: string;
-  specialization?: SpecializationEnum | BlankEnum;
+  specialization?: SpecialtyEnum | BlankEnum;
   programs?: any;
   payoutType?: string;
   companyName: string;
@@ -1685,7 +1693,7 @@ export type VacancyCreateRead = {
   schedule?: string;
   workingHours?: string;
   workFormat?: string;
-  specialization?: SpecializationEnum | BlankEnum;
+  specialization?: SpecialtyEnum | BlankEnum;
   programs?: any;
   payoutType?: string;
   companyName: string;

@@ -15,6 +15,14 @@ import {
   type ProjectCreateWrite,
 } from "@/services/generatedApi";
 import { stripHtml } from "@/lib/utils";
+import { SPECIALTIES } from "@/lib/specialties";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { ProjectImageDropzone, useUploadedImages } from "../components/ProjectImageDropzone";
@@ -46,6 +54,13 @@ export default function CreateProjectPage() {
   const [showPreview, setShowPreview] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Аккаунтам из админки и старых регистраций специальность не задана —
+  // спрашиваем её здесь, профиль специалиста заведётся вместе с проектом.
+  const needsSpecialty = user?.role === "specialist" && !user.specialistSlug;
+  const [specialty, setSpecialty] = useState("");
+  const isIncomplete =
+    !title.trim() || images.length === 0 || (needsSpecialty && !specialty);
+
   const handleSubmit = async () => {
     if (!title.trim() || !user) return;
 
@@ -64,6 +79,7 @@ export default function CreateProjectPage() {
       const formData = new FormData();
       formData.append("title", title);
       formData.append("description", description);
+      if (needsSpecialty) formData.append("category", specialty);
 
       images.forEach((img) => {
         formData.append("images", img.file);
@@ -227,6 +243,30 @@ export default function CreateProjectPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Левая часть — форма */}
         <div className="lg:col-span-2 space-y-6">
+          {needsSpecialty && (
+            <div>
+              <label className="text-sm font-medium text-[#333] mb-2 block">
+                Ваша специальность
+              </label>
+              <Select value={specialty} onValueChange={setSpecialty}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Выберите специальность" />
+                </SelectTrigger>
+                <SelectContent>
+                  {SPECIALTIES.map((item) => (
+                    <SelectItem key={item.id} value={item.id}>
+                      {item.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-[#949494] mt-2">
+                В вашем аккаунте специальность ещё не указана. Профиль в разделе
+                «Специалисты» появится вместе с первым проектом.
+              </p>
+            </div>
+          )}
+
           {/* Заголовок */}
           <div>
             <label className="text-sm font-medium text-[#333] mb-2 block">
@@ -301,7 +341,7 @@ export default function CreateProjectPage() {
             <Button
               variant="outline"
               className="w-full rounded-[40px]"
-              disabled={!title.trim() || images.length === 0}
+              disabled={isIncomplete}
               onClick={() => {
                 setError(null);
                 if (!stripHtml(description)) {
@@ -317,7 +357,7 @@ export default function CreateProjectPage() {
             <Button
               className="w-full rounded-[40px]"
               onClick={handleSubmit}
-              disabled={!title.trim() || images.length === 0 || isSubmitting}
+              disabled={isIncomplete || isSubmitting}
             >
               {isSubmitting ? "Создание..." : "Продолжить"}
             </Button>

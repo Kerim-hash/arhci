@@ -1515,22 +1515,6 @@ components:
       required:
       - id
       - image
-    CategoryEnum:
-      enum:
-      - architects
-      - engineers
-      - constructors
-      - interior-designers
-      - visualizers
-      - companies
-      type: string
-      description: |-
-        * `architects` - Архитекторы
-        * `engineers` - Инженеры
-        * `constructors` - Конструкторы
-        * `interior-designers` - Дизайнеры интерьера
-        * `visualizers` - Визуализаторы
-        * `companies` - Компании
     CompetitionCreate:
       type: object
       description: Create competition serializer.
@@ -2356,6 +2340,18 @@ components:
             type: string
             format: uri
           writeOnly: true
+        category:
+          allOf:
+          - $ref: '#/components/schemas/SpecialtyEnum'
+          writeOnly: true
+          description: |-
+            Специальность — только если у аккаунта ещё нет профиля специалиста.
+
+            * `architects` - Архитекторы
+            * `engineers` - Инженеры
+            * `constructors` - Конструкторы
+            * `interior-designers` - Дизайнеры интерьера
+            * `visualizers` - Визуализаторы
       required:
       - description
       - title
@@ -2783,6 +2779,22 @@ components:
       - moderationStatus
       - name
       - userName
+    SpecialistCategoryEnum:
+      enum:
+      - architects
+      - engineers
+      - constructors
+      - interior-designers
+      - visualizers
+      - companies
+      type: string
+      description: |-
+        * `architects` - Архитекторы
+        * `engineers` - Инженеры
+        * `constructors` - Конструкторы
+        * `interior-designers` - Дизайнеры интерьера
+        * `visualizers` - Визуализаторы
+        * `companies` - Компании
     SpecialistDetail:
       type: object
       description: Full specialist profile serializer.
@@ -2816,7 +2828,7 @@ components:
           readOnly: true
         category:
           allOf:
-          - $ref: '#/components/schemas/CategoryEnum'
+          - $ref: '#/components/schemas/SpecialistCategoryEnum'
           title: Категория
         categoryName:
           type: string
@@ -2916,7 +2928,7 @@ components:
           readOnly: true
         category:
           allOf:
-          - $ref: '#/components/schemas/CategoryEnum'
+          - $ref: '#/components/schemas/SpecialistCategoryEnum'
           title: Категория
         categoryName:
           type: string
@@ -2959,7 +2971,7 @@ components:
       - slug
       - specialization
       - totalLikes
-    SpecializationEnum:
+    SpecialtyEnum:
       enum:
       - architects
       - engineers
@@ -3058,7 +3070,7 @@ components:
         specialization:
           title: Специализация
           oneOf:
-          - $ref: '#/components/schemas/SpecializationEnum'
+          - $ref: '#/components/schemas/SpecialtyEnum'
           - $ref: '#/components/schemas/BlankEnum'
         programs:
           title: Программы / ПО
@@ -3194,7 +3206,7 @@ components:
         specialization:
           title: Специализация
           oneOf:
-          - $ref: '#/components/schemas/SpecializationEnum'
+          - $ref: '#/components/schemas/SpecialtyEnum'
           - $ref: '#/components/schemas/BlankEnum'
         programs:
           title: Программы / ПО
@@ -3360,7 +3372,7 @@ components:
         specialization:
           title: Специализация
           oneOf:
-          - $ref: '#/components/schemas/SpecializationEnum'
+          - $ref: '#/components/schemas/SpecialtyEnum'
           - $ref: '#/components/schemas/BlankEnum'
         programs:
           title: Программы / ПО

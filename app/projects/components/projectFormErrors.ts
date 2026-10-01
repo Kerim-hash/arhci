@@ -3,6 +3,7 @@ import { formatApiError } from "@/lib/formatApiError";
 const FIELD_LABELS: Record<string, string> = {
   title: "Заголовок",
   description: "Описание",
+  category: "Специальность",
   images: "Изображения",
   removeImageIds: "Удаляемые изображения",
   remove_image_ids: "Удаляемые изображения",

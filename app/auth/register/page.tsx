@@ -13,6 +13,7 @@ import { useRegisterUserMutation } from "@/app/store/features/authApi";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/use-auth";
+import { SPECIALTIES } from "@/lib/specialties";
 
 type FormValues = {
   email: string;
@@ -111,17 +112,7 @@ export default function LoginPage() {
     }
   };
 
-  const specializations = [
-    { id: "architects", label: "Архитектор", icon: "/achteck.svg" },
-    { id: "engineers", label: "Инженер", icon: "/engineer.svg" },
-    { id: "constructors", label: "Конструктор", icon: "/engineer.svg" },
-    { id: "visualizers", label: "Визуализатор", icon: "/design.svg" },
-    {
-      id: "interior-designers",
-      label: "Дизайнер интерьера",
-      icon: "/design.svg",
-    },
-  ];
+  const specializations = SPECIALTIES;
 
   return (
     <div className="flex flex-col items-center w-full max-w-md mx-auto px-4">
