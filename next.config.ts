@@ -18,6 +18,10 @@ const apiOrigin = new URL(serverUrl)
 const nextConfig = {
   reactStrictMode: true,
   images: {
+    // Загрузки лежат под постоянными адресами (Django не перезаписывает файл с
+    // тем же именем), поэтому пережатую картинку можно держать в кэше долго.
+    // По умолчанию — 60 секунд, после чего оригинал качался и пережимался заново.
+    minimumCacheTTL: 60 * 60 * 24 * 30,
     remotePatterns: [
       // Хост из NEXT_PUBLIC_SERVER_URL — основной источник медиа.
       {

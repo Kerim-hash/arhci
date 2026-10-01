@@ -4,6 +4,7 @@ import { useMemo } from "react";
 
 import RichContent from "./content/RichContent";
 import { API_BASE_URL } from "@/lib/api";
+import { formatShortDate } from "@/lib/formatDate";
 
 // components/NewsDetailContent.tsx (обновленный NewsContent)
 export const NewsContent = ({ content, title }: { content: string; title?: string }) => {
@@ -313,7 +314,7 @@ export const NewsContent = ({ content, title }: { content: string; title?: strin
           </div>
           
           <div class="document-meta">
-            <span>📅 ${new Date().toLocaleDateString("ru-RU")}</span>
+            <span>📅 ${formatShortDate(new Date().toISOString())}</span>
             <span>📄 Новость с сайта</span>
           </div>
         </body>

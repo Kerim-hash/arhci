@@ -1,63 +1,25 @@
 "use client";
 
-import {
-  QueryClient,
-  QueryClientProvider,
-  useQuery,
-} from "@tanstack/react-query";
-import axios from "axios";
 import { useRouter } from "next/navigation";
-import { NewsContent } from "./NewsDetailContent";
-import { API_BASE_URL } from "@/lib/api";
 
-interface NewsType {
-  id: number;
-  title: string;
-  slug: string;
-  previewImage: string;
-  shortDescription: string;
-  content: string;
-  views: number;
-  createdAt: string;
-}
+import { isNotFound } from "@/lib/isNotFound";
+import { useApiNewsRetrieveQuery, type NewsDetailRead } from "@/services/generatedApi";
+
+import { NewsContent } from "./NewsDetailContent";
 
 interface NewsDetailProps {
   slug: string;
+  /** Новость с сервера: текст виден сразу, без ожидания клиентского запроса. */
+  initialNews?: NewsDetailRead;
 }
 
-const fetchNewsById = async (slug: string): Promise<NewsType> => {
-  console.log("Fetching news with slug:", slug);
-  const { data } = await axios.get<NewsType>(
-    `${API_BASE_URL}/api/news/${slug}/`,
-  );
-  return data;
-};
-
-// Создаем локальный queryClient
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 5 * 60 * 1000,
-      retry: 2,
-    },
-  },
-});
-
-// Основной компонент с логикой
-function NewsDetailContent({ slug }: NewsDetailProps) {
+export default function NewsDetail({ slug, initialNews }: NewsDetailProps) {
   const router = useRouter();
+  const query = useApiNewsRetrieveQuery({ slug }, { skip: !slug });
+  // Серверная копия не показывается, если API уже ответил, что новости нет
+  const news = query.data ?? (isNotFound(query.error) ? undefined : initialNews);
 
-  const {
-    data: news,
-    isLoading,
-    error,
-    refetch,
-  } = useQuery({
-    queryKey: ["news", slug],
-    queryFn: () => fetchNewsById(slug),
-  });
-
-  if (isLoading) {
+  if (query.isLoading && !news) {
     return (
       <section className="container mx-auto relative px-4 sm:px-6 py-12">
         <div className="flex justify-center items-center min-h-[400px]">
@@ -67,7 +29,7 @@ function NewsDetailContent({ slug }: NewsDetailProps) {
     );
   }
 
-  if (error || !news) {
+  if (!news) {
     return (
       <section className="container mx-auto relative px-4 sm:px-6 py-12">
         <div className="text-center">
@@ -76,7 +38,7 @@ function NewsDetailContent({ slug }: NewsDetailProps) {
           </div>
           <div className="flex gap-4 justify-center">
             <button
-              onClick={() => refetch()}
+              onClick={() => query.refetch()}
               className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
             >
               Попробовать снова
@@ -100,12 +62,7 @@ function NewsDetailContent({ slug }: NewsDetailProps) {
         onClick={() => router.back()}
         className="mb-6 flex items-center text-gray-600 hover:text-gray-900 transition-colors"
       >
-        <svg
-          className="w-5 h-5 mr-2"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
+        <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -116,18 +73,7 @@ function NewsDetailContent({ slug }: NewsDetailProps) {
         Назад к списку
       </button>
 
-      <NewsContent content={news.content} title={news.title} />
+      <NewsContent content={news.content ?? ""} title={news.title} />
     </section>
   );
 }
-
-// Оборачиваем в провайдер
-const NewsDetail = ({ slug }: NewsDetailProps) => {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <NewsDetailContent slug={slug} />
-    </QueryClientProvider>
-  );
-};
-
-export default NewsDetail;

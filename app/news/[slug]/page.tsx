@@ -1,70 +1,48 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 // app/news/[slug]/page.tsx
-import { Metadata } from "next";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+
 import NewsDetail from "@/components/NewsDetail";
+import { fetchApi, type ApiPage } from "@/lib/serverApi";
 import { stripHtml } from "@/lib/utils";
-import { API_BASE_URL } from "@/lib/api";
+import type { NewsDetailRead, NewsListRead } from "@/services/generatedApi";
 
 interface PageProps {
-  params: Promise<{
-    slug: string;
-  }>;
+  params: Promise<{ slug: string }>;
+}
+
+function loadNews(slug: string) {
+  return fetchApi<NewsDetailRead>(`/api/news/${encodeURIComponent(slug)}/`);
 }
 
 // Динамические метаданные для SEO
-export async function generateMetadata({
-  params,
-}: PageProps): Promise<Metadata> {
-  try {
-    const { slug } = await params;
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const news = await loadNews(slug);
+  if (!news) return {};
 
-    const res = await fetch(`${API_BASE_URL}/api/news/${slug}/`, {
-      next: { revalidate: 60 },
-    });
-
-    if (!res.ok) return {};
-
-    const news = await res.json();
-
-    return {
+  const description = stripHtml(news.shortDescription || "") || "Новость на нашем сайте";
+  return {
+    title: news.title,
+    description,
+    openGraph: {
       title: news.title,
-      description: stripHtml(news.shortDescription) || "Новость на нашем сайте",
-      openGraph: {
-        title: news.title,
-        description: stripHtml(news.shortDescription),
-        images: news.previewImage ? [news.previewImage] : [],
-      },
-    };
-  } catch {
-    return {};
-  }
+      description,
+      images: news.previewImage ? [news.previewImage] : [],
+    },
+  };
 }
 
-// Для статической генерации (опционально)
+// Свежие новости собираются при сборке, остальные — по первому заходу
 export async function generateStaticParams() {
-  try {
-    const res = await fetch(`${API_BASE_URL}/api/news/`);
-    const data = await res.json();
-
-    // Проверяем структуру ответа
-    const news = data.results || data;
-
-    return news.map((item: any) => ({
-      slug: item.slug,
-    }));
-  } catch (error) {
-    console.error("Error generating static params:", error);
-    return [];
-  }
+  const page = await fetchApi<ApiPage<NewsListRead>>("/api/news/?page=1");
+  return (page?.results ?? []).map((item) => ({ slug: item.slug }));
 }
 
 export default async function Page({ params }: PageProps) {
   const { slug } = await params;
+  if (!slug) notFound();
 
-  if (!slug) {
-    notFound();
-  }
-
-  return <NewsDetail slug={slug} />;
+  const initialNews = await loadNews(slug);
+  return <NewsDetail slug={slug} initialNews={initialNews} />;
 }

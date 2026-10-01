@@ -100,8 +100,10 @@ const Header: FC = () => {
         <div className="hidden lg:flex items-center col-span-2 justify-end">
           {isAuthenticated ? (
             <>
+              {/* Редактор статьи тяжёлый и нужен единицам — не тянем его заранее на каждой странице */}
               <Link
                 href={"/create-article"}
+                prefetch={false}
                 className="w-6 h-6 rounded-full overflow-hidden ml-4"
               >
                 <Image
@@ -181,7 +183,7 @@ const Header: FC = () => {
               </Link>
             ))}
             {isAuthenticated && (
-              <Link href="/create-article" className="text-[#333] font-medium mt-2">
+              <Link href="/create-article" prefetch={false} className="text-[#333] font-medium mt-2">
                 Написать статью
               </Link>
             )}

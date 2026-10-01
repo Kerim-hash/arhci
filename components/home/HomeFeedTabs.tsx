@@ -14,6 +14,7 @@ import {
   useApiProjectsListQuery,
   useApiSpecialistsListQuery,
   type ModerationStatusEnum,
+  type PaginatedArticleListListRead,
 } from "@/services/generatedApi";
 import SpecialistCard from "@/app/specialists/components/SpecialistCard";
 
@@ -45,6 +46,8 @@ interface FeedCardProps {
   views?: number;
   /** API отдаёт неодобренные материалы только автору и сотрудникам — им и нужна пометка. */
   moderationStatus?: ModerationStatusEnum;
+  /** Первая карточка — самый крупный элемент первого экрана: её картинку грузим сразу. */
+  priority?: boolean;
 }
 
 function FeedCard({
@@ -55,6 +58,7 @@ function FeedCard({
   description,
   views,
   moderationStatus,
+  priority = false,
 }: FeedCardProps) {
   const isUnderModeration = moderationStatus !== undefined && moderationStatus !== "approved";
 
@@ -68,7 +72,8 @@ function FeedCard({
               alt={title}
               fill
               className="object-cover w-full transition-transform duration-300 group-hover:scale-105"
-              sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              sizes="(max-width: 1024px) 100vw, 50vw"
+              priority={priority}
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center bg-gray-200">
@@ -134,7 +139,12 @@ function Panel({ isLoading, isError, isEmpty, emptyText, children }: PanelProps)
  * на другие страницы. Данные каждой вкладки запрашиваются только когда
  * она активна (skip), а RTK Query кэширует их при повторном открытии.
  */
-export default function HomeFeedTabs() {
+interface HomeFeedTabsProps {
+  /** Статьи вкладки по умолчанию, полученные на сервере. */
+  initialArticles?: PaginatedArticleListListRead;
+}
+
+export default function HomeFeedTabs({ initialArticles }: HomeFeedTabsProps) {
   const [activeTab, setActiveTab] = useState<FeedTab>(DEFAULT_TAB);
 
   const articles = useApiArticlesListQuery({ page: 1 }, { skip: activeTab !== "articles" });
@@ -151,7 +161,8 @@ export default function HomeFeedTabs() {
     { skip: activeTab !== "objects" },
   );
 
-  const articleItems = articles.data?.results?.slice(0, FEED_LIMIT) ?? [];
+  const articlesData = articles.data ?? initialArticles;
+  const articleItems = articlesData?.results?.slice(0, FEED_LIMIT) ?? [];
   const competitionItems = competitions.data?.results?.slice(0, FEED_LIMIT) ?? [];
   const personItems = persons.data?.results?.slice(0, PERSONS_LIMIT) ?? [];
   const objectItems = objects.data?.results?.slice(0, FEED_LIMIT) ?? [];
@@ -163,14 +174,15 @@ export default function HomeFeedTabs() {
       case "articles":
         return (
           <Panel
-            isLoading={articles.isLoading}
-            isError={articles.isError}
+            isLoading={articles.isLoading && !articlesData}
+            isError={articles.isError && !articlesData}
             isEmpty={articleItems.length === 0}
             emptyText="Нет доступных статей."
           >
-            {articleItems.map((item) => (
+            {articleItems.map((item, index) => (
               <FeedCard
                 key={item.id}
+                priority={index === 0}
                 href={`/articles/${item.slug}`}
                 title={item.title}
                 image={item.previewImage}

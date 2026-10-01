@@ -3,7 +3,6 @@
 
 import { useState, useCallback, useRef, useEffect } from "react";
 import dynamic from "next/dynamic";
-import axios, { AxiosError } from "axios";
 import { useDropzone } from "react-dropzone";
 import { Button } from "./ui/button";
 import { tokenStorage } from "@/hooks/storage";
@@ -562,24 +561,28 @@ const CreateArticleForm: React.FC = () => {
         headers["Authorization"] = `Bearer ${token}`;
       }
 
-      await axios.post(
-        `${API_BASE_URL}/api/articles/create/`,
-        submitData,
-        { headers }
-      );
+      // Content-Type не задаём: границу multipart браузер подставит сам
+      const response = await fetch(`${API_BASE_URL}/api/articles/create/`, {
+        method: "POST",
+        headers,
+        body: submitData,
+      });
+
+      if (!response.ok) {
+        const data: unknown = await response.json().catch(() => undefined);
+        setError(
+          "Ошибка при создании статьи: " +
+            formatApiError({ data }, "Не удалось отправить статью", ARTICLE_FIELD_LABELS),
+        );
+        return;
+      }
 
       setFormState("success");
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err) {
-      // formatApiError ждёт тело ответа в `data`, у axios оно в `response.data`.
-      const axiosErr = err as AxiosError<unknown>;
       setError(
         "Ошибка при создании статьи: " +
-          formatApiError(
-            { data: axiosErr.response?.data, message: axiosErr.message },
-            "Не удалось отправить статью",
-            ARTICLE_FIELD_LABELS,
-          )
+          formatApiError(err, "Не удалось отправить статью", ARTICLE_FIELD_LABELS),
       );
     } finally {
       setLoading(false);

@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { formatShortDate } from "@/lib/formatDate";
 import { useState, useEffect, useMemo, useRef } from "react";
 
 import { GALLERY_SELECTOR } from "./content/gallery";
@@ -60,7 +61,7 @@ export const ArticleContent = ({ article }: { article: any }) => {
   }, [zoomIndex, zoomImages.length]);
 
   const articleDate = useMemo(() => {
-    return createdAtDate ? new Date(createdAtDate).toLocaleDateString("ru-RU") : "";
+    return formatShortDate(createdAtDate);
   }, [createdAtDate]);
 
   const processedContent = useMemo(() => {
@@ -329,7 +330,7 @@ export const ArticleContent = ({ article }: { article: any }) => {
         ${bodyContent}
       </div>
       <div class="document-meta">
-        <span>📅 ${new Date().toLocaleDateString("ru-RU")}</span>
+        <span>📅 ${formatShortDate(new Date().toISOString())}</span>
         <span>📄 Статья с сайта</span>
       </div>
     `;

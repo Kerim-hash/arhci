@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { TypeLoginSchema } from "@/schemas/login";
-import { TypeRegisterSchema } from "@/schemas/register";
+import type { TypeLoginSchema } from "@/schemas/login";
+import type { TypeRegisterSchema } from "@/schemas/register";
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { User } from "@/types/user";
-import { TypeRecoverSchema } from "@/schemas/recover";
+import type { TypeRecoverSchema } from "@/schemas/recover";
 import { baseQueryWithReauth } from "@/services/baseQuery";
 
 export interface RequestResetPasswordBody {

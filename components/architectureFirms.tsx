@@ -11,8 +11,15 @@ import {
 const FIRMS_LIMIT = 5;
 const SPECIALISTS_LIMIT = 5;
 
-export default function ArchitectureFirms() {
-  const { data, isLoading } = useApiSpecialistsTopListQuery({ page: 1 });
+interface ArchitectureFirmsProps {
+  /** Топ специалистов, полученный на сервере. */
+  initialTop?: SpecialistListRead[];
+}
+
+export default function ArchitectureFirms({ initialTop }: ArchitectureFirmsProps) {
+  const query = useApiSpecialistsTopListQuery({ page: 1 });
+  const data = query.data ?? initialTop;
+  const isLoading = query.isLoading && !data;
   // /api/specialists/top/ returns a plain array, not the paginated { results } shape.
   const topSpecialists: SpecialistListRead[] = Array.isArray(data)
     ? data

@@ -17,7 +17,6 @@ const Footer = () => {
                 width={155}
                 height={23}
                 alt="Logotype"
-                priority
               />
             </p>
             <p className="text-[14px] text-[#6D6D6D] max-w-xl">

@@ -1,12 +1,15 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useApiArticlesRetrieveQuery } from "@/services/generatedApi";
+import { isNotFound } from "@/lib/isNotFound";
+import { useApiArticlesRetrieveQuery, type ArticleDetailRead } from "@/services/generatedApi";
 import { ModerationStatusBadge } from "@/components/ModerationStatusBadge";
 import { ArticleContent } from "./ArticleDetailContent";
 
 interface ArticleDetailProps {
   slug: string;
+  /** Статья с сервера (анонимный запрос): одобренная видна сразу. */
+  initialArticle?: ArticleDetailRead;
 }
 
 function unavailableMessage(status: unknown): string {
@@ -20,15 +23,14 @@ function unavailableMessage(status: unknown): string {
  * Деталь статьи. Запрос идёт через общий API-слайс с токеном: так автор видит
  * свою статью ещё до одобрения (с пометкой о модерации), а не «не найдено».
  */
-export default function ArticleDetail({ slug }: ArticleDetailProps) {
+export default function ArticleDetail({ slug, initialArticle }: ArticleDetailProps) {
   const router = useRouter();
-  const {
-    data: article,
-    isLoading,
-    isError,
-    error,
-    refetch,
-  } = useApiArticlesRetrieveQuery({ slug }, { skip: !slug });
+  const query = useApiArticlesRetrieveQuery({ slug }, { skip: !slug });
+  const { error, refetch } = query;
+  // Серверная копия не показывается, если API уже ответил, что статьи нет
+  const article = query.data ?? (isNotFound(error) ? undefined : initialArticle);
+  const isLoading = query.isLoading && !article;
+  const isError = query.isError && !article;
 
   if (isLoading) {
     return (

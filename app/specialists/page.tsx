@@ -1,50 +1,32 @@
 // app/specialists/page.tsx
-"use client";
+import type { Metadata } from "next";
 
-import {
-  useApiSpecialistsListQuery,
-  type SpecialistCategoryEnum,
-} from "@/services/generatedApi";
-import SpecialistCategorySection from "./components/SpecialistCategorySection";
+import { fetchApi } from "@/lib/serverApi";
+import { SPECIALTIES } from "@/lib/specialties";
+import type { PaginatedSpecialistListListRead } from "@/services/generatedApi";
 
-const categories: { id: SpecialistCategoryEnum; title: string }[] = [
-  { id: "architects", title: "Архитекторы" },
-  { id: "engineers", title: "Инженеры" },
-  { id: "constructors", title: "Конструкторы" },
-  { id: "interior-designers", title: "Дизайнеры интерьера" },
-  { id: "visualizers", title: "Визуализаторы" },
-];
+import SpecialistsIndex, {
+  type InitialSpecialistsByCategory,
+} from "./components/SpecialistsIndex";
 
-/**
- * Список пагинирован по 20, поэтому один общий запрос показывал только тех,
- * кто попал на первую страницу: категории дальше по списку просто пропадали.
- * Запрашиваем каждую категорию отдельно — полный список ведёт «Смотреть всех».
- */
-function CategoryBlock({ id, title }: { id: SpecialistCategoryEnum; title: string }) {
-  const { data } = useApiSpecialistsListQuery({
-    category: id,
-    ordering: "-rating",
-    page: 1,
-  });
-  const specialists = data?.results || [];
+export const metadata: Metadata = {
+  title: "Специалисты",
+  description:
+    "Архитекторы, инженеры, конструкторы, дизайнеры интерьера и визуализаторы Кыргызстана",
+};
 
-  if (specialists.length === 0) return null;
-
-  return (
-    <SpecialistCategorySection
-      title={title}
-      category={id}
-      specialists={specialists}
-    />
+export default async function SpecialistsPage() {
+  // Те же параметры, с которыми разделы запрашивают список на клиенте
+  const pages = await Promise.all(
+    SPECIALTIES.map((specialty) =>
+      fetchApi<PaginatedSpecialistListListRead>(
+        `/api/specialists/?category=${specialty.id}&ordering=-rating&page=1`,
+      ),
+    ),
   );
-}
-
-export default function SpecialistsPage() {
-  return (
-    <section className="container mx-auto relative px-4 sm:px-6 py-8">
-      {categories.map((category) => (
-        <CategoryBlock key={category.id} id={category.id} title={category.title} />
-      ))}
-    </section>
+  const initialByCategory: InitialSpecialistsByCategory = Object.fromEntries(
+    SPECIALTIES.map((specialty, index) => [specialty.id, pages[index]]),
   );
+
+  return <SpecialistsIndex initialByCategory={initialByCategory} />;
 }
