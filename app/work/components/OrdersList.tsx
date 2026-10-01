@@ -6,20 +6,22 @@ import { Search } from "lucide-react";
 import { useAppSelector, useAppDispatch } from "@/app/store/hooks";
 import { setSearchQuery } from "@/app/store/features/ordersSlice";
 import { useApiOrdersListQuery } from "@/services/generatedApi";
+import { useDebounce } from "@/hooks/use-debounce";
+import { usePagedQuery } from "../model/usePagedQuery";
 import { OrderCard } from "./OrderCard";
+import { LoadMoreButton } from "./LoadMoreButton";
+
+const SEARCH_DEBOUNCE_MS = 300;
 
 export function OrdersList() {
   const dispatch = useAppDispatch();
   const { searchQuery } = useAppSelector((state) => state.orders);
+  const debouncedSearch = useDebounce(searchQuery, SEARCH_DEBOUNCE_MS);
 
-  const { data, isLoading } = useApiOrdersListQuery({
-    search: searchQuery || undefined,
-  });
-  const orders = data?.results || [];
-
-  if (isLoading) {
-    return <div className="text-center py-8 text-gray-500">Загрузка...</div>;
-  }
+  const { items: orders, hasMore, isLoading, isLoadingMore, loadMore } = usePagedQuery(
+    useApiOrdersListQuery,
+    { search: debouncedSearch || undefined },
+  );
 
   return (
     <div className="space-y-4">
@@ -33,17 +35,23 @@ export function OrdersList() {
         />
       </div>
 
-      <div className="space-y-4 max-h-[calc(100vh-200px)] overflow-y-auto pr-2">
-        {orders.map((order: any) => (
-          <OrderCard key={order.id} order={order} />
-        ))}
+      {isLoading ? (
+        <div className="text-center py-8 text-gray-500">Загрузка...</div>
+      ) : (
+        <div className="space-y-4 max-h-[calc(100vh-200px)] overflow-y-auto pr-2">
+          {orders.map((order) => (
+            <OrderCard key={order.id} order={order} />
+          ))}
 
-        {orders.length === 0 && (
-          <div className="text-center py-8 text-gray-500">
-            Ничего не найдено
-          </div>
-        )}
-      </div>
+          {orders.length === 0 && (
+            <div className="text-center py-8 text-gray-500">
+              Ничего не найдено
+            </div>
+          )}
+
+          <LoadMoreButton hasMore={hasMore} isLoading={isLoadingMore} onClick={loadMore} />
+        </div>
+      )}
     </div>
   );
 }

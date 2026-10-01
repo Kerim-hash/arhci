@@ -85,13 +85,13 @@ const Header: FC = () => {
         <div className="hidden lg:flex col-span-8 justify-center">
           <nav className="flex items-center gap-8 text-secondary-foreground">
             {navLinks.map(({ label, link }) => (
-              <a
+              <Link
                 key={link}
                 href={`/${link}`}
                 className="hover:text-primary transition-colors"
               >
                 {label}
-              </a>
+              </Link>
             ))}
           </nav>
         </div>
@@ -140,7 +140,9 @@ const Header: FC = () => {
           <button
             className="p-2"
             onClick={() => setIsMenuOpen((prev) => !prev)}
-            aria-label="Toggle menu"
+            aria-label={isMenuOpen ? "Закрыть меню" : "Открыть меню"}
+            aria-expanded={isMenuOpen}
+            aria-controls="mobile-menu"
           >
             <div className="space-y-1">
               <span className="block w-6 h-0.5 bg-foreground" />
@@ -151,8 +153,13 @@ const Header: FC = () => {
         </div>
       </div>
 
+      {/* Закрытое меню уезжает за экран, но остаётся в DOM — убираем его из
+          порядка табуляции и от скринридеров, чтобы фокус не «пропадал». */}
       <div
         ref={menuRef}
+        id="mobile-menu"
+        aria-hidden={!isMenuOpen}
+        inert={!isMenuOpen}
         className={clsx(
           "fixed top-0 right-0 h-screen w-3/4 max-w-xs bg-white shadow-lg z-50 transition-transform",
           isMenuOpen ? "translate-x-0" : "translate-x-full",
@@ -162,6 +169,7 @@ const Header: FC = () => {
           <button
             className="self-end text-[#333] text-xl"
             onClick={() => setIsMenuOpen(false)}
+            aria-label="Закрыть меню"
           >
             ✕
           </button>

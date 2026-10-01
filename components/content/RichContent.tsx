@@ -2,6 +2,8 @@
 
 import { useMemo, useRef, type MouseEvent } from "react";
 
+import { sanitizeHtml } from "@/lib/sanitizeHtml";
+
 import { useGalleryPortals } from "./useGalleryPortals";
 
 interface RichContentProps {
@@ -21,7 +23,7 @@ export default function RichContent({ html, className, onClick }: RichContentPro
   // React 19 сравнивает dangerouslySetInnerHTML по идентичности объекта, а не по
   // строке: литерал {__html: …} пересоздавался бы на каждом рендере и перезаписывал
   // innerHTML, стирая галереи, вставленные порталами. Держим ссылку стабильной.
-  const markup = useMemo(() => ({ __html: html }), [html]);
+  const markup = useMemo(() => ({ __html: sanitizeHtml(html) }), [html]);
 
   return (
     <>

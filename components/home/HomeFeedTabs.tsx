@@ -36,9 +36,6 @@ const DEFAULT_TAB: FeedTab = "articles";
 const FEED_LIMIT = 3;
 const PERSONS_LIMIT = 4;
 
-const ARTICLE_CATEGORIES = ["Личности", "Архитектура", "Дизайн", "Искусство"];
-const articleCategory = (id: number) => ARTICLE_CATEGORIES[id % ARTICLE_CATEGORIES.length];
-
 interface FeedCardProps {
   href: string;
   title: string;
@@ -177,7 +174,6 @@ export default function HomeFeedTabs() {
                 href={`/articles/${item.slug}`}
                 title={item.title}
                 image={item.previewImage}
-                badge={articleCategory(item.id)}
                 moderationStatus={item.moderationStatus}
                 description={stripHtml(item.shortDescription ?? "")}
                 views={item.views}

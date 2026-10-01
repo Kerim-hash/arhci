@@ -1,34 +1,24 @@
 // app/work/resume/create/page.tsx
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Plus, X, ArrowLeft } from "lucide-react";
-import { useAppSelector } from "@/app/store/hooks";
+import { Plus, X } from "lucide-react";
 import { useApiResumesCreateCreateMutation } from "@/services/generatedApi";
-import type { WorkExperience } from "@/app/store/features/resumesSlice";
 import Link from "next/link";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import { SPECIALTIES } from "@/lib/specialties";
+import { displayName } from "@/lib/displayName";
+import { EXPERIENCE_OPTIONS, REGIONS, SOFTWARE_OPTIONS } from "../../model/options";
 
 // В резюме специализации хранятся подписями — теми же, что в фильтре
 const SPECIALIZATION_OPTIONS = SPECIALTIES.map((spec) => spec.plural);
-
-const SOFTWARE_OPTIONS = [
-  "ArchiCAD",
-  "AutoCAD",
-  "Revit",
-  "SketchUp",
-  "3ds Max + Corona",
-  "Photoshop",
-  "Rhino",
-];
 
 const EMPLOYMENT_TYPE_OPTIONS = [
   "Полный день (В штат)",
@@ -37,18 +27,8 @@ const EMPLOYMENT_TYPE_OPTIONS = [
   "Удалённо",
 ];
 
-const EXPERIENCE_OPTIONS = [
-  "Без опыта",
-  "1-3 года",
-  "3-6 лет",
-  "6+ лет",
-];
-
-const REGION_OPTIONS = [
-  { value: "bishkek", label: "Бишкек" },
-  { value: "osh", label: "Ош" },
-  { value: "other", label: "Другой" },
-];
+// Регион хранится русским названием — так же, как его ищет фильтр
+const REGION_OPTIONS = [...REGIONS, { value: "Другой", label: "Другой" }];
 
 interface WorkExpForm {
   id: string;
@@ -109,7 +89,7 @@ export default function CreateResumePage() {
   };
 
   // Основная информация
-  const [name, setName] = useState(user?.name || "");
+  const [name, setName] = useState("");
   const [category, setCategory] = useState("");
   const [salaryFrom, setSalaryFrom] = useState("");
   const [salaryTo, setSalaryTo] = useState("");
@@ -119,9 +99,17 @@ export default function CreateResumePage() {
 
   // Контакты
   const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState(user?.email || "");
+  const [email, setEmail] = useState("");
   const [socialLinks, setSocialLinks] = useState<string[]>([]);
   const [newSocialLink, setNewSocialLink] = useState("");
+
+  // Предзаполняем имя и почту, когда профиль загрузится. В профиле нет поля
+  // `name`, поэтому имя собирает displayName(); введённое вручную не трогаем.
+  useEffect(() => {
+    if (!user) return;
+    setName((prev) => prev || displayName(user));
+    setEmail((prev) => prev || user.email || "");
+  }, [user]);
 
   // Работа
   const [workPlace, setWorkPlace] = useState("");
@@ -186,7 +174,11 @@ export default function CreateResumePage() {
     ]);
   };
 
-  const updateWorkExp = (id: string, field: string, value: any) => {
+  const updateWorkExp = (
+    id: string,
+    field: "company" | "position" | "startDate" | "endDate" | "achievement",
+    value: string
+  ) => {
     setWorkExperiences((prev) =>
       prev.map((exp) => (exp.id === id ? { ...exp, [field]: value } : exp))
     );
@@ -318,8 +310,8 @@ export default function CreateResumePage() {
           })),
         },
       }).unwrap();
-      toast.success("Резюме успешно опубликовано!");
-      router.push("/work");
+      toast.success("Резюме отправлено на модерацию");
+      router.push("/profile");
     } catch (error: any) {
       console.error("Ошибка создания резюме:", error);
 
@@ -375,10 +367,10 @@ export default function CreateResumePage() {
         } else if (Object.keys(nextFieldErrors).length > 0 || workExperience) {
           toast.error("Проверьте отмеченные поля в форме.");
         } else {
-          toast.error("Не удалось опубликовать резюме.");
+          toast.error("Не удалось отправить резюме.");
         }
       } else {
-        toast.error("Не удалось опубликовать резюме.");
+        toast.error("Не удалось отправить резюме.");
       }
     } finally {
       setIsSubmitting(false);
@@ -981,7 +973,7 @@ export default function CreateResumePage() {
             onClick={handleSubmit}
             disabled={!name.trim() || !category.trim() || isSubmitting}
           >
-            {isSubmitting ? "Создание..." : "Опубликовать резюме"}
+            {isSubmitting ? "Отправка..." : "Отправить на модерацию"}
           </Button>
         </div>
       </div>

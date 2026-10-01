@@ -1,26 +1,15 @@
 // store/features/ordersSlice.ts — Подключен к бэкенду через RTK Query (generatedApi)
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
+// У заказов на бэкенде нет фильтров, кроме поиска и страницы.
 interface OrdersState {
   activeTab: string;
   searchQuery: string;
-  filters: {
-    propertyTypes: string[];
-    budgetFrom: string;
-    budgetTo: string;
-    software: string[];
-  };
 }
 
 const initialState: OrdersState = {
   activeTab: "orders",
   searchQuery: "",
-  filters: {
-    propertyTypes: [],
-    budgetFrom: "",
-    budgetTo: "",
-    software: [],
-  },
 };
 
 const ordersSlice = createSlice({
@@ -33,20 +22,10 @@ const ordersSlice = createSlice({
     setSearchQuery: (state, action: PayloadAction<string>) => {
       state.searchQuery = action.payload;
     },
-    updateFilters: (
-      state,
-      action: PayloadAction<Partial<OrdersState["filters"]>>,
-    ) => {
-      state.filters = { ...state.filters, ...action.payload };
-    },
-    resetFilters: (state) => {
-      state.filters = initialState.filters;
-    },
   },
 });
 
-export const { setActiveTab, setSearchQuery, updateFilters, resetFilters } =
-  ordersSlice.actions;
+export const { setActiveTab, setSearchQuery } = ordersSlice.actions;
 export default ordersSlice.reducer;
 
 // Re-export хуки из generatedApi

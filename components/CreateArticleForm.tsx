@@ -5,7 +5,6 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import dynamic from "next/dynamic";
 import axios, { AxiosError } from "axios";
 import { useDropzone } from "react-dropzone";
-import type { ApiError } from "../types/article.types";
 import { Button } from "./ui/button";
 import { tokenStorage } from "@/hooks/storage";
 import { useRouter } from "next/navigation";
@@ -18,6 +17,18 @@ import {
   SheetDescription,
 } from "./ui/sheet";
 import { API_BASE_URL } from "@/lib/api";
+import { formatApiError } from "@/lib/formatApiError";
+import { displayName } from "@/lib/displayName";
+
+// Подписи полей для ошибок DRF (ключи приходят в camelCase).
+const ARTICLE_FIELD_LABELS: Record<string, string> = {
+  title: "Заголовок",
+  previewImage: "Обложка",
+  wordFile: "Файл DOCX",
+  blocks: "Содержимое",
+  contentMode: "Режим контента",
+  isPublished: "Публикация",
+};
 
 const DynamicRichTextBlock = dynamic(
   () => import("@/components/RichTextBlock"),
@@ -560,10 +571,15 @@ const CreateArticleForm: React.FC = () => {
       setFormState("success");
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err) {
-      const axiosErr = err as AxiosError<ApiError>;
+      // formatApiError ждёт тело ответа в `data`, у axios оно в `response.data`.
+      const axiosErr = err as AxiosError<unknown>;
       setError(
         "Ошибка при создании статьи: " +
-          (axiosErr.response?.data?.message || axiosErr.message)
+          formatApiError(
+            { data: axiosErr.response?.data, message: axiosErr.message },
+            "Не удалось отправить статью",
+            ARTICLE_FIELD_LABELS,
+          )
       );
     } finally {
       setLoading(false);
@@ -585,7 +601,7 @@ const CreateArticleForm: React.FC = () => {
             alt="avatar"
             className="rounded-full object-cover"
           />
-          {user?.email || "Daniar Asanov"}
+          {displayName(user)}
         </div>
 
         <h1 className="text-3xl font-bold text-[#333] mb-4">
@@ -942,7 +958,7 @@ const CreateArticleForm: React.FC = () => {
       <div className="max-w-2xl mx-auto px-4 md:px-0 mt-8">
         {/* Alerts */}
       {error && (
-        <div className="mb-5 p-3 bg-red-50 text-red-600 rounded-lg border border-red-100 text-sm" role="alert">
+        <div className="mb-5 p-3 bg-red-50 text-red-600 rounded-lg border border-red-100 text-sm whitespace-pre-line" role="alert">
           {error}
         </div>
       )}

@@ -1,13 +1,32 @@
 "use client";
 
 import { toast } from "sonner";
-import { useApiArticlesListQuery } from "@/services/generatedApi";
+import {
+  useApiArticlesDestroyMutation,
+  useApiArticlesListQuery,
+} from "@/services/generatedApi";
+import { formatApiError } from "@/lib/formatApiError";
 import { MyContentRow } from "./MyContentRow";
 import { EmptyState } from "@/components/EmptyState";
 
 export function MyArticlesList() {
-  const { data, isLoading } = useApiArticlesListQuery({ mine: true });
+  const { data, isLoading, refetch } = useApiArticlesListQuery({ mine: true });
+  const [destroyArticle] = useApiArticlesDestroyMutation();
   const articles = data?.results || [];
+
+  const handleDelete = async (slug?: string) => {
+    if (!slug) {
+      toast.error("У статьи нет адреса — удалить её пока нельзя");
+      return;
+    }
+    try {
+      await destroyArticle({ slug }).unwrap();
+      toast.success("Статья удалена");
+      refetch();
+    } catch (err) {
+      toast.error(formatApiError(err, "Не удалось удалить статью"));
+    }
+  };
 
   if (isLoading) {
     return <div className="text-center py-8 text-gray-500">Загрузка...</div>;
@@ -32,7 +51,9 @@ export function MyArticlesList() {
           title={article.title}
           createdAt={article.createdAt}
           status={article.moderationStatus}
-          onDelete={() => { toast.error("Удаление статей скоро будет доступно"); }}
+          moderationComment={article.moderationComment}
+          href={article.slug ? `/articles/${article.slug}` : undefined}
+          onDelete={() => handleDelete(article.slug)}
         />
       ))}
     </div>

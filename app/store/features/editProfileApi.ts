@@ -1,23 +1,26 @@
 import { TypeEditProfileSchema } from "@/schemas/editProfile";
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { API_BASE_URL } from "@/lib/api";
+import { createApi } from "@reduxjs/toolkit/query/react";
+import { baseQueryWithReauth } from "@/services/baseQuery";
 
 export interface LoginResponse {
   token: string;
 }
 
+export interface ChangePasswordBody {
+  currentPassword: string;
+  password: string;
+}
+
+export interface ChangeEmailBody {
+  email: string;
+  /** Текущий пароль — бэкенд требует его для смены email. */
+  password: string;
+}
+
 export const editProfileApi = createApi({
   reducerPath: "editProfileApi",
-  baseQuery: fetchBaseQuery({
-    baseUrl: API_BASE_URL,
-    prepareHeaders: (headers) => {
-      const token = localStorage.getItem("access_token");
-      if (token) {
-        headers.set("Authorization", `Bearer ${token}`);
-      }
-      return headers;
-    },
-  }),
+  // Общий baseQuery: просроченный access-токен обновляется, а не роняет запрос.
+  baseQuery: baseQueryWithReauth,
   tagTypes: ["UserProfile"], // Добавляем тег
   endpoints: (builder) => ({
     editProfile: builder.mutation<LoginResponse, FormData | TypeEditProfileSchema>({
@@ -49,7 +52,7 @@ export const editProfileApi = createApi({
       }),
     }),
 
-    changePassword: builder.mutation<void, { password: string }>({
+    changePassword: builder.mutation<void, ChangePasswordBody>({
       query: (body) => ({
         url: "/auth/change-password",
         method: "POST",
@@ -58,7 +61,7 @@ export const editProfileApi = createApi({
       invalidatesTags: ["UserProfile"],
     }),
 
-    changeEmail: builder.mutation<void, { email: string }>({
+    changeEmail: builder.mutation<void, ChangeEmailBody>({
       query: (body) => ({
         url: "/users/change-email",
         method: "POST",

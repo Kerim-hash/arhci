@@ -16,6 +16,7 @@ import {
 } from "@/services/generatedApi";
 import { stripHtml } from "@/lib/utils";
 import { SPECIALTIES } from "@/lib/specialties";
+import { sanitizeHtml } from "@/lib/sanitizeHtml";
 import {
   Select,
   SelectContent,
@@ -187,7 +188,7 @@ export default function CreateProjectPage() {
             <div className="prose max-w-none">
               <div
                 className="text-[#333333] leading-relaxed"
-                dangerouslySetInnerHTML={{ __html: description }}
+                dangerouslySetInnerHTML={{ __html: sanitizeHtml(description) }}
               />
             </div>
           </div>

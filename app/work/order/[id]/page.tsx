@@ -24,5 +24,5 @@ export default function OrderPage() {
     );
   if (!order) return null;
 
-  return <OrderDetailComponent order={order as any} />;
+  return <OrderDetailComponent order={order} />;
 }

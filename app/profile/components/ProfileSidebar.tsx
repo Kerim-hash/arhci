@@ -7,6 +7,7 @@ import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { useApiSpecialistsRetrieveQuery } from "@/services/generatedApi";
 import { User } from "@/types/user";
+import { displayName } from "@/lib/displayName";
 
 export function ProfileSidebar({ user }: { user?: User }) {
   const { data: specialist } = useApiSpecialistsRetrieveQuery(
@@ -14,14 +15,10 @@ export function ProfileSidebar({ user }: { user?: User }) {
     { skip: !user?.specialistSlug }
   );
 
-  const displayName =
-    user?.name ||
-    (user?.first_name || user?.firstName
-      ? `${user?.first_name || user?.firstName || ""} ${user?.last_name || user?.lastName || ""}`.trim()
-      : "Пользователь");
-
   const roleLabel =
     user?.position || (user?.role === "specialist" ? "Специалист" : "Компания");
+
+  const location = (user?.regionFrom || user?.region_from || []).filter(Boolean).join(", ");
 
   return (
     <div className="bg-white rounded-lg border border-gray-100 p-6 sticky top-24">
@@ -34,7 +31,7 @@ export function ProfileSidebar({ user }: { user?: User }) {
             className="rounded-full object-cover"
           />
         </div>
-        <h3 className="font-semibold text-lg">{displayName}</h3>
+        <h3 className="font-semibold text-lg">{displayName(user)}</h3>
       </div>
 
       <div className="space-y-3 text-sm">
@@ -42,10 +39,12 @@ export function ProfileSidebar({ user }: { user?: User }) {
           <UserIcon className="w-3.5 h-3.5" />
           <span>{roleLabel}</span>
         </div>
-        <div className="flex items-center gap-2 text-[#949494]">
-          <MapPin className="w-3.5 h-3.5" />
-          <span>г.Бишкек, Кыргызстан</span>
-        </div>
+        {location && (
+          <div className="flex items-center gap-2 text-[#949494]">
+            <MapPin className="w-3.5 h-3.5" />
+            <span>{location}</span>
+          </div>
+        )}
         {user?.email && (
           <div className="flex items-center gap-2 text-[#949494] min-w-0">
             <Mail className="w-3.5 h-3.5 shrink-0" />

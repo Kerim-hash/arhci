@@ -18,19 +18,24 @@ import { useGetProfileQuery } from "@/app/store/features/authApi";
 import {
   useEditProfileMutation,
   useChangePasswordMutation,
-  useCheckPasswordMutation,
+  useChangeEmailMutation,
 } from "@/app/store/features/editProfileApi";
 import { User } from "@/types/user";
 import { useAuth } from "@/hooks/use-auth";
+import { tokenStorage } from "@/hooks/storage";
+import { displayName } from "@/lib/displayName";
+import { formatApiError } from "@/lib/formatApiError";
 
 type TabType = "personal" | "social" | "password";
 
 const ProfileSettings = () => {
   const router = useRouter();
-  const { data: user, isLoading, isError, refetch } = useGetProfileQuery();
+  const { data: user, isLoading, isError, error, refetch } = useGetProfileQuery();
   const { logout } = useAuth();
   const [activeTab, setActiveTab] = useState<TabType>("personal");
   const [editProfile] = useEditProfileMutation();
+  // На логин уводим только при 401: 500 или сетевой сбой — не повод терять сессию.
+  const isUnauthorized = isError && !!error && "status" in error && error.status === 401;
 
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -51,11 +56,10 @@ const ProfileSettings = () => {
   };
 
   useEffect(() => {
-    const token = typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
-    if (!token || isError) {
+    if (!tokenStorage.getAccessToken() || isUnauthorized) {
       router.push("/auth/login");
     }
-  }, [isError, router]);
+  }, [isUnauthorized, router]);
 
   const tabs = [
     { id: "personal" as const, label: "Личная информация" },
@@ -71,14 +75,30 @@ const ProfileSettings = () => {
     );
   }
 
-  if (isError || (typeof window !== "undefined" && !localStorage.getItem("access_token"))) {
+  if (isUnauthorized || !tokenStorage.getAccessToken()) {
     return null;
+  }
+
+  if (isError) {
+    return (
+      <div className="container mx-auto px-4 py-8 max-w-6xl text-center text-gray-500 min-h-[50vh] flex flex-col items-center justify-center">
+        <p>Не удалось загрузить профиль.</p>
+        <Button variant="outline" className="mt-4 rounded-[40px]" onClick={() => refetch()}>
+          Повторить
+        </Button>
+      </div>
+    );
   }
 
   const renderContent = () => {
     switch (activeTab) {
       case "personal":
-        return <PersonalInfo user={user} refetch={refetch} />;
+        return (
+          <>
+            <PersonalInfo user={user} refetch={refetch} />
+            <ChangeEmail user={user} refetch={refetch} />
+          </>
+        );
       case "social":
         return <SocialLinks user={user} refetch={refetch} />;
       case "password":
@@ -138,7 +158,7 @@ const ProfileSettings = () => {
                   </svg>
                 </button>
               </div>
-              <h3 className="font-semibold text-lg">{user?.name || (user?.first_name || user?.firstName ? `${user?.first_name || user?.firstName || ""} ${user?.last_name || user?.lastName || ""}`.trim() : "Пользователь")}</h3>
+              <h3 className="font-semibold text-lg">{displayName(user)}</h3>
               <p className="text-gray-500 text-sm">
                 {user?.position || (user?.role === "specialist" ? "Специалист" : "Компания")}
               </p>
@@ -196,7 +216,6 @@ const PersonalInfo = ({ user, refetch }: { user?: User; refetch?: () => any }) =
   } = useForm<TypeEditProfileSchema>({
     resolver: zodResolver(EditProfileSchema) as any,
     defaultValues: {
-      email: user?.email || "",
       name: user?.name || (user?.first_name || user?.firstName ? `${user?.first_name || user?.firstName || ""} ${user?.last_name || user?.lastName || ""}`.trim() : ""),
       phone: user?.phone || "",
       position: user?.position || "",
@@ -210,7 +229,6 @@ const PersonalInfo = ({ user, refetch }: { user?: User; refetch?: () => any }) =
   useEffect(() => {
     if (user) {
       reset({
-        email: user.email || "",
         name: user.name || (user.first_name || user.firstName ? `${user.first_name || user.firstName || ""} ${user.last_name || user.lastName || ""}`.trim() : ""),
         phone: user.phone || "",
         position: user.position || "",
@@ -291,18 +309,6 @@ const PersonalInfo = ({ user, refetch }: { user?: User; refetch?: () => any }) =
             className="mt-1.5"
           />
           {errors.name && <p className="text-sm text-red-500 mt-1">{errors.name.message}</p>}
-        </div>
-
-        <div>
-          <Label htmlFor="email">Email</Label>
-          <Input
-            id="email"
-            type="email"
-            {...register("email")}
-            placeholder="alex@example.com"
-            className="mt-1.5"
-          />
-          {errors.email && <p className="text-sm text-red-500 mt-1">{errors.email.message}</p>}
         </div>
 
         <div>
@@ -512,6 +518,100 @@ const SocialLinks = ({ user, refetch }: { user?: User; refetch?: () => any }) =>
   );
 };
 
+/** Ошибки DRF по полям: {field: ["..."]} → текст первой ошибки поля. */
+const fieldError = (err: unknown, field: string): string | undefined => {
+  const data = (err as { data?: Record<string, unknown> } | null)?.data;
+  const value = data && typeof data === "object" ? data[field] : undefined;
+  if (Array.isArray(value)) return value.map(String).join(", ");
+  if (typeof value === "string") return value;
+  return undefined;
+};
+
+const ChangeEmailSchema = z.object({
+  email: z.string().email("Некорректная почта"),
+  password: z.string().min(1, "Введите текущий пароль"),
+});
+
+type TypeChangeEmailSchema = z.infer<typeof ChangeEmailSchema>;
+
+// Смена email: бэкенд требует новый адрес и текущий пароль
+const ChangeEmail = ({ user, refetch }: { user?: User; refetch?: () => unknown }) => {
+  const [changeEmail, { isLoading }] = useChangeEmailMutation();
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+    setError,
+  } = useForm<TypeChangeEmailSchema>({
+    resolver: zodResolver(ChangeEmailSchema),
+    defaultValues: { email: "", password: "" },
+  });
+
+  const onSubmit = async (data: TypeChangeEmailSchema) => {
+    try {
+      await changeEmail({ email: data.email, password: data.password }).unwrap();
+      if (refetch) {
+        await refetch();
+      }
+      toast.success("Email успешно изменён");
+      reset();
+    } catch (err) {
+      const emailError = fieldError(err, "email");
+      const passwordError = fieldError(err, "password");
+      if (emailError) setError("email", { type: "server", message: emailError });
+      if (passwordError) setError("password", { type: "server", message: passwordError });
+      if (!emailError && !passwordError) {
+        toast.error(formatApiError(err, "Ошибка при изменении email"));
+      }
+      console.error(err);
+    }
+  };
+
+  return (
+    <div className="mt-10 pt-8 border-t border-gray-200">
+      <h2 className="text-2xl font-semibold mb-2">Сменить email</h2>
+      {user?.email && (
+        <p className="text-sm text-gray-500 mb-6">
+          Текущий email: <span className="text-[#333]">{user.email}</span>
+        </p>
+      )}
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+        <div>
+          <Label htmlFor="newEmail">Новый email</Label>
+          <Input
+            id="newEmail"
+            type="email"
+            autoComplete="email"
+            {...register("email")}
+            placeholder="alex@example.com"
+            className="mt-1.5"
+          />
+          {errors.email && <p className="text-sm text-red-500 mt-1">{errors.email.message}</p>}
+        </div>
+
+        <div>
+          <Label htmlFor="emailPassword">Текущий пароль</Label>
+          <Input
+            id="emailPassword"
+            type="password"
+            autoComplete="current-password"
+            {...register("password")}
+            placeholder="Введите текущий пароль"
+            className="mt-1.5"
+          />
+          {errors.password && <p className="text-sm text-red-500 mt-1">{errors.password.message}</p>}
+        </div>
+
+        <Button type="submit" disabled={isLoading} className="w-full md:w-auto">
+          {isLoading ? "Сохранение..." : "Сменить email"}
+        </Button>
+      </form>
+    </div>
+  );
+};
+
 const ChangePasswordSchema = z.object({
   currentPassword: z.string().min(1, "Введите текущий пароль"),
   newPassword: z.string().min(8, "Пароль должен содержать минимум 8 символов"),
@@ -525,8 +625,7 @@ type TypeChangePasswordSchema = z.infer<typeof ChangePasswordSchema>;
 
 // Компонент смены пароля
 const ChangePassword = () => {
-  const [changePassword, { isLoading: isChanging }] = useChangePasswordMutation();
-  const [checkPassword, { isLoading: isChecking }] = useCheckPasswordMutation();
+  const [changePassword, { isLoading: isPending }] = useChangePasswordMutation();
 
   const {
     register,
@@ -539,54 +638,26 @@ const ChangePassword = () => {
   });
 
   const onSubmit = async (data: TypeChangePasswordSchema) => {
-    // 1. Проверяем текущий пароль
+    // Текущий пароль проверяет сам /auth/change-password — отдельный
+    // check-password не нужен.
     try {
-      await checkPassword({ password: data.currentPassword }).unwrap();
-    } catch (checkErr: any) {
-      if (checkErr?.status === 400 || checkErr?.status === 401) {
-         setError("currentPassword", { type: "server", message: "Неверный текущий пароль" });
-      } else {
-         toast.error("Ошибка при проверке пароля");
-      }
-      console.error(checkErr);
-      return; // Прерываем выполнение
-    }
-
-    // 2. Если проверка успешна, меняем на новый пароль
-    try {
-      await changePassword({ password: data.newPassword }).unwrap();
+      await changePassword({
+        currentPassword: data.currentPassword,
+        password: data.newPassword,
+      }).unwrap();
       toast.success("Пароль успешно изменен");
       reset();
-    } catch (changeErr: any) {
-      if (changeErr?.data && typeof changeErr.data === 'object') {
-        let hasErrors = false;
-        Object.keys(changeErr.data).forEach((key) => {
-          const message = Array.isArray(changeErr.data[key]) ? changeErr.data[key][0] : changeErr.data[key];
-          if (key === 'detail' || key === 'non_field_errors') {
-            toast.error(message);
-            hasErrors = true;
-          } else if (key === 'password' || key === 'new_password') {
-            // Ошибка от changePassword относится к новому паролю
-            setError("newPassword", { type: "server", message });
-            hasErrors = true;
-          } else {
-            try {
-              setError(key as any, { type: "server", message });
-            } catch (e) {
-              toast.error(message);
-            }
-            hasErrors = true;
-          }
-        });
-        if (!hasErrors) toast.error("Ошибка при изменении пароля");
-      } else {
-         toast.error("Ошибка при изменении пароля");
+    } catch (changeErr) {
+      const currentError = fieldError(changeErr, "currentPassword");
+      const newError = fieldError(changeErr, "password");
+      if (currentError) setError("currentPassword", { type: "server", message: currentError });
+      if (newError) setError("newPassword", { type: "server", message: newError });
+      if (!currentError && !newError) {
+        toast.error(formatApiError(changeErr, "Ошибка при изменении пароля"));
       }
       console.error(changeErr);
     }
   };
-
-  const isPending = isChanging || isChecking;
 
   return (
     <div>

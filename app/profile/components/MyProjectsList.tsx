@@ -1,13 +1,28 @@
 "use client";
 
 import { toast } from "sonner";
-import { useApiProjectsListQuery } from "@/services/generatedApi";
+import {
+  useApiProjectsDestroyMutation,
+  useApiProjectsListQuery,
+} from "@/services/generatedApi";
+import { formatApiError } from "@/lib/formatApiError";
 import { MyContentRow } from "./MyContentRow";
 import { EmptyState } from "@/components/EmptyState";
 
 export function MyProjectsList() {
-  const { data, isLoading } = useApiProjectsListQuery({ mine: true });
+  const { data, isLoading, refetch } = useApiProjectsListQuery({ mine: true });
+  const [destroyProject] = useApiProjectsDestroyMutation();
   const projects = data?.results || [];
+
+  const handleDelete = async (id: number) => {
+    try {
+      await destroyProject({ id }).unwrap();
+      toast.success("Проект удалён");
+      refetch();
+    } catch (err) {
+      toast.error(formatApiError(err, "Не удалось удалить проект"));
+    }
+  };
 
   if (isLoading) {
     return <div className="text-center py-8 text-gray-500">Загрузка...</div>;
@@ -32,8 +47,10 @@ export function MyProjectsList() {
           title={project.title}
           createdAt={project.createdAt}
           status={project.moderationStatus}
+          moderationComment={project.moderationComment}
+          href={`/projects/${project.id}`}
           editHref={`/projects/${project.id}/edit`}
-          onDelete={() => { toast.error("Удаление проектов скоро будет доступно"); }}
+          onDelete={() => handleDelete(project.id)}
         />
       ))}
     </div>

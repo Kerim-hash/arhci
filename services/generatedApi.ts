@@ -23,6 +23,15 @@ const injectedRtkApi = api.injectEndpoints({
     >({
       query: (queryArg) => ({ url: `/api/articles/${queryArg.slug}/` }),
     }),
+    apiArticlesDestroy: build.mutation<
+      ApiArticlesDestroyApiResponse,
+      ApiArticlesDestroyApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/articles/${queryArg.slug}/`,
+        method: "DELETE",
+      }),
+    }),
     apiArticlesCreateCreate: build.mutation<
       ApiArticlesCreateCreateApiResponse,
       ApiArticlesCreateCreateApiArg
@@ -54,6 +63,15 @@ const injectedRtkApi = api.injectEndpoints({
       ApiCompetitionsRetrieveApiArg
     >({
       query: (queryArg) => ({ url: `/api/competitions/${queryArg.id}/` }),
+    }),
+    apiCompetitionsDestroy: build.mutation<
+      ApiCompetitionsDestroyApiResponse,
+      ApiCompetitionsDestroyApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/competitions/${queryArg.id}/`,
+        method: "DELETE",
+      }),
     }),
     apiCompetitionsViewsCreate: build.mutation<
       ApiCompetitionsViewsCreateApiResponse,
@@ -117,6 +135,15 @@ const injectedRtkApi = api.injectEndpoints({
     >({
       query: (queryArg) => ({ url: `/api/orders/${queryArg.id}/` }),
     }),
+    apiOrdersDestroy: build.mutation<
+      ApiOrdersDestroyApiResponse,
+      ApiOrdersDestroyApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/orders/${queryArg.id}/`,
+        method: "DELETE",
+      }),
+    }),
     apiOrdersRespondCreate: build.mutation<
       ApiOrdersRespondCreateApiResponse,
       ApiOrdersRespondCreateApiArg
@@ -124,6 +151,17 @@ const injectedRtkApi = api.injectEndpoints({
       query: (queryArg) => ({
         url: `/api/orders/${queryArg.id}/respond`,
         method: "POST",
+      }),
+    }),
+    apiOrdersResponsesList: build.query<
+      ApiOrdersResponsesListApiResponse,
+      ApiOrdersResponsesListApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/orders/${queryArg.id}/responses/`,
+        params: {
+          page: queryArg.page,
+        },
       }),
     }),
     apiOrdersCreateCreate: build.mutation<
@@ -134,6 +172,17 @@ const injectedRtkApi = api.injectEndpoints({
         url: `/api/orders/create/`,
         method: "POST",
         body: queryArg.orderCreate,
+      }),
+    }),
+    apiOrdersMyResponsesList: build.query<
+      ApiOrdersMyResponsesListApiResponse,
+      ApiOrdersMyResponsesListApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/orders/my-responses/`,
+        params: {
+          page: queryArg.page,
+        },
       }),
     }),
     apiProjectsList: build.query<
@@ -166,6 +215,15 @@ const injectedRtkApi = api.injectEndpoints({
         url: `/api/projects/${queryArg.id}/`,
         method: "PATCH",
         body: queryArg.patchedProjectUpdate,
+      }),
+    }),
+    apiProjectsDestroy: build.mutation<
+      ApiProjectsDestroyApiResponse,
+      ApiProjectsDestroyApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/projects/${queryArg.id}/`,
+        method: "DELETE",
       }),
     }),
     apiProjectsLikeCreate: build.mutation<
@@ -236,6 +294,15 @@ const injectedRtkApi = api.injectEndpoints({
     >({
       query: (queryArg) => ({ url: `/api/resumes/${queryArg.id}/` }),
     }),
+    apiResumesDestroy: build.mutation<
+      ApiResumesDestroyApiResponse,
+      ApiResumesDestroyApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/resumes/${queryArg.id}/`,
+        method: "DELETE",
+      }),
+    }),
     apiResumesCreateCreate: build.mutation<
       ApiResumesCreateCreateApiResponse,
       ApiResumesCreateCreateApiArg
@@ -291,9 +358,7 @@ const injectedRtkApi = api.injectEndpoints({
       query: (queryArg) => ({
         url: `/api/specialists/top/`,
         params: {
-          ordering: queryArg.ordering,
           page: queryArg.page,
-          search: queryArg.search,
         },
       }),
     }),
@@ -328,6 +393,15 @@ const injectedRtkApi = api.injectEndpoints({
     >({
       query: (queryArg) => ({ url: `/api/vacancies/${queryArg.id}/` }),
     }),
+    apiVacanciesDestroy: build.mutation<
+      ApiVacanciesDestroyApiResponse,
+      ApiVacanciesDestroyApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/vacancies/${queryArg.id}/`,
+        method: "DELETE",
+      }),
+    }),
     apiVacanciesRespondCreate: build.mutation<
       ApiVacanciesRespondCreateApiResponse,
       ApiVacanciesRespondCreateApiArg
@@ -335,6 +409,17 @@ const injectedRtkApi = api.injectEndpoints({
       query: (queryArg) => ({
         url: `/api/vacancies/${queryArg.id}/respond`,
         method: "POST",
+      }),
+    }),
+    apiVacanciesResponsesList: build.query<
+      ApiVacanciesResponsesListApiResponse,
+      ApiVacanciesResponsesListApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/vacancies/${queryArg.id}/responses/`,
+        params: {
+          page: queryArg.page,
+        },
       }),
     }),
     apiVacanciesSaveCreate: build.mutation<
@@ -353,9 +438,7 @@ const injectedRtkApi = api.injectEndpoints({
       query: (queryArg) => ({
         url: `/api/vacancies/${queryArg.id}/similar/`,
         params: {
-          ordering: queryArg.ordering,
           page: queryArg.page,
-          search: queryArg.search,
         },
       }),
     }),
@@ -367,6 +450,17 @@ const injectedRtkApi = api.injectEndpoints({
         url: `/api/vacancies/create/`,
         method: "POST",
         body: queryArg.vacancyCreate,
+      }),
+    }),
+    apiVacanciesMyResponsesList: build.query<
+      ApiVacanciesMyResponsesListApiResponse,
+      ApiVacanciesMyResponsesListApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/vacancies/my-responses/`,
+        params: {
+          page: queryArg.page,
+        },
       }),
     }),
     authChangePasswordCreate: build.mutation<
@@ -479,6 +573,10 @@ export type ApiArticlesRetrieveApiResponse =
 export type ApiArticlesRetrieveApiArg = {
   slug: string;
 };
+export type ApiArticlesDestroyApiResponse = unknown;
+export type ApiArticlesDestroyApiArg = {
+  slug: string;
+};
 export type ApiArticlesCreateCreateApiResponse =
   /** status 201  */ ArticleCreate;
 export type ApiArticlesCreateCreateApiArg = {
@@ -507,6 +605,10 @@ export type ApiCompetitionsListApiArg = {
 export type ApiCompetitionsRetrieveApiResponse =
   /** status 200  */ CompetitionDetailRead;
 export type ApiCompetitionsRetrieveApiArg = {
+  id: number;
+};
+export type ApiCompetitionsDestroyApiResponse = unknown;
+export type ApiCompetitionsDestroyApiArg = {
   id: number;
 };
 export type ApiCompetitionsViewsCreateApiResponse = unknown;
@@ -561,13 +663,31 @@ export type ApiOrdersRetrieveApiResponse = /** status 200  */ OrderDetailRead;
 export type ApiOrdersRetrieveApiArg = {
   id: number;
 };
+export type ApiOrdersDestroyApiResponse = unknown;
+export type ApiOrdersDestroyApiArg = {
+  id: number;
+};
 export type ApiOrdersRespondCreateApiResponse = unknown;
 export type ApiOrdersRespondCreateApiArg = {
   id: number;
 };
-export type ApiOrdersCreateCreateApiResponse = /** status 201  */ OrderCreate;
+export type ApiOrdersResponsesListApiResponse =
+  /** status 200  */ PaginatedOrderResponseDetailListRead;
+export type ApiOrdersResponsesListApiArg = {
+  id: number;
+  /** A page number within the paginated result set. */
+  page?: number;
+};
+export type ApiOrdersCreateCreateApiResponse =
+  /** status 201  */ OrderCreateRead;
 export type ApiOrdersCreateCreateApiArg = {
   orderCreate: OrderCreate;
+};
+export type ApiOrdersMyResponsesListApiResponse =
+  /** status 200  */ PaginatedMyOrderResponseListRead;
+export type ApiOrdersMyResponsesListApiArg = {
+  /** A page number within the paginated result set. */
+  page?: number;
 };
 export type ApiProjectsListApiResponse =
   /** status 200  */ PaginatedProjectListListRead;
@@ -600,6 +720,10 @@ export type ApiProjectsPartialUpdateApiArg = {
   id: number;
   patchedProjectUpdate: PatchedProjectUpdateWrite;
 };
+export type ApiProjectsDestroyApiResponse = unknown;
+export type ApiProjectsDestroyApiArg = {
+  id: number;
+};
 export type ApiProjectsLikeCreateApiResponse = unknown;
 export type ApiProjectsLikeCreateApiArg = {
   id: number;
@@ -609,7 +733,7 @@ export type ApiProjectsViewsCreateApiArg = {
   id: number;
 };
 export type ApiProjectsCreateCreateApiResponse =
-  /** status 201  */ ProjectCreate;
+  /** status 201  */ ProjectCreateRead;
 export type ApiProjectsCreateCreateApiArg = {
   projectCreate: ProjectCreateWrite;
 };
@@ -654,6 +778,10 @@ export type ApiResumesRetrieveApiResponse = /** status 200  */ ResumeDetailRead;
 export type ApiResumesRetrieveApiArg = {
   id: number;
 };
+export type ApiResumesDestroyApiResponse = unknown;
+export type ApiResumesDestroyApiArg = {
+  id: number;
+};
 export type ApiResumesCreateCreateApiResponse =
   /** status 201  */ ResumeCreateRead;
 export type ApiResumesCreateCreateApiArg = {
@@ -686,12 +814,8 @@ export type ApiSpecialistsRetrieveApiArg = {
 export type ApiSpecialistsTopListApiResponse =
   /** status 200  */ PaginatedSpecialistListListRead;
 export type ApiSpecialistsTopListApiArg = {
-  /** Which field to use when ordering the results. */
-  ordering?: string;
   /** A page number within the paginated result set. */
   page?: number;
-  /** A search term. */
-  search?: string;
 };
 export type ApiVacanciesListApiResponse =
   /** status 200  */ PaginatedVacancyListListRead;
@@ -727,9 +851,20 @@ export type ApiVacanciesRetrieveApiResponse =
 export type ApiVacanciesRetrieveApiArg = {
   id: number;
 };
+export type ApiVacanciesDestroyApiResponse = unknown;
+export type ApiVacanciesDestroyApiArg = {
+  id: number;
+};
 export type ApiVacanciesRespondCreateApiResponse = unknown;
 export type ApiVacanciesRespondCreateApiArg = {
   id: number;
+};
+export type ApiVacanciesResponsesListApiResponse =
+  /** status 200  */ PaginatedVacancyResponseDetailListRead;
+export type ApiVacanciesResponsesListApiArg = {
+  id: number;
+  /** A page number within the paginated result set. */
+  page?: number;
 };
 export type ApiVacanciesSaveCreateApiResponse = unknown;
 export type ApiVacanciesSaveCreateApiArg = {
@@ -739,17 +874,19 @@ export type ApiVacanciesSimilarListApiResponse =
   /** status 200  */ PaginatedVacancyListListRead;
 export type ApiVacanciesSimilarListApiArg = {
   id: number;
-  /** Which field to use when ordering the results. */
-  ordering?: string;
   /** A page number within the paginated result set. */
   page?: number;
-  /** A search term. */
-  search?: string;
 };
 export type ApiVacanciesCreateCreateApiResponse =
   /** status 201  */ VacancyCreateRead;
 export type ApiVacanciesCreateCreateApiArg = {
   vacancyCreate: VacancyCreate;
+};
+export type ApiVacanciesMyResponsesListApiResponse =
+  /** status 200  */ PaginatedMyVacancyResponseListRead;
+export type ApiVacanciesMyResponsesListApiArg = {
+  /** A page number within the paginated result set. */
+  page?: number;
 };
 export type AuthChangePasswordCreateApiResponse = unknown;
 export type AuthChangePasswordCreateApiArg = void;
@@ -928,10 +1065,6 @@ export type PaginatedCompetitionListListRead = {
   results: CompetitionListRead[];
 };
 export type CompetitionDetail = {
-  moderationStatus?: ModerationStatusEnum;
-  /** Причина отклонения. Её видит автор материала. */
-  moderationComment?: string;
-  moderatedAt?: string | null;
   slug: string;
   title: string;
   /** Фото-галерею или слайдер можно вставить кнопкой «Галерея» на панели редактора. Двойной клик по вставленному блоку открывает его на редактирование. */
@@ -957,15 +1090,12 @@ export type CompetitionDetail = {
   participantsCount?: number;
   isActive?: boolean;
   isFeatured?: boolean;
-  moderatedBy?: number | null;
-  createdBy?: number | null;
 };
 export type CompetitionDetailRead = {
   id: number;
-  moderationStatus?: ModerationStatusEnum;
+  moderationStatus: ModerationStatusEnum;
   /** Причина отклонения. Её видит автор материала. */
-  moderationComment?: string;
-  moderatedAt?: string | null;
+  moderationComment: string;
   slug: string;
   title: string;
   /** Фото-галерею или слайдер можно вставить кнопкой «Галерея» на панели редактора. Двойной клик по вставленному блоку открывает его на редактирование. */
@@ -993,8 +1123,6 @@ export type CompetitionDetailRead = {
   isFeatured?: boolean;
   createdAt: string;
   updatedAt: string;
-  moderatedBy?: number | null;
-  createdBy?: number | null;
 };
 export type CompetitionCreate = {
   title: string;
@@ -1109,7 +1237,7 @@ export type OrderListRead = {
   propertyType?: any;
   software?: any;
   createdByName: string;
-  responsesCount: string;
+  responsesCount: number;
   createdAt: string;
   moderationStatus: ModerationStatusEnum;
   /** Причина отклонения. Её видит автор материала. */
@@ -1150,6 +1278,39 @@ export type OrderDetailRead = {
   /** Причина отклонения. Её видит автор материала. */
   moderationComment: string;
 };
+export type OrderResponseDetail = {
+  message?: string;
+};
+export type ResponseAuthor = {
+  id: number;
+  email: string;
+  phone: string;
+};
+export type ResponseAuthorRead = {
+  id: number;
+  name: string;
+  email: string;
+  phone: string;
+  specialistSlug: string;
+};
+export type OrderResponseDetailRead = {
+  id: number;
+  message?: string;
+  createdAt: string;
+  user: ResponseAuthorRead;
+};
+export type PaginatedOrderResponseDetailList = {
+  count: number;
+  next?: string | null;
+  previous?: string | null;
+  results: OrderResponseDetail[];
+};
+export type PaginatedOrderResponseDetailListRead = {
+  count: number;
+  next?: string | null;
+  previous?: string | null;
+  results: OrderResponseDetailRead[];
+};
 export type OrderCreate = {
   title: string;
   budget?: number;
@@ -1157,6 +1318,38 @@ export type OrderCreate = {
   description: string;
   propertyType?: any;
   software?: any;
+};
+export type OrderCreateRead = {
+  id: number;
+  title: string;
+  budget?: number;
+  /** Фото-галерею или слайдер можно вставить кнопкой «Галерея» на панели редактора. Двойной клик по вставленному блоку открывает его на редактирование. */
+  description: string;
+  propertyType?: any;
+  software?: any;
+};
+export type MyOrderResponse = {
+  message?: string;
+};
+export type MyOrderResponseRead = {
+  id: number;
+  message?: string;
+  createdAt: string;
+  order: {
+    [key: string]: any;
+  };
+};
+export type PaginatedMyOrderResponseList = {
+  count: number;
+  next?: string | null;
+  previous?: string | null;
+  results: MyOrderResponse[];
+};
+export type PaginatedMyOrderResponseListRead = {
+  count: number;
+  next?: string | null;
+  previous?: string | null;
+  results: MyOrderResponseRead[];
 };
 export type ProjectList = {
   title: string;
@@ -1239,6 +1432,13 @@ export type PatchedProjectUpdateWrite = {
   previewImageId?: number | null;
 };
 export type ProjectCreate = {
+  title: string;
+  /** Фото-галерею или слайдер можно вставить кнопкой «Галерея» на панели редактора. Двойной клик по вставленному блоку открывает его на редактирование. */
+  description: string;
+  previewImage?: string | null;
+};
+export type ProjectCreateRead = {
+  id: number;
   title: string;
   /** Фото-галерею или слайдер можно вставить кнопкой «Галерея» на панели редактора. Двойной клик по вставленному блоку открывает его на редактирование. */
   description: string;
@@ -1546,6 +1746,7 @@ export type VacancyListRead = {
   viewsCount?: number;
   createdAt: string;
   isSaved: string;
+  responsesCount: number;
   moderationStatus: ModerationStatusEnum;
   /** Причина отклонения. Её видит автор материала. */
   moderationComment: string;
@@ -1641,13 +1842,33 @@ export type VacancyDetailRead = {
   /** Причина отклонения. Её видит автор материала. */
   moderationComment: string;
 };
+export type VacancyResponseDetail = {
+  message?: string;
+};
+export type VacancyResponseDetailRead = {
+  id: number;
+  message?: string;
+  createdAt: string;
+  user: ResponseAuthorRead;
+};
+export type PaginatedVacancyResponseDetailList = {
+  count: number;
+  next?: string | null;
+  previous?: string | null;
+  results: VacancyResponseDetail[];
+};
+export type PaginatedVacancyResponseDetailListRead = {
+  count: number;
+  next?: string | null;
+  previous?: string | null;
+  results: VacancyResponseDetailRead[];
+};
 export type VacancyCreate = {
   title: string;
   salaryFrom?: number;
   salaryTo?: number;
   currency?: string;
   experience?: string;
-  rating?: string;
   workTags?: any;
   /** Фото-галерею или слайдер можно вставить кнопкой «Галерея» на панели редактора. Двойной клик по вставленному блоку открывает его на редактирование. */
   description?: string;
@@ -1683,7 +1904,6 @@ export type VacancyCreateRead = {
   salaryTo?: number;
   currency?: string;
   experience?: string;
-  rating?: string;
   workTags?: any;
   /** Фото-галерею или слайдер можно вставить кнопкой «Галерея» на панели редактора. Двойной клик по вставленному блоку открывает его на редактирование. */
   description?: string;
@@ -1712,12 +1932,37 @@ export type VacancyCreateRead = {
   publisherPhone?: string;
   publisherEmail?: string;
 };
+export type MyVacancyResponse = {
+  message?: string;
+};
+export type MyVacancyResponseRead = {
+  id: number;
+  message?: string;
+  createdAt: string;
+  vacancy: {
+    [key: string]: any;
+  };
+};
+export type PaginatedMyVacancyResponseList = {
+  count: number;
+  next?: string | null;
+  previous?: string | null;
+  results: MyVacancyResponse[];
+};
+export type PaginatedMyVacancyResponseListRead = {
+  count: number;
+  next?: string | null;
+  previous?: string | null;
+  results: MyVacancyResponseRead[];
+};
 export const {
   useApiArticlesListQuery,
   useApiArticlesRetrieveQuery,
+  useApiArticlesDestroyMutation,
   useApiArticlesCreateCreateMutation,
   useApiCompetitionsListQuery,
   useApiCompetitionsRetrieveQuery,
+  useApiCompetitionsDestroyMutation,
   useApiCompetitionsViewsCreateMutation,
   useApiCompetitionsCreateCreateMutation,
   useApiCompetitionsSlugRetrieveQuery,
@@ -1725,17 +1970,22 @@ export const {
   useApiNewsRetrieveQuery,
   useApiOrdersListQuery,
   useApiOrdersRetrieveQuery,
+  useApiOrdersDestroyMutation,
   useApiOrdersRespondCreateMutation,
+  useApiOrdersResponsesListQuery,
   useApiOrdersCreateCreateMutation,
+  useApiOrdersMyResponsesListQuery,
   useApiProjectsListQuery,
   useApiProjectsRetrieveQuery,
   useApiProjectsPartialUpdateMutation,
+  useApiProjectsDestroyMutation,
   useApiProjectsLikeCreateMutation,
   useApiProjectsViewsCreateMutation,
   useApiProjectsCreateCreateMutation,
   useApiProjectsSpecialistListQuery,
   useApiResumesListQuery,
   useApiResumesRetrieveQuery,
+  useApiResumesDestroyMutation,
   useApiResumesCreateCreateMutation,
   useApiSpecialistsListQuery,
   useApiSpecialistsLikeCreateMutation,
@@ -1744,10 +1994,13 @@ export const {
   useApiSpecialistsTopListQuery,
   useApiVacanciesListQuery,
   useApiVacanciesRetrieveQuery,
+  useApiVacanciesDestroyMutation,
   useApiVacanciesRespondCreateMutation,
+  useApiVacanciesResponsesListQuery,
   useApiVacanciesSaveCreateMutation,
   useApiVacanciesSimilarListQuery,
   useApiVacanciesCreateCreateMutation,
+  useApiVacanciesMyResponsesListQuery,
   useAuthChangePasswordCreateMutation,
   useAuthCheckCodeCreateMutation,
   useAuthCheckEmailCreateMutation,

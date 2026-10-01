@@ -55,7 +55,6 @@ paths:
       tags:
       - api
       security:
-      - jwtAuth: []
       - {}
       responses:
         '200':
@@ -67,7 +66,7 @@ paths:
   /api/articles/{slug}/:
     get:
       operationId: apiArticlesRetrieve
-      description: GET /api/articles/:slug/ — Article detail by slug.
+      description: GET /api/articles/:slug/ — деталь по slug. DELETE — удаление автором.
       parameters:
       - in: path
         name: slug
@@ -76,9 +75,6 @@ paths:
         required: true
       tags:
       - api
-      security:
-      - jwtAuth: []
-      - {}
       responses:
         '200':
           content:
@@ -86,6 +82,20 @@ paths:
               schema:
                 $ref: '#/components/schemas/ArticleDetail'
           description: ''
+    delete:
+      operationId: apiArticlesDestroy
+      description: GET /api/articles/:slug/ — деталь по slug. DELETE — удаление автором.
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      responses:
+        '204':
+          description: No response body
   /api/articles/create/:
     post:
       operationId: apiArticlesCreateCreate
@@ -102,8 +112,6 @@ paths:
             schema:
               $ref: '#/components/schemas/ArticleCreate'
         required: true
-      security:
-      - jwtAuth: []
       responses:
         '201':
           content:
@@ -162,7 +170,6 @@ paths:
       tags:
       - api
       security:
-      - jwtAuth: []
       - {}
       responses:
         '200':
@@ -174,7 +181,7 @@ paths:
   /api/competitions/{id}/:
     get:
       operationId: apiCompetitionsRetrieve
-      description: GET /api/competitions/:id/ — Competition detail by ID.
+      description: GET /api/competitions/:id/ — деталь по id. DELETE — удаление автором.
       parameters:
       - in: path
         name: id
@@ -183,9 +190,6 @@ paths:
         required: true
       tags:
       - api
-      security:
-      - jwtAuth: []
-      - {}
       responses:
         '200':
           content:
@@ -193,6 +197,20 @@ paths:
               schema:
                 $ref: '#/components/schemas/CompetitionDetail'
           description: ''
+    delete:
+      operationId: apiCompetitionsDestroy
+      description: GET /api/competitions/:id/ — деталь по id. DELETE — удаление автором.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      responses:
+        '204':
+          description: No response body
   /api/competitions/{id}/views:
     post:
       operationId: apiCompetitionsViewsCreate
@@ -206,7 +224,6 @@ paths:
       tags:
       - api
       security:
-      - jwtAuth: []
       - {}
       responses:
         '200':
@@ -229,8 +246,6 @@ paths:
             schema:
               $ref: '#/components/schemas/CompetitionCreate'
         required: true
-      security:
-      - jwtAuth: []
       responses:
         '201':
           content:
@@ -251,7 +266,6 @@ paths:
       tags:
       - api
       security:
-      - jwtAuth: []
       - {}
       responses:
         '200':
@@ -286,7 +300,6 @@ paths:
       tags:
       - api
       security:
-      - jwtAuth: []
       - {}
       responses:
         '200':
@@ -308,7 +321,6 @@ paths:
       tags:
       - api
       security:
-      - jwtAuth: []
       - {}
       responses:
         '200':
@@ -368,7 +380,6 @@ paths:
       tags:
       - api
       security:
-      - jwtAuth: []
       - {}
       responses:
         '200':
@@ -389,9 +400,6 @@ paths:
         required: true
       tags:
       - api
-      security:
-      - jwtAuth: []
-      - {}
       responses:
         '200':
           content:
@@ -399,6 +407,20 @@ paths:
               schema:
                 $ref: '#/components/schemas/OrderDetail'
           description: ''
+    delete:
+      operationId: apiOrdersDestroy
+      description: GET /api/orders/:id/ — Order detail.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      responses:
+        '204':
+          description: No response body
   /api/orders/{id}/respond:
     post:
       operationId: apiOrdersRespondCreate
@@ -411,11 +433,34 @@ paths:
         required: true
       tags:
       - api
-      security:
-      - jwtAuth: []
       responses:
         '200':
           description: No response body
+  /api/orders/{id}/responses/:
+    get:
+      operationId: apiOrdersResponsesList
+      description: GET /api/orders/:id/responses/ — Отклики на мой заказ (только автору).
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - api
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedOrderResponseDetailList'
+          description: ''
   /api/orders/create/:
     post:
       operationId: apiOrdersCreateCreate
@@ -434,14 +479,32 @@ paths:
             schema:
               $ref: '#/components/schemas/OrderCreate'
         required: true
-      security:
-      - jwtAuth: []
       responses:
         '201':
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/OrderCreate'
+          description: ''
+  /api/orders/my-responses/:
+    get:
+      operationId: apiOrdersMyResponsesList
+      description: GET /api/orders/my-responses/ — Мои отклики на заказы.
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - api
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedMyOrderResponseList'
           description: ''
   /api/projects/:
     get:
@@ -494,7 +557,6 @@ paths:
       tags:
       - api
       security:
-      - jwtAuth: []
       - {}
       responses:
         '200':
@@ -506,7 +568,8 @@ paths:
   /api/projects/{id}/:
     get:
       operationId: apiProjectsRetrieve
-      description: GET /api/projects/:id/ — Project detail. PATCH — edit by the author.
+      description: GET /api/projects/:id/ — деталь. PATCH — правка, DELETE — удаление
+        автором.
       parameters:
       - in: path
         name: id
@@ -515,8 +578,6 @@ paths:
         required: true
       tags:
       - api
-      security:
-      - jwtAuth: []
       responses:
         '200':
           content:
@@ -526,7 +587,8 @@ paths:
           description: ''
     patch:
       operationId: apiProjectsPartialUpdate
-      description: GET /api/projects/:id/ — Project detail. PATCH — edit by the author.
+      description: GET /api/projects/:id/ — деталь. PATCH — правка, DELETE — удаление
+        автором.
       parameters:
       - in: path
         name: id
@@ -546,8 +608,6 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/PatchedProjectUpdate'
-      security:
-      - jwtAuth: []
       responses:
         '200':
           content:
@@ -555,6 +615,21 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProjectDetail'
           description: ''
+    delete:
+      operationId: apiProjectsDestroy
+      description: GET /api/projects/:id/ — деталь. PATCH — правка, DELETE — удаление
+        автором.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      responses:
+        '204':
+          description: No response body
   /api/projects/{id}/like/:
     post:
       operationId: apiProjectsLikeCreate
@@ -567,8 +642,6 @@ paths:
         required: true
       tags:
       - api
-      security:
-      - jwtAuth: []
       responses:
         '200':
           description: No response body
@@ -585,7 +658,6 @@ paths:
       tags:
       - api
       security:
-      - jwtAuth: []
       - {}
       responses:
         '200':
@@ -608,8 +680,6 @@ paths:
             schema:
               $ref: '#/components/schemas/ProjectCreate'
         required: true
-      security:
-      - jwtAuth: []
       responses:
         '201':
           content:
@@ -648,7 +718,6 @@ paths:
       tags:
       - api
       security:
-      - jwtAuth: []
       - {}
       responses:
         '200':
@@ -729,7 +798,6 @@ paths:
       tags:
       - api
       security:
-      - jwtAuth: []
       - {}
       responses:
         '200':
@@ -750,9 +818,6 @@ paths:
         required: true
       tags:
       - api
-      security:
-      - jwtAuth: []
-      - {}
       responses:
         '200':
           content:
@@ -760,6 +825,20 @@ paths:
               schema:
                 $ref: '#/components/schemas/ResumeDetail'
           description: ''
+    delete:
+      operationId: apiResumesDestroy
+      description: GET /api/resumes/:id/ — Resume detail.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      responses:
+        '204':
+          description: No response body
   /api/resumes/create/:
     post:
       operationId: apiResumesCreateCreate
@@ -778,8 +857,6 @@ paths:
             schema:
               $ref: '#/components/schemas/ResumeCreate'
         required: true
-      security:
-      - jwtAuth: []
       responses:
         '201':
           content:
@@ -817,7 +894,6 @@ paths:
       tags:
       - api
       security:
-      - jwtAuth: []
       - {}
       responses:
         '200':
@@ -838,8 +914,6 @@ paths:
         required: true
       tags:
       - api
-      security:
-      - jwtAuth: []
       responses:
         '200':
           description: No response body
@@ -856,7 +930,6 @@ paths:
       tags:
       - api
       security:
-      - jwtAuth: []
       - {}
       responses:
         '200':
@@ -874,7 +947,6 @@ paths:
       tags:
       - api
       security:
-      - jwtAuth: []
       - {}
       responses:
         '200':
@@ -891,28 +963,15 @@ paths:
 
         Рейтинг топа = лайки профиля + лайки всех одобренных проектов специалиста.
       parameters:
-      - name: ordering
-        required: false
-        in: query
-        description: Which field to use when ordering the results.
-        schema:
-          type: string
       - name: page
         required: false
         in: query
         description: A page number within the paginated result set.
         schema:
           type: integer
-      - name: search
-        required: false
-        in: query
-        description: A search term.
-        schema:
-          type: string
       tags:
       - api
       security:
-      - jwtAuth: []
       - {}
       responses:
         '200':
@@ -1008,7 +1067,6 @@ paths:
       tags:
       - api
       security:
-      - jwtAuth: []
       - {}
       responses:
         '200':
@@ -1029,9 +1087,6 @@ paths:
         required: true
       tags:
       - api
-      security:
-      - jwtAuth: []
-      - {}
       responses:
         '200':
           content:
@@ -1039,6 +1094,20 @@ paths:
               schema:
                 $ref: '#/components/schemas/VacancyDetail'
           description: ''
+    delete:
+      operationId: apiVacanciesDestroy
+      description: GET /api/vacancies/:id/ — Vacancy detail.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      responses:
+        '204':
+          description: No response body
   /api/vacancies/{id}/respond:
     post:
       operationId: apiVacanciesRespondCreate
@@ -1051,11 +1120,35 @@ paths:
         required: true
       tags:
       - api
-      security:
-      - jwtAuth: []
       responses:
         '200':
           description: No response body
+  /api/vacancies/{id}/responses/:
+    get:
+      operationId: apiVacanciesResponsesList
+      description: GET /api/vacancies/:id/responses/ — Отклики на мою вакансию (только
+        автору).
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - api
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedVacancyResponseDetailList'
+          description: ''
   /api/vacancies/{id}/save:
     post:
       operationId: apiVacanciesSaveCreate
@@ -1068,8 +1161,6 @@ paths:
         required: true
       tags:
       - api
-      security:
-      - jwtAuth: []
       responses:
         '200':
           description: No response body
@@ -1084,28 +1175,15 @@ paths:
         schema:
           type: integer
         required: true
-      - name: ordering
-        required: false
-        in: query
-        description: Which field to use when ordering the results.
-        schema:
-          type: string
       - name: page
         required: false
         in: query
         description: A page number within the paginated result set.
         schema:
           type: integer
-      - name: search
-        required: false
-        in: query
-        description: A search term.
-        schema:
-          type: string
       tags:
       - api
       security:
-      - jwtAuth: []
       - {}
       responses:
         '200':
@@ -1132,8 +1210,6 @@ paths:
             schema:
               $ref: '#/components/schemas/VacancyCreate'
         required: true
-      security:
-      - jwtAuth: []
       responses:
         '201':
           content:
@@ -1141,14 +1217,32 @@ paths:
               schema:
                 $ref: '#/components/schemas/VacancyCreate'
           description: ''
+  /api/vacancies/my-responses/:
+    get:
+      operationId: apiVacanciesMyResponsesList
+      description: GET /api/vacancies/my-responses/ — Мои отклики на вакансии.
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - api
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedMyVacancyResponseList'
+          description: ''
   /auth/change-password:
     post:
       operationId: authChangePasswordCreate
       description: POST /auth/change-password — Change password.
       tags:
       - auth
-      security:
-      - jwtAuth: []
       responses:
         '200':
           description: No response body
@@ -1159,7 +1253,6 @@ paths:
       tags:
       - auth
       security:
-      - jwtAuth: []
       - {}
       responses:
         '200':
@@ -1171,7 +1264,6 @@ paths:
       tags:
       - auth
       security:
-      - jwtAuth: []
       - {}
       responses:
         '200':
@@ -1182,8 +1274,6 @@ paths:
       description: POST /auth/check-password — Check current password.
       tags:
       - auth
-      security:
-      - jwtAuth: []
       responses:
         '200':
           description: No response body
@@ -1204,8 +1294,6 @@ paths:
       description: GET /auth/profile — Get current user profile.
       tags:
       - auth
-      security:
-      - jwtAuth: []
       responses:
         '200':
           description: No response body
@@ -1216,7 +1304,6 @@ paths:
       tags:
       - auth
       security:
-      - jwtAuth: []
       - {}
       responses:
         '200':
@@ -1239,7 +1326,6 @@ paths:
       tags:
       - auth
       security:
-      - jwtAuth: []
       - {}
       responses:
         '200':
@@ -1251,7 +1337,6 @@ paths:
       tags:
       - auth
       security:
-      - jwtAuth: []
       - {}
       responses:
         '200':
@@ -1262,8 +1347,6 @@ paths:
       description: POST /edit-profile — Edit user profile.
       tags:
       - edit-profile
-      security:
-      - jwtAuth: []
       responses:
         '200':
           description: No response body
@@ -1273,8 +1356,6 @@ paths:
       description: POST /events — Record an analytics event.
       tags:
       - events
-      security:
-      - jwtAuth: []
       responses:
         '200':
           description: No response body
@@ -1284,8 +1365,6 @@ paths:
       description: POST /users/change-email — Change email.
       tags:
       - users
-      security:
-      - jwtAuth: []
       responses:
         '200':
           description: No response body
@@ -1296,7 +1375,6 @@ paths:
       tags:
       - users
       security:
-      - jwtAuth: []
       - {}
       responses:
         '200':
@@ -1642,16 +1720,13 @@ components:
         moderationStatus:
           allOf:
           - $ref: '#/components/schemas/ModerationStatusEnum'
+          readOnly: true
           title: Статус модерации
         moderationComment:
           type: string
+          readOnly: true
           title: Комментарий модератора
           description: Причина отклонения. Её видит автор материала.
-        moderatedAt:
-          type: string
-          format: date-time
-          nullable: true
-          title: Проверено
         slug:
           type: string
           title: Ссылка (slug)
@@ -1756,18 +1831,12 @@ components:
           format: date-time
           readOnly: true
           title: Обновлено
-        moderatedBy:
-          type: integer
-          nullable: true
-          title: Модератор
-        createdBy:
-          type: integer
-          nullable: true
-          title: Создатель
       required:
       - createdAt
       - description
       - id
+      - moderationComment
+      - moderationStatus
       - slug
       - title
       - updatedAt
@@ -1882,6 +1951,52 @@ components:
         * `pending` - На модерации
         * `approved` - Одобрено
         * `rejected` - Отклонено
+    MyOrderResponse:
+      type: object
+      description: Мой отклик с краткой карточкой заказа.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        message:
+          type: string
+          title: Сопроводительное письмо / Отклик
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Дата отклика
+        order:
+          type: object
+          additionalProperties: {}
+          readOnly: true
+      required:
+      - createdAt
+      - id
+      - order
+    MyVacancyResponse:
+      type: object
+      description: Мой отклик с краткой карточкой вакансии.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        message:
+          type: string
+          title: Сопроводительное письмо / Отклик
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Дата отклика
+        vacancy:
+          type: object
+          additionalProperties: {}
+          readOnly: true
+      required:
+      - createdAt
+      - id
+      - vacancy
     NewsDetail:
       type: object
       properties:
@@ -1971,6 +2086,9 @@ components:
       type: object
       description: Create order serializer.
       properties:
+        id:
+          type: integer
+          readOnly: true
         title:
           type: string
           title: Название заказа / задачи
@@ -1978,7 +2096,7 @@ components:
         budget:
           type: integer
           maximum: 2147483647
-          minimum: -2147483648
+          minimum: 0
           title: Бюджет (сом)
         description:
           type: string
@@ -1992,6 +2110,7 @@ components:
           title: Требуемое ПО
       required:
       - description
+      - id
       - title
     OrderDetail:
       type: object
@@ -2073,7 +2192,7 @@ components:
           type: string
           readOnly: true
         responsesCount:
-          type: string
+          type: integer
           readOnly: true
         createdAt:
           type: string
@@ -2098,6 +2217,29 @@ components:
       - moderationStatus
       - responsesCount
       - title
+    OrderResponseDetail:
+      type: object
+      description: Отклик глазами автора заказа.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        message:
+          type: string
+          title: Сопроводительное письмо / Отклик
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Дата отклика
+        user:
+          allOf:
+          - $ref: '#/components/schemas/ResponseAuthor'
+          readOnly: true
+      required:
+      - createdAt
+      - id
+      - user
     PaginatedArticleListList:
       type: object
       required:
@@ -2144,6 +2286,52 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CompetitionList'
+    PaginatedMyOrderResponseList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/MyOrderResponse'
+    PaginatedMyVacancyResponseList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/MyVacancyResponse'
     PaginatedNewsListList:
       type: object
       required:
@@ -2190,6 +2378,29 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/OrderList'
+    PaginatedOrderResponseDetailList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderResponseDetail'
     PaginatedProjectListList:
       type: object
       required:
@@ -2282,6 +2493,29 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/VacancyList'
+    PaginatedVacancyResponseDetailList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/VacancyResponseDetail'
     PatchedProjectUpdate:
       type: object
       description: |-
@@ -2310,6 +2544,7 @@ components:
             type: string
             format: uri
           writeOnly: true
+          maxItems: 30
         removeImageIds:
           type: array
           items:
@@ -2324,6 +2559,9 @@ components:
       type: object
       description: Create project with multipart image upload.
       properties:
+        id:
+          type: integer
+          readOnly: true
         title:
           type: string
           title: Название
@@ -2345,6 +2583,7 @@ components:
             type: string
             format: uri
           writeOnly: true
+          maxItems: 30
         category:
           allOf:
           - $ref: '#/components/schemas/SpecialtyEnum'
@@ -2359,6 +2598,7 @@ components:
             * `visualizers` - Визуализаторы
       required:
       - description
+      - id
       - title
     ProjectDetail:
       type: object
@@ -2517,6 +2757,29 @@ components:
       - specialistName
       - specialistSlug
       - title
+    ResponseAuthor:
+      type: object
+      description: Кто откликнулся — для автора вакансии, чтобы связаться.
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+          readOnly: true
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        specialistSlug:
+          type: string
+          readOnly: true
+      required:
+      - email
+      - id
+      - name
+      - phone
+      - specialistSlug
     ResumeCreate:
       type: object
       description: Create resume with nested work experience.
@@ -2535,12 +2798,12 @@ components:
         salaryFrom:
           type: integer
           maximum: 2147483647
-          minimum: -2147483648
+          minimum: 0
           title: Желаемая зарплата от
         salaryTo:
           type: integer
           maximum: 2147483647
-          minimum: -2147483648
+          minimum: 0
           title: Желаемая зарплата до
         experience:
           type: string
@@ -3016,12 +3279,12 @@ components:
         salaryFrom:
           type: integer
           maximum: 2147483647
-          minimum: -2147483648
+          minimum: 0
           title: Зарплата от
         salaryTo:
           type: integer
           maximum: 2147483647
-          minimum: -2147483648
+          minimum: 0
           title: Зарплата до
         currency:
           type: string
@@ -3031,11 +3294,6 @@ components:
           type: string
           title: Опыт работы
           maxLength: 100
-        rating:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,2}(?:\.\d{0,1})?$
-          title: Рейтинг
         workTags:
           title: Теги работы
         description:
@@ -3398,6 +3656,9 @@ components:
         isSaved:
           type: string
           readOnly: true
+        responsesCount:
+          type: integer
+          readOnly: true
         moderationStatus:
           allOf:
           - $ref: '#/components/schemas/ModerationStatusEnum'
@@ -3415,7 +3676,31 @@ components:
       - isSaved
       - moderationComment
       - moderationStatus
+      - responsesCount
       - title
+    VacancyResponseDetail:
+      type: object
+      description: Отклик глазами автора вакансии.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        message:
+          type: string
+          title: Сопроводительное письмо / Отклик
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Дата отклика
+        user:
+          allOf:
+          - $ref: '#/components/schemas/ResponseAuthor'
+          readOnly: true
+      required:
+      - createdAt
+      - id
+      - user
     WorkExperience:
       type: object
       properties:
@@ -3448,8 +3733,3 @@ components:
       - endDate
       - id
       - startDate
-  securitySchemes:
-    jwtAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT

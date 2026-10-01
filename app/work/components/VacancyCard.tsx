@@ -2,102 +2,69 @@
 "use client";
 
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { useApiVacanciesRespondCreateMutation } from "@/services/generatedApi";
-import { useState } from "react";
-import { RoleGuard } from "@/components/RoleGuard";
-import { toast } from "sonner";
+import {
+  useApiVacanciesRespondCreateMutation,
+  type VacancyListRead,
+} from "@/services/generatedApi";
+import { formatSalaryRange } from "../model/format";
+import { RespondButton } from "./RespondButton";
 
 interface VacancyCardProps {
-  vacancy: any;
+  vacancy: VacancyListRead;
 }
 
 export function VacancyCard({ vacancy }: VacancyCardProps) {
   const [respondToVacancy] = useApiVacanciesRespondCreateMutation();
-  const [isResponding, setIsResponding] = useState(false);
-  const hasSalary = vacancy.salaryFrom > 0 || vacancy.salaryTo > 0;
-
-  const handleRespond = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsResponding(true);
-    try {
-      await respondToVacancy({ id: vacancy.id }).unwrap();
-      toast.success("Отклик отправлен");
-      console.log("Отклик отправлен");
-    } catch (error: any) {
-      if (error?.status === 401) {
-        toast.error("Авторизуйтесь, чтобы откликнуться");
-      } else {
-        toast.error("Ошибка при отправке отклика");
-      }
-      console.error("Ошибка при отклике", error);
-    } finally {
-      setIsResponding(false);
-    }
-  };
+  const salary = formatSalaryRange(vacancy.salaryFrom, vacancy.salaryTo, vacancy.currency);
 
   return (
     <Card className="border border-[#F1EFEF] transition-shadow">
       <CardContent className="p-5">
         <div className="flex justify-between items-start gap-4">
-          {/* Левая часть с контентом - обернута в Link */}
-          <Link href={`/work/vacancy/${vacancy.id}`} className="flex-1">
-            <div>
-              {/* Заголовок */}
-              <h3 className="text-[24px] font-bold mb-2 text-primary">
-                {vacancy.title}
-              </h3>
+          {/* Левая часть: ссылка на вакансию — только заголовок и описание */}
+          <Link href={`/work/vacancy/${vacancy.id}`} className="flex-1 block">
+            <h3 className="text-[24px] font-bold mb-2 text-primary">
+              {vacancy.title}
+            </h3>
 
-              {/* Зарплата и опыт в одной строке */}
-              <div className="flex items-center gap-3 mb-3 flex-wrap">
-                {hasSalary ? (
-                  <div className="flex items-center gap-1 text-primary font-medium">
-                    <span>
-                      {vacancy.salaryFrom.toLocaleString()} —{" "}
-                      {vacancy.salaryTo.toLocaleString()} {vacancy.currency || 'сом'}
-                    </span>
-                  </div>
-                ) : (
-                  <div className="text-gray-500 text-sm">
-                    Зарплата не указана
-                  </div>
-                )}
+            {/* Зарплата и опыт в одной строке */}
+            <div className="flex items-center gap-3 mb-3 flex-wrap">
+              {salary ? (
+                <div className="flex items-center gap-1 text-primary font-medium">
+                  <span>{salary}</span>
+                </div>
+              ) : (
+                <div className="text-gray-500 text-sm">Зарплата не указана</div>
+              )}
+              {vacancy.experience && (
                 <div className="flex bg-[#F5F5F7] px-2 py-1 rounded-[40px] items-center gap-1 text-[#949494]">
                   <span className="text-sm">Опыт: {vacancy.experience}</span>
                 </div>
-              </div>
-
-              {/* Компания */}
-              {vacancy.company && (
-                <div className="flex items-center gap-1 mb-2 text-primary">
-                  <span className="text-sm font-medium">{vacancy.company}</span>
-                </div>
-              )}
-
-              {/* Адрес */}
-              {vacancy.address && (
-                <div className="flex items-center gap-1 text-[#949494]">
-                  <span className="text-sm">{vacancy.address}</span>
-                </div>
               )}
             </div>
-               <RoleGuard role="specialist">
-                 <div onClick={(e) => e.stopPropagation()}>
-                   <Button
-                     className="mt-8 rounded-[40px] whitespace-nowrap"
-                     onClick={handleRespond}
-                     disabled={isResponding}
-                   >
-                     {isResponding ? "Отправка..." : "Откликнуться"}
-                   </Button>
-                 </div>
-               </RoleGuard>
-          </Link>
 
-        
+            {/* Компания */}
+            {vacancy.companyName && (
+              <div className="flex items-center gap-1 mb-2 text-primary">
+                <span className="text-sm font-medium">{vacancy.companyName}</span>
+              </div>
+            )}
+
+            {/* Адрес */}
+            {vacancy.companyAddress && (
+              <div className="flex items-center gap-1 text-[#949494]">
+                <span className="text-sm">{vacancy.companyAddress}</span>
+              </div>
+            )}
+          </Link>
         </div>
+
+        {/* Кнопка — сосед ссылки, а не её потомок, иначе <button> внутри <a> */}
+        <RespondButton
+          className="mt-6"
+          onRespond={() => respondToVacancy({ id: vacancy.id }).unwrap()}
+        />
       </CardContent>
     </Card>
   );

@@ -9,29 +9,34 @@ import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Plus, X } from "lucide-react";
-import { useAppSelector } from "@/app/store/hooks";
 import { useApiVacanciesCreateCreateMutation } from "@/services/generatedApi";
 import Link from "next/link";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import { SPECIALTIES, type SpecialtyId } from "@/lib/specialties";
-
-const EXPERIENCE_OPTIONS = [
-  "Без опыта",
-  "1-3 года",
-  "3-6 лет",
-  "6+ лет",
-  "По доверенности",
-];
+import { displayName } from "@/lib/displayName";
+import { formatApiError } from "@/lib/formatApiError";
+import {
+  EMPLOYMENT_OPTIONS,
+  SOFTWARE_OPTIONS,
+  VACANCY_EXPERIENCE_OPTIONS,
+} from "../../model/options";
 
 const CURRENCY_OPTIONS = ["сом", "₽", "USD", "EUR"];
 
-const EMPLOYMENT_OPTIONS = [
-  "Полная занятость",
-  "Частичная занятость",
-  "Проектная работа",
-  "Стажировка",
-];
+// Подписи полей для ошибок валидации с бэкенда
+const FIELD_LABELS: Record<string, string> = {
+  title: "Название вакансии",
+  specialization: "Специализация",
+  salaryFrom: "Зарплата от",
+  salaryTo: "Зарплата до",
+  companyName: "Название компании",
+  companyEmail: "Email компании",
+  publisherEmail: "Email для связи",
+  programs: "Программы",
+};
+
+const REQUIRED_MSG = "Это поле не может быть пустым.";
 
 const SCHEDULE_OPTIONS = [
   "Полный день",
@@ -49,10 +54,12 @@ export default function CreateVacancyPage() {
   const { user, isAuthenticated } = useAuth();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [titleError, setTitleError] = useState<string | null>(null);
 
   // States
   const [title, setTitle] = useState("");
   const [specialization, setSpecialization] = useState<SpecialtyId | "">("");
+  const [programs, setPrograms] = useState<string[]>([]);
   const [salaryFrom, setSalaryFrom] = useState("");
   const [salaryTo, setSalaryTo] = useState("");
   const [currency, setCurrency] = useState("сом");
@@ -81,13 +88,22 @@ export default function CreateVacancyPage() {
   const [requirements, setRequirements] = useState<string[]>([""]);
   const [benefits, setBenefits] = useState<string[]>([""]);
 
-  // Prefill publisher fields when user details load
+  // Предзаполняем компанию и контактное лицо, когда профиль загрузится.
+  // В профиле нет поля `name`, поэтому имя собирает displayName(); уже
+  // введённое вручную значение не перетираем.
   useEffect(() => {
-    if (user) {
-      setPublisherName(user.name || "");
-      setPublisherEmail(user.email || "");
-    }
+    if (!user) return;
+    const name = displayName(user);
+    setCompany((prev) => prev || name);
+    setPublisherName((prev) => prev || name);
+    setPublisherEmail((prev) => prev || user.email || "");
   }, [user]);
+
+  const toggleProgram = (value: string) => {
+    setPrograms((prev) =>
+      prev.includes(value) ? prev.filter((item) => item !== value) : [...prev, value]
+    );
+  };
 
   const handleListItemChange = (
     setter: React.Dispatch<React.SetStateAction<string[]>>,
@@ -109,7 +125,11 @@ export default function CreateVacancyPage() {
   };
 
   const handleSubmit = async () => {
-    if (!title.trim()) return;
+    if (!title.trim()) {
+      setTitleError(REQUIRED_MSG);
+      toast.error("Укажите название вакансии.");
+      return;
+    }
     if (!isAuthenticated || !user) {
       toast.error("Пожалуйста, войдите в систему, чтобы опубликовать вакансию.");
       return;
@@ -119,8 +139,9 @@ export default function CreateVacancyPage() {
     try {
       await createVacancy({
         vacancyCreate: {
-          title,
+          title: title.trim(),
           specialization: specialization || undefined,
+          programs,
           salaryFrom: Number(salaryFrom) || undefined,
           salaryTo: Number(salaryTo) || undefined,
           currency,
@@ -134,7 +155,7 @@ export default function CreateVacancyPage() {
           schedule,
           workingHours: workingHours,
           workFormat: workFormat,
-          companyName: company || user?.name || "",
+          companyName: company.trim() || displayName(user),
           companyAddress: address,
           companyWebsite: companyWebsite,
           companyPhone: companyPhone,
@@ -146,23 +167,11 @@ export default function CreateVacancyPage() {
           publisherEmail: publisherEmail,
         },
       }).unwrap();
-      toast.success("Вакансия успешно опубликована!");
-      router.push("/work");
-    } catch (error: any) {
+      toast.success("Вакансия отправлена на модерацию");
+      router.push("/profile");
+    } catch (error) {
       console.error("Ошибка создания вакансии:", error);
-      let errMsg = "Не удалось опубликовать вакансию.";
-      if (error?.data) {
-        if (typeof error.data === "string") errMsg = error.data;
-        else if (error.data.detail) errMsg = error.data.detail;
-        else if (error.data.message) errMsg = error.data.message;
-        else {
-          const fieldErrors = Object.values(error.data).flat();
-          if (fieldErrors.length > 0 && typeof fieldErrors[0] === "string") {
-            errMsg = fieldErrors.join(", ");
-          }
-        }
-      }
-      toast.error(errMsg);
+      toast.error(formatApiError(error, "Не удалось отправить вакансию.", FIELD_LABELS));
     } finally {
       setIsSubmitting(false);
     }
@@ -194,9 +203,14 @@ export default function CreateVacancyPage() {
             </label>
             <Input
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={(e) => {
+                setTitle(e.target.value);
+                setTitleError(null);
+              }}
               placeholder="Ведущий архитектор (Lead Architect)"
+              className={titleError ? "border-red-500 focus-visible:ring-red-500" : ""}
             />
+            {titleError && <p className="text-sm text-red-500 mt-1">{titleError}</p>}
           </div>
           {/* По специализации вакансию находят через фильтр в разделе «Работа» */}
           <div className="mt-4">
@@ -214,6 +228,24 @@ export default function CreateVacancyPage() {
                   }
                 >
                   {spec.plural}
+                </Badge>
+              ))}
+            </div>
+          </div>
+          {/* По программам вакансию тоже находят через фильтр */}
+          <div className="mt-4">
+            <label className="text-sm font-medium text-[#333] mb-2 block">
+              Программы / ПО
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {SOFTWARE_OPTIONS.map((program) => (
+                <Badge
+                  key={program}
+                  variant={programs.includes(program) ? "default" : "outline"}
+                  className="cursor-pointer text-sm py-1.5 px-4"
+                  onClick={() => toggleProgram(program)}
+                >
+                  {program}
                 </Badge>
               ))}
             </div>
@@ -276,7 +308,7 @@ export default function CreateVacancyPage() {
           <h2 className="text-lg font-semibold mb-4">Требуемый опыт</h2>
           <Separator className="mb-4" />
           <div className="flex flex-wrap gap-2">
-            {EXPERIENCE_OPTIONS.map((exp) => (
+            {VACANCY_EXPERIENCE_OPTIONS.map((exp) => (
               <Badge
                 key={exp}
                 variant={experience === exp ? "default" : "outline"}
@@ -621,9 +653,9 @@ export default function CreateVacancyPage() {
           <Button
             className="rounded-[40px] w-full sm:w-auto"
             onClick={handleSubmit}
-            disabled={!title.trim() || isSubmitting}
+            disabled={isSubmitting}
           >
-            {isSubmitting ? "Создание..." : "Опубликовать вакансию"}
+            {isSubmitting ? "Отправка..." : "Отправить на модерацию"}
           </Button>
         </div>
       </div>

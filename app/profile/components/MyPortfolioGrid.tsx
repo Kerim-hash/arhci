@@ -1,16 +1,43 @@
 "use client";
 
 import Link from "next/link";
-import { Pencil, Plus } from "lucide-react";
-import { useApiProjectsListQuery } from "@/services/generatedApi";
+import { Pencil, Plus, Trash2 } from "lucide-react";
+import { toast } from "sonner";
+import {
+  useApiProjectsDestroyMutation,
+  useApiProjectsListQuery,
+} from "@/services/generatedApi";
 import ProjectCard from "@/app/projects/components/ProjectCard";
 import { EmptyState } from "@/components/EmptyState";
 import { ModerationStatusBadge } from "@/components/ModerationStatusBadge";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { formatApiError } from "@/lib/formatApiError";
 
 export function MyPortfolioGrid() {
   const { data, isLoading, isError, refetch } = useApiProjectsListQuery({ mine: true });
+  const [destroyProject, { isLoading: isDeleting }] = useApiProjectsDestroyMutation();
   const projects = data?.results || [];
+
+  const handleDelete = async (id: number) => {
+    try {
+      await destroyProject({ id }).unwrap();
+      toast.success("Проект удалён");
+      refetch();
+    } catch (err) {
+      toast.error(formatApiError(err, "Не удалось удалить проект"));
+    }
+  };
 
   if (isLoading) {
     return <div className="text-center py-8 text-gray-500">Загрузка...</div>;
@@ -45,13 +72,45 @@ export function MyPortfolioGrid() {
           <ProjectCard project={project} />
           <div className="flex items-center justify-between gap-2">
             <ModerationStatusBadge status={project.moderationStatus} />
-            <Link
-              href={`/projects/${project.id}/edit`}
-              className="inline-flex items-center gap-1 text-sm text-[#333] hover:underline"
-            >
-              <Pencil className="w-3.5 h-3.5" />
-              Редактировать
-            </Link>
+            <div className="flex items-center gap-3">
+              <Link
+                href={`/projects/${project.id}/edit`}
+                className="inline-flex items-center gap-1 text-sm text-[#333] hover:underline"
+              >
+                <Pencil className="w-3.5 h-3.5" />
+                Редактировать
+              </Link>
+
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-1 text-sm text-red-500 hover:underline cursor-pointer"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    Удалить
+                  </button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Удалить проект?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      «{project.title}» будет удалён без возможности восстановления.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Отмена</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={() => handleDelete(project.id)}
+                      disabled={isDeleting}
+                      className="bg-red-500 hover:bg-red-600"
+                    >
+                      {isDeleting ? "Удаление..." : "Удалить"}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
           </div>
           {project.moderationStatus === "rejected" && project.moderationComment && (
             <p className="text-xs text-red-600">Причина: {project.moderationComment}</p>

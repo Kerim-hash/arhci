@@ -5,7 +5,9 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { LayoutGrid, MessageSquareText, FileText } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
 import { useGetProfileQuery } from "@/app/store/features/authApi";
+import { tokenStorage } from "@/hooks/storage";
 import { ProfileSidebar } from "./components/ProfileSidebar";
 import { MyPortfolioGrid } from "./components/MyPortfolioGrid";
 import { MyOrdersTab } from "./components/MyOrdersTab";
@@ -18,15 +20,16 @@ type TabType = "portfolio" | "orders" | "responses" | "resume" | "articles" | "c
 
 const Profile = () => {
   const router = useRouter();
-  const { data: user, isLoading, isError } = useGetProfileQuery();
+  const { data: user, isLoading, isError, error, refetch } = useGetProfileQuery();
   const [activeTab, setActiveTab] = useState<TabType>("portfolio");
+  // На логин уводим только при 401: 500 или сетевой сбой — не повод терять сессию.
+  const isUnauthorized = isError && !!error && "status" in error && error.status === 401;
 
   useEffect(() => {
-    const token = typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
-    if (!token || isError) {
+    if (!tokenStorage.getAccessToken() || isUnauthorized) {
       router.push("/auth/login");
     }
-  }, [isError, router]);
+  }, [isUnauthorized, router]);
 
   if (isLoading) {
     return (
@@ -36,8 +39,19 @@ const Profile = () => {
     );
   }
 
-  if (isError || (typeof window !== "undefined" && !localStorage.getItem("access_token"))) {
+  if (isUnauthorized || !tokenStorage.getAccessToken()) {
     return null;
+  }
+
+  if (isError) {
+    return (
+      <div className="container mx-auto px-4 py-8 max-w-6xl text-center text-gray-500 min-h-[50vh] flex flex-col items-center justify-center">
+        <p>Не удалось загрузить профиль.</p>
+        <Button variant="outline" className="mt-4 rounded-[40px]" onClick={() => refetch()}>
+          Повторить
+        </Button>
+      </div>
+    );
   }
 
   return (

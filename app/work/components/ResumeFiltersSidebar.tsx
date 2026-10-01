@@ -17,27 +17,18 @@ import {
   resetFilters,
   updateFilters,
 } from "@/app/store/features/resumesSlice";
+import { EXPERIENCE_OPTIONS, REGIONS } from "../model/options";
 
+const REGION_FILTER_OPTIONS = [{ value: "all", label: "Все" }, ...REGIONS];
+
+// Бэкенд фильтрует резюме только по специализации, зарплате «от»,
+// опыту и региону — остальные контролы здесь не нужны.
 export function ResumeFiltersSidebar() {
   const dispatch = useAppDispatch();
   const { filters } = useAppSelector((state) => state.resumes);
 
   // В фильтре хранятся ключи категорий — их и ждёт бэкенд
   const specializations = SPECIALTIES;
-  const softwareList = [
-    "ArchiCAD",
-    "AutoCAD",
-    "Revit",
-    "3ds Max + Corona",
-    "SketchUp",
-  ];
-  const experienceList = ["1-3 года", "3-6 лет", "6+ лет"];
-  const employmentTypes = ["Полный день (В штат)", "Фриланс", "Проектно"];
-  const regions = [
-    { value: "all", label: "Все" },
-    { value: "bishkek", label: "Бишкек" },
-    { value: "osh", label: "Ош" },
-  ];
 
   return (
     <div className="space-y-4">
@@ -55,14 +46,7 @@ export function ResumeFiltersSidebar() {
       <Accordion
         type="multiple"
         className="space-y-2"
-        defaultValue={[
-          "spec",
-          "income",
-          "software",
-          "experience",
-          "employment",
-          "region",
-        ]}
+        defaultValue={["spec", "income", "experience", "region"]}
       >
         {/* Специализация */}
         <AccordionItem value="spec" className="border rounded-lg px-4">
@@ -90,72 +74,21 @@ export function ResumeFiltersSidebar() {
         <AccordionItem value="income" className="border rounded-lg px-4">
           <AccordionTrigger>Уровень дохода</AccordionTrigger>
           <AccordionContent className="space-y-3">
-            <div className="flex gap-2">
-              <Input
-                placeholder="От"
-                type="number"
-                value={filters.incomeFrom}
-                onChange={(e) =>
-                  dispatch(updateFilters({ incomeFrom: e.target.value }))
-                }
-              />
-              <Input
-                placeholder="До"
-                type="number"
-                value={filters.incomeTo}
-                onChange={(e) =>
-                  dispatch(updateFilters({ incomeTo: e.target.value }))
-                }
-              />
-            </div>
+            <Input
+              placeholder="От"
+              type="number"
+              value={filters.incomeFrom}
+              onChange={(e) =>
+                dispatch(updateFilters({ incomeFrom: e.target.value }))
+              }
+            />
             <Button
               variant="outline"
               size="sm"
-              onClick={() =>
-                dispatch(updateFilters({ incomeFrom: "", incomeTo: "" }))
-              }
+              onClick={() => dispatch(updateFilters({ incomeFrom: "" }))}
             >
               Сбросить
             </Button>
-          </AccordionContent>
-        </AccordionItem>
-
-        {/* Указан доход */}
-        <AccordionItem value="hasIncome" className="border rounded-lg px-4">
-          <AccordionTrigger>Указан доход</AccordionTrigger>
-          <AccordionContent>
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="resume-hasIncome"
-                checked={filters.hasIncome}
-                onCheckedChange={(checked) =>
-                  dispatch(updateFilters({ hasIncome: !!checked }))
-                }
-              />
-              <Label htmlFor="resume-hasIncome">Только с указанным доходом</Label>
-            </div>
-          </AccordionContent>
-        </AccordionItem>
-
-        {/* Программы */}
-        <AccordionItem value="software" className="border rounded-lg px-4">
-          <AccordionTrigger>Программы</AccordionTrigger>
-          <AccordionContent className="space-y-2">
-            {softwareList.map((software) => (
-              <div key={software} className="flex items-center space-x-2">
-                <Checkbox
-                  id={`resume-${software}`}
-                  checked={filters.software.includes(software)}
-                  onCheckedChange={(checked) => {
-                    const newSoftware = checked
-                      ? [...filters.software, software]
-                      : filters.software.filter((s) => s !== software);
-                    dispatch(updateFilters({ software: newSoftware }));
-                  }}
-                />
-                <Label htmlFor={`resume-${software}`}>{software}</Label>
-              </div>
-            ))}
           </AccordionContent>
         </AccordionItem>
 
@@ -163,7 +96,7 @@ export function ResumeFiltersSidebar() {
         <AccordionItem value="experience" className="border rounded-lg px-4">
           <AccordionTrigger>Опыт</AccordionTrigger>
           <AccordionContent className="space-y-2">
-            {experienceList.map((exp) => (
+            {EXPERIENCE_OPTIONS.map((exp) => (
               <div key={exp} className="flex items-center space-x-2">
                 <Checkbox
                   id={`resume-${exp}`}
@@ -179,44 +112,26 @@ export function ResumeFiltersSidebar() {
           </AccordionContent>
         </AccordionItem>
 
-        {/* Тип занятости */}
-        <AccordionItem value="employment" className="border rounded-lg px-4">
-          <AccordionTrigger>Тип занятости</AccordionTrigger>
-          <AccordionContent className="space-y-2">
-            {employmentTypes.map((type) => (
-              <div key={type} className="flex items-center space-x-2">
-                <Checkbox
-                  id={`resume-${type}`}
-                  checked={filters.employmentType.includes(type)}
-                  onCheckedChange={(checked) => {
-                    const newTypes = checked
-                      ? [...filters.employmentType, type]
-                      : filters.employmentType.filter((t) => t !== type);
-                    dispatch(updateFilters({ employmentType: newTypes }));
-                  }}
-                />
-                <Label htmlFor={`resume-${type}`}>{type}</Label>
-              </div>
-            ))}
-          </AccordionContent>
-        </AccordionItem>
-
         {/* Регион */}
         <AccordionItem value="region" className="border rounded-lg px-4">
           <AccordionTrigger>Регион</AccordionTrigger>
           <AccordionContent>
             <div className="space-y-2">
-              {regions.map((region) => (
+              {REGION_FILTER_OPTIONS.map((region) => (
                 <div key={region.value} className="flex items-center space-x-2">
                   <Checkbox
-                    id={`resume-${region.value}`}
-                    checked={filters.region === region.value}
+                    id={`resume-region-${region.value}`}
+                    checked={
+                      region.value === "all"
+                        ? !filters.region || filters.region === "all"
+                        : filters.region === region.value
+                    }
                     onCheckedChange={(checked) => {
                       if (checked)
                         dispatch(updateFilters({ region: region.value }));
                     }}
                   />
-                  <Label htmlFor={`resume-${region.value}`}>{region.label}</Label>
+                  <Label htmlFor={`resume-region-${region.value}`}>{region.label}</Label>
                 </div>
               ))}
             </div>

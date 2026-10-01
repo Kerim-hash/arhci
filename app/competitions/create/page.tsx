@@ -10,12 +10,14 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Plus, X, ImageIcon } from "lucide-react";
 import { useAppSelector } from "@/app/store/hooks";
+import { useAuth } from "@/hooks/use-auth";
 import {
   useApiCompetitionsCreateCreateMutation,
   type CompetitionCreate,
 } from "@/services/generatedApi";
 import { formatApiError } from "@/lib/formatApiError";
 import Link from "next/link";
+import { toast } from "sonner";
 
 const OPEN_FOR_OPTIONS = [
   "Профессионалы",
@@ -48,6 +50,7 @@ export default function CreateCompetitionPage() {
   const router = useRouter();
   const [createCompetition] = useApiCompetitionsCreateCreateMutation();
   const user = useAppSelector((state) => state.authSlice.user);
+  const { loading: isAuthLoading } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -158,7 +161,8 @@ export default function CreateCompetitionPage() {
       await createCompetition({
         competitionCreate: formData as unknown as CompetitionCreate,
       }).unwrap();
-      router.push("/work");
+      toast.success("Конкурс отправлен на модерацию");
+      router.push("/profile");
     } catch (err) {
       console.error("Ошибка создания конкурса:", err);
       setError(formatApiError(err, "Не удалось создать конкурс. Попробуйте ещё раз.", FIELD_LABELS));
@@ -210,6 +214,40 @@ export default function CreateCompetitionPage() {
       </button>
     </div>
   );
+
+  // Профиль подтягивается после загрузки страницы — не пугаем залогиненного
+  // пользователя сообщением о входе, пока запрос ещё идёт.
+  if (!user && isAuthLoading) {
+    return (
+      <section className="container mx-auto relative px-4 sm:px-6 py-8 max-w-[800px]">
+        <div className="text-center py-12 text-[#666666]">Загрузка...</div>
+      </section>
+    );
+  }
+
+  // Без аккаунта конкурс не создать: раньше форма просто молча не отправлялась.
+  if (!user) {
+    return (
+      <section className="container mx-auto relative px-4 sm:px-6 py-8 max-w-[800px]">
+        <div className="text-center py-12 max-w-md mx-auto">
+          <h1 className="text-xl font-semibold mb-2">Нужно войти в аккаунт</h1>
+          <p className="text-[#666666] mb-6">
+            Создавать конкурсы могут только авторизованные пользователи.
+          </p>
+          <div className="flex justify-center gap-3">
+            <Link href="/work">
+              <Button variant="outline" className="rounded-[40px]">
+                К разделу «Работа»
+              </Button>
+            </Link>
+            <Link href="/auth/login">
+              <Button className="rounded-[40px]">Войти</Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="container mx-auto relative px-4 sm:px-6 py-8 max-w-[800px]">

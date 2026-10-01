@@ -118,7 +118,7 @@ export default function LoginPage() {
     <div className="flex flex-col items-center w-full max-w-md mx-auto px-4">
       <Image src="/logo.png" width={74} height={85} alt="Logotype" />
 
-      <h1 className="mt-8 mx-auto font-semibold text-[20px] text-center whitespace-nowrap">
+      <h1 className="mt-8 mx-auto font-semibold text-[20px] text-center">
         Добро пожаловать в сообщество архитекторов
       </h1>
 
@@ -251,13 +251,14 @@ export default function LoginPage() {
           </div>
 
           <div className="flex flex-col gap-4">
+            {/* Для компании этот шаг сразу отправляет регистрацию — блокируем повторный клик. */}
             <Button
               type="submit"
               size="lg"
               className="w-full"
-              disabled={!userType}
+              disabled={!userType || isLoading}
             >
-              Продолжить
+              {isLoading ? "Загрузка..." : "Продолжить"}
             </Button>
 
             <Button

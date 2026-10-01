@@ -1,7 +1,6 @@
 // components/ArticleWithLocalQuery.tsx
 "use client";
 
-import { Badge } from "@/components/ui/badge";
 import { stripHtml } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -12,7 +11,7 @@ import { Eye } from "lucide-react";
 import {
   QueryClient,
   QueryClientProvider,
-  useQuery,
+  useInfiniteQuery,
 } from "@tanstack/react-query";
 import axios from "axios";
 import { API_BASE_URL } from "@/lib/api";
@@ -36,18 +35,31 @@ interface ApiResponse {
   results: ArticleType[];
 }
 
-const fetchArticles = async (): Promise<ArticleType[]> => {
-  const { data } = await axios.get<ApiResponse>(
+const fetchArticles = async (page: number): Promise<ApiResponse> => {
+  const { data } = await axios.get<ApiResponse | ArticleType[]>(
     `${API_BASE_URL}/api/articles/`,
+    { params: { page } },
   );
 
   // Проверяем, является ли ответ пагинированным (есть поле results)
   if (data && typeof data === "object" && "results" in data) {
-    return data.results;
+    return data;
   }
 
-  // Если это просто массив
-  return data as ArticleType[];
+  // Если это просто массив — страница одна
+  const results = data as ArticleType[];
+  return { count: results.length, next: null, previous: null, results };
+};
+
+// Номер следующей страницы из ссылки `next`, которую отдаёт DRF
+const pageFromNext = (next: string | null): number | undefined => {
+  if (!next) return undefined;
+  try {
+    const page = Number(new URL(next, API_BASE_URL).searchParams.get("page"));
+    return Number.isInteger(page) && page > 1 ? page : undefined;
+  } catch {
+    return undefined;
+  }
 };
 
 // Создаем локальный queryClient
@@ -63,14 +75,20 @@ const queryClient = new QueryClient({
 // Основной компонент с логикой
 function ArticleContent() {
   const {
-    data: articles,
+    data,
     isLoading,
     error,
     refetch,
-  } = useQuery({
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
     queryKey: ["articles"],
-    queryFn: fetchArticles,
+    queryFn: ({ pageParam }) => fetchArticles(pageParam),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => pageFromNext(lastPage.next),
   });
+  const articles = data?.pages.flatMap((page) => page.results) ?? [];
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return "";
@@ -81,11 +99,6 @@ function ArticleContent() {
       month: "long",
       day: "numeric",
     });
-  };
-
-  const getCategory = (article: ArticleType) => {
-    const categories = ["Личности", "Архитектура", "Дизайн", "Искусство"];
-    return categories[article.id % categories.length];
   };
 
   if (isLoading) {
@@ -125,83 +138,90 @@ function ArticleContent() {
         </div>
       </div>
 
-      {!articles || articles.length === 0 ? (
+      {articles.length === 0 ? (
         <div className="text-center py-12">
           <p className="text-gray-500 text-lg">Статьи пока не добавлены</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-          {articles.map((article) => {
-            const previewImg = article.previewImage || article.preview_image;
-            const shortDesc = article.shortDescription || article.short_description;
-            const createdAtDate = article.createdAt || article.created_at;
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+            {articles.map((article) => {
+              const previewImg = article.previewImage || article.preview_image;
+              const shortDesc = article.shortDescription || article.short_description;
+              const createdAtDate = article.createdAt || article.created_at;
 
-            return (
-              <Card key={article.id} className="overflow-hidden flex flex-col p-0 gap-0">
-                <Link
-                  href={`/articles/${article.slug}`}
-                  className="relative block aspect-video md:aspect-[2/5] overflow-hidden md:max-h-[320px] w-full bg-gray-100 group"
-                >
-                  {previewImg ? (
-                    <Image
-                      src={previewImg}
-                      alt={article.title}
-                      fill
-                      className="object-cover w-full transition-transform duration-300 group-hover:scale-105"
-                      sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.src = "/placeholder-image.jpg";
-                      }}
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-gray-200">
-                      <span className="text-gray-400">Нет изображения</span>
-                    </div>
-                  )}
-
-                  <Badge
-                    variant="secondary"
-                    className="absolute bottom-3 right-3 text-[16px] px-7 z-10"
+              return (
+                <Card key={article.id} className="overflow-hidden flex flex-col p-0 gap-0">
+                  <Link
+                    href={`/articles/${article.slug}`}
+                    className="relative block aspect-video md:aspect-[2/5] overflow-hidden md:max-h-[320px] w-full bg-gray-100 group"
                   >
-                    {getCategory(article)}
-                  </Badge>
-                </Link>
-
-                <div className="p-4 md:p-6 flex-1">
-                  <h2 className="text-lg sm:text-xl md:text-[32px] font-medium leading-tight mb-3 line-clamp-2">
-                    <Link href={`/articles/${article.slug}`} className="hover:text-blue-600 hover:underline transition-colors">
-                      {article.title}
-                    </Link>
-                  </h2>
-
-                  <p className="text-sm md:text-[16px] text-[#6D6D6D] leading-relaxed line-clamp-3 md:line-clamp-4 mb-4">
-                    {stripHtml(shortDesc || "") || "Описание отсутствует"}
-                  </p>
-
-                  <div className="flex items-center justify-between gap-3 mb-2">
-                    {createdAtDate && (
-                      <p className="text-xs text-gray-400">
-                        {formatDate(createdAtDate)}
-                      </p>
+                    {previewImg ? (
+                      <Image
+                        src={previewImg}
+                        alt={article.title}
+                        fill
+                        className="object-cover w-full transition-transform duration-300 group-hover:scale-105"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.src = "/placeholder-architect.png";
+                        }}
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                        <span className="text-gray-400">Нет изображения</span>
+                      </div>
                     )}
-                    <div className="flex items-center gap-1 text-xs text-gray-400">
-                      <Eye className="w-3.5 h-3.5" />
-                      <span>{article.views || 0}</span>
+                  </Link>
+
+                  <div className="p-4 md:p-6 flex-1">
+                    <h2 className="text-lg sm:text-xl md:text-[32px] font-medium leading-tight mb-3 line-clamp-2">
+                      <Link href={`/articles/${article.slug}`} className="hover:text-blue-600 hover:underline transition-colors">
+                        {article.title}
+                      </Link>
+                    </h2>
+
+                    <p className="text-sm md:text-[16px] text-[#6D6D6D] leading-relaxed line-clamp-3 md:line-clamp-4 mb-4">
+                      {stripHtml(shortDesc || "") || "Описание отсутствует"}
+                    </p>
+
+                    <div className="flex items-center justify-between gap-3 mb-2">
+                      {createdAtDate && (
+                        <p className="text-xs text-gray-400">
+                          {formatDate(createdAtDate)}
+                        </p>
+                      )}
+                      <div className="flex items-center gap-1 text-xs text-gray-400">
+                        <Eye className="w-3.5 h-3.5" />
+                        <span>{article.views || 0}</span>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <Link
-                  href={`/articles/${article.slug}`}
-                  className="block text-right px-4 md:px-6 pb-4 md:pb-6 font-medium text-[18px] text-blue-600 hover:text-blue-800 transition-colors"
-                >
-                  Читать далее →
-                </Link>
-              </Card>
-            );
-          })}
-        </div>
+                  <Link
+                    href={`/articles/${article.slug}`}
+                    className="block text-right px-4 md:px-6 pb-4 md:pb-6 font-medium text-[18px] text-blue-600 hover:text-blue-800 transition-colors"
+                  >
+                    Читать далее →
+                  </Link>
+                </Card>
+              );
+            })}
+          </div>
+
+          {hasNextPage && (
+            <div className="flex justify-center mt-8">
+              <button
+                onClick={() => fetchNextPage()}
+                disabled={isFetchingNextPage}
+                className="px-6 py-2 border border-[#333333] rounded-[40px] text-[#333333] hover:bg-gray-100 transition-colors disabled:opacity-50"
+              >
+                {isFetchingNextPage ? "Загрузка..." : "Показать ещё"}
+              </button>
+            </div>
+          )}
+        </>
       )}
     </section>
   );

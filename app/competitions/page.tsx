@@ -21,7 +21,7 @@ const sortOptions = [
   { value: "created_at", label: "Сначала старые" },
   { value: "submission_deadline", label: "Скоро закрытие" },
   { value: "-views", label: "По популярности" },
-  { value: "-participants_count", label: "По призовому фонду" },
+  { value: "-participants_count", label: "По числу участников" },
 ];
 
 export default function CompetitionsPage() {
@@ -92,7 +92,7 @@ export default function CompetitionsPage() {
       ) : results.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {results.map((competition) => (
-            <CompetitionCard key={competition.id} competition={competition as any} />
+            <CompetitionCard key={competition.id} competition={competition} />
           ))}
         </div>
       ) : (

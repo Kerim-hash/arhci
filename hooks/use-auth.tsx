@@ -1,13 +1,21 @@
 "use client";
 
-import { useGetProfileQuery } from "@/app/store/features/authApi";
+import { authApi, useGetProfileQuery } from "@/app/store/features/authApi";
 import { logoutUser, setAuth, setUser } from "@/app/auth/model/authSlice";
 import { useCallback, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/app/store";
 import { tokenStorage } from "@/hooks/storage";
 import { useRouter } from "next/navigation";
-import { API_BASE_URL } from "@/lib/api";
+import { apiSlice } from "@/services/api";
+
+/** Ответ логина/регистрации: бэкенд отдаёт camelCase, старые варианты оставлены на всякий случай. */
+type AuthTokens = Partial<
+  Record<
+    "accessToken" | "access_token" | "access" | "refreshToken" | "refresh_token" | "refresh",
+    string
+  >
+>;
 
 export const useAuth = () => {
   const dispatch = useDispatch();
@@ -16,53 +24,22 @@ export const useAuth = () => {
     (state: RootState) => state.authSlice,
   );
 
-  const { data, isError, isSuccess, error, refetch, isLoading } =
+  const { data, isError, isSuccess, error, isLoading } =
     useGetProfileQuery(undefined, {
       skip: !tokenStorage.getAccessToken(),
     });
 
   const handleLogout = useCallback(() => {
-    router.push("/auth/login");
-    dispatch(logoutUser());
     tokenStorage.clearTokens();
+    dispatch(logoutUser());
+    // Сбрасываем кэши RTK Query, чтобы следующий пользователь не увидел
+    // «мои» списки и профиль предыдущего.
+    dispatch(apiSlice.util.resetApiState());
+    dispatch(authApi.util.resetApiState());
+    router.push("/auth/login");
   }, [dispatch, router]);
 
-  const checkAuth = async () => {
-    if (tokenStorage.getAccessToken()) {
-      await refetch();
-    }
-  };
-
-  const refreshAuthToken = async (refreshToken: string) => {
-    try {
-      const response = await fetch(
-        `${API_BASE_URL}/auth/refresh-token`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ refresh_token: refreshToken }),
-        },
-      );
-
-      if (response.ok) {
-        const tokens: { access_token: string; refresh_token: string } =
-          await response.json();
-        tokenStorage.setTokens(tokens.access_token, tokens.refresh_token);
-        await refetch();
-        return true;
-      } else {
-        throw new Error("Token refresh failed");
-      }
-    } catch (error) {
-      console.error("Token refresh error:", error);
-      handleLogout();
-      return false;
-    }
-  };
-
-  const loginSuccess = (tokens: any) => {
+  const loginSuccess = (tokens: AuthTokens) => {
     try {
       const access = tokens.accessToken || tokens.access_token || tokens.access;
       const refresh =
@@ -93,20 +70,22 @@ export const useAuth = () => {
   }, [isSuccess, data, dispatch]);
 
   useEffect(() => {
-    if (isError) {
-      if ("status" in error && error.status !== 401) {
-        console.warn("Authentication error, logging out:", error);
-        handleLogout();
-      }
+    if (!isError) return;
+    const status = error && "status" in error ? error.status : undefined;
+    // 500 или сетевой сбой — не повод разлогинивать. Выходим только когда
+    // профиль отвечает 401 и refresh-токена больше нет: baseQueryWithReauth
+    // чистит токены, если /auth/refresh-token отклонил их.
+    if (status === 401 && !tokenStorage.getRefreshToken()) {
+      handleLogout();
     }
   }, [isError, error, handleLogout]);
 
   return {
-    isAuthenticated: isAuthenticated && !isError,
+    // isSuccess страхует один рендер между ответом профиля и setAuth(true)
+    // в эффекте выше — иначе ProtectedRoute успевает увидеть «не вошёл».
+    isAuthenticated: (isAuthenticated || isSuccess) && !isError,
     loading: isLoading || loading,
     user,
-    checkAuth,
-    refreshAuthToken,
     loginSuccess,
     logout,
   };

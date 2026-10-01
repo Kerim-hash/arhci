@@ -11,16 +11,17 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useAppDispatch, useAppSelector } from "@/app/store/hooks";
 import { SPECIALTIES } from "@/lib/specialties";
 import { resetFilters, updateFilters } from "../model/vacanciesSlice";
+import {
+  EMPLOYMENT_OPTIONS,
+  REGIONS,
+  SOFTWARE_OPTIONS,
+  VACANCY_EXPERIENCE_OPTIONS,
+} from "../model/options";
+
+const REGION_FILTER_OPTIONS = [{ value: "all", label: "Все" }, ...REGIONS];
 
 export function FiltersSidebar() {
   const dispatch = useAppDispatch();
@@ -28,20 +29,6 @@ export function FiltersSidebar() {
 
   // В фильтре хранятся ключи категорий — их и ждёт бэкенд
   const specializations = SPECIALTIES;
-  const softwareList = [
-    "ArchiCAD",
-    "AutoCAD",
-    "Revit",
-    "3ds Max + Corona",
-    "SketchUp",
-  ];
-  const experienceList = ["1-3 года", "3-6 лет", "6+ лет"];
-  const employmentTypes = ["Полный день (В штат)", "Фриланс", "Проектно"];
-  const regions = [
-    { value: "all", label: "Все" },
-    { value: "bishkek", label: "Бишкек" },
-    { value: "osh", label: "Ош" },
-  ];
 
   return (
     <div className="space-y-4">
@@ -124,29 +111,6 @@ export function FiltersSidebar() {
           </AccordionContent>
         </AccordionItem>
 
-        {/* Выплаты */}
-        <AccordionItem value="payment" className="border rounded-lg px-4">
-          <AccordionTrigger>Выплаты</AccordionTrigger>
-          <AccordionContent>
-            <Select
-              value={filters.paymentType}
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              onValueChange={(value: any) =>
-                dispatch(updateFilters({ paymentType: value }))
-              }
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="month">Раз в месяц</SelectItem>
-                <SelectItem value="week">Раз в неделю</SelectItem>
-                <SelectItem value="day">Ежедневно</SelectItem>
-              </SelectContent>
-            </Select>
-          </AccordionContent>
-        </AccordionItem>
-
         {/* Указан доход */}
         <AccordionItem value="hasIncome" className="border rounded-lg px-4">
           <AccordionTrigger>Указан доход</AccordionTrigger>
@@ -168,7 +132,7 @@ export function FiltersSidebar() {
         <AccordionItem value="software" className="border rounded-lg px-4">
           <AccordionTrigger>Программы</AccordionTrigger>
           <AccordionContent className="space-y-2">
-            {softwareList.map((software) => (
+            {SOFTWARE_OPTIONS.map((software) => (
               <div key={software} className="flex items-center space-x-2">
                 <Checkbox
                   id={software}
@@ -190,7 +154,7 @@ export function FiltersSidebar() {
         <AccordionItem value="experience" className="border rounded-lg px-4">
           <AccordionTrigger>Опыт</AccordionTrigger>
           <AccordionContent className="space-y-2">
-            {experienceList.map((exp) => (
+            {VACANCY_EXPERIENCE_OPTIONS.map((exp) => (
               <div key={exp} className="flex items-center space-x-2">
                 <Checkbox
                   id={exp}
@@ -210,7 +174,7 @@ export function FiltersSidebar() {
         <AccordionItem value="employment" className="border rounded-lg px-4">
           <AccordionTrigger>Тип занятости</AccordionTrigger>
           <AccordionContent className="space-y-2">
-            {employmentTypes.map((type) => (
+            {EMPLOYMENT_OPTIONS.map((type) => (
               <div key={type} className="flex items-center space-x-2">
                 <Checkbox
                   id={type}
@@ -233,17 +197,17 @@ export function FiltersSidebar() {
           <AccordionTrigger>Регион</AccordionTrigger>
           <AccordionContent>
             <div className="space-y-2">
-              {regions.map((region) => (
+              {REGION_FILTER_OPTIONS.map((region) => (
                 <div key={region.value} className="flex items-center space-x-2">
                   <Checkbox
-                    id={region.value}
+                    id={`region-${region.value}`}
                     checked={filters.region === region.value}
                     onCheckedChange={(checked) => {
                       if (checked)
                         dispatch(updateFilters({ region: region.value }));
                     }}
                   />
-                  <Label htmlFor={region.value}>{region.label}</Label>
+                  <Label htmlFor={`region-${region.value}`}>{region.label}</Label>
                 </div>
               ))}
             </div>

@@ -5,7 +5,6 @@ interface FiltersState {
   specializations: string[];
   incomeFrom: string;
   incomeTo: string;
-  paymentType: "month" | "week" | "day";
   hasIncome: boolean;
   software: string[];
   experience: string;
@@ -26,7 +25,6 @@ const initialState: VacanciesState = {
     specializations: [],
     incomeFrom: "",
     incomeTo: "",
-    paymentType: "month",
     hasIncome: false,
     software: [],
     experience: "",

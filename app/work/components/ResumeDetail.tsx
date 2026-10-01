@@ -13,14 +13,20 @@ import {
   BreadcrumbList,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import type { Resume } from "@/app/store/features/resumesSlice";
+import type { ResumeDetailRead } from "@/services/generatedApi";
 import RichContent from "@/components/content/RichContent";
+import { asStringArray, formatSalaryRange } from "../model/format";
 
 interface ResumeDetailProps {
-  resume: Resume;
+  resume: ResumeDetailRead;
 }
 
 export function ResumeDetailComponent({ resume }: ResumeDetailProps) {
+  const salary = formatSalaryRange(resume.salaryFrom, resume.salaryTo);
+  const socialLinks = asStringArray(resume.socialLinks);
+  const keySkills = asStringArray(resume.keySkills);
+  const phone = resume.phone?.trim() || "";
+
   return (
     <div className="container mx-auto px-4 py-8">
       <Breadcrumb className="mb-6">
@@ -30,7 +36,7 @@ export function ResumeDetailComponent({ resume }: ResumeDetailProps) {
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbLink href="/work">Вакансии</BreadcrumbLink>
+            <BreadcrumbLink href="/work?tab=resumes">Резюме</BreadcrumbLink>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
@@ -58,19 +64,20 @@ export function ResumeDetailComponent({ resume }: ResumeDetailProps) {
               </div>
               <div>
                 <h1 className="text-xl font-bold">{resume.name}</h1>
-                <p className="text-[#949494] text-sm">{resume.category}</p>
+                {resume.category && (
+                  <p className="text-[#949494] text-sm">{resume.category}</p>
+                )}
               </div>
             </div>
 
             {/* Зарплата и опыт */}
             <div className="flex items-center gap-3 flex-wrap">
-              <div className="font-semibold">
-                {resume.salaryFrom.toLocaleString()} —{" "}
-                {resume.salaryTo.toLocaleString()} сом
-              </div>
-              <div className="flex bg-[#F5F5F7] px-2 py-1 rounded-[40px] items-center gap-1 text-[#949494]">
-                <span className="text-sm">Опыт {resume.experience}</span>
-              </div>
+              <div className="font-semibold">{salary ?? "Зарплата не указана"}</div>
+              {resume.experience && (
+                <div className="flex bg-[#F5F5F7] px-2 py-1 rounded-[40px] items-center gap-1 text-[#949494]">
+                  <span className="text-sm">Опыт {resume.experience}</span>
+                </div>
+              )}
             </div>
 
             {/* Информационная таблица */}
@@ -78,55 +85,68 @@ export function ResumeDetailComponent({ resume }: ResumeDetailProps) {
               <div className="flex items-center justify-between">
                 <div className="text-[16px] text-[#333333]">Место работы</div>
                 <div className="text-[#333333] text-[16px] font-medium">
-                  {resume.workPlace}
+                  {resume.workPlace || "Не указано"}
                 </div>
               </div>
               <div className="flex items-center justify-between">
                 <div className="text-[16px] text-[#333333]">Занятость</div>
                 <div className="text-[#333333] text-[16px] font-medium">
-                  {resume.employment}
+                  {resume.employment || "Не указана"}
                 </div>
               </div>
               <div className="flex items-center justify-between">
                 <div className="text-[16px] text-[#333333]">График</div>
                 <div className="text-[#333333] text-[16px] font-medium">
-                  {resume.schedule}
+                  {resume.schedule || "Не указан"}
                 </div>
               </div>
-              <div className="flex items-center justify-between">
-                <div className="text-[16px] text-[#333333]">Телефон</div>
-                <div className="text-[#333333] text-[16px] font-medium">
-                  📞 {resume.phone}
+              {phone && (
+                <div className="flex items-center justify-between">
+                  <div className="text-[16px] text-[#333333]">Телефон</div>
+                  <div className="text-[#333333] text-[16px] font-medium">
+                    📞 {phone}
+                  </div>
                 </div>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="text-[16px] text-[#333333]">
-                  Социальные сети
+              )}
+              {socialLinks.length > 0 && (
+                <div className="flex items-center justify-between">
+                  <div className="text-[16px] text-[#333333]">
+                    Социальные сети
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {socialLinks.map((link, index) => (
+                      <span
+                        key={index}
+                        title={link}
+                        className="w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center text-xs"
+                      >
+                        {link.charAt(0).toUpperCase()}
+                      </span>
+                    ))}
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  {resume.socialLinks.map((link, index) => (
-                    <span
-                      key={index}
-                      className="w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center text-xs"
-                    >
-                      {link.charAt(0).toUpperCase()}
-                    </span>
-                  ))}
+              )}
+              {resume.email && (
+                <div className="flex items-center justify-between">
+                  <div className="text-[16px] text-[#333333]">
+                    Электронная почта
+                  </div>
+                  <div className="text-[#333333] text-[16px] font-medium">
+                    {resume.email}
+                  </div>
                 </div>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="text-[16px] text-[#333333]">
-                  Электронная почта
-                </div>
-                <div className="text-[#333333] text-[16px] font-medium">
-                  {resume.email}
-                </div>
-              </div>
+              )}
             </div>
 
-            <a href={`tel:${resume.phone}`}>
-              <Button className="rounded-[40px]">Связаться</Button>
-            </a>
+            {phone ? (
+              <Button asChild className="rounded-[40px] w-fit">
+                <a href={`tel:${phone}`}>Связаться</a>
+              </Button>
+            ) : resume.email ? (
+              <Button asChild className="rounded-[40px] w-fit">
+                <a href={`mailto:${resume.email}`}>Связаться</a>
+              </Button>
+            ) : null}
           </CardContent>
         </Card>
 
@@ -148,40 +168,48 @@ export function ResumeDetailComponent({ resume }: ResumeDetailProps) {
             <h2 className="text-xl font-semibold mb-4">Опыт</h2>
             <Separator className="mb-6" />
             <div className="space-y-8">
-              {resume.workExperience.map((exp, index) => (
-                <Card key={index}>
-                  <CardContent className="p-0!">
-                    <h3 className="font-semibold text-lg mb-1">
-                      {exp.company}
-                    </h3>
-                    <p className="text-[#949494] text-sm mb-4">
-                      {exp.startDate} — {exp.endDate}
-                    </p>
-                    <ul className="list-disc list-inside space-y-2 text-gray-700 text-sm">
-                      {exp.duties.map((duty, i) => (
-                        <li key={i}>{duty}</li>
-                      ))}
-                    </ul>
-                    {exp.achievement && (
-                      <p className="text-sm text-gray-700 mt-3">
-                        <span className="font-medium">Достижение:</span>{" "}
-                        {exp.achievement}
+              {resume.workExperience.map((exp) => {
+                const duties = asStringArray(exp.duties);
+                return (
+                  <Card key={exp.id}>
+                    <CardContent className="p-0!">
+                      <h3 className="font-semibold text-lg mb-1">
+                        {exp.company}
+                      </h3>
+                      {exp.position && (
+                        <p className="text-sm text-gray-700 mb-1">{exp.position}</p>
+                      )}
+                      <p className="text-[#949494] text-sm mb-4">
+                        {exp.startDate} — {exp.endDate}
                       </p>
-                    )}
-                  </CardContent>
-                </Card>
-              ))}
+                      {duties.length > 0 && (
+                        <ul className="list-disc list-inside space-y-2 text-gray-700 text-sm">
+                          {duties.map((duty, i) => (
+                            <li key={i}>{duty}</li>
+                          ))}
+                        </ul>
+                      )}
+                      {exp.achievement && (
+                        <p className="text-sm text-gray-700 mt-3">
+                          <span className="font-medium">Достижение:</span>{" "}
+                          {exp.achievement}
+                        </p>
+                      )}
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
           </div>
         )}
 
         {/* Ключевые навыки */}
-        {resume.keySkills && resume.keySkills.length > 0 && (
+        {keySkills.length > 0 && (
           <div>
             <h2 className="text-xl font-semibold mb-4">Ключевые навыки</h2>
             <Separator className="mb-4" />
             <div className="flex flex-wrap gap-2">
-              {resume.keySkills.map((skill, index) => (
+              {keySkills.map((skill, index) => (
                 <Badge
                   key={index}
                   variant="outline"

@@ -1,13 +1,14 @@
 // components/MainPage.tsx (упрощенный вариант)
 "use client";
 
+import { Suspense, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { VacanciesList } from "./components/VacanciesList";
 import { OrdersList } from "./components/OrdersList";
 import { ContestsList } from "./components/ContestsList";
 import { ResumesList } from "./components/ResumesList";
 import { FiltersSidebar } from "./components/FiltersSidebar";
-import { OrderFiltersSidebar } from "./components/OrderFiltersSidebar";
 import { ResumeFiltersSidebar } from "./components/ResumeFiltersSidebar";
 import Image from "next/image";
 import Link from "next/link";
@@ -16,6 +17,29 @@ import { setActiveTab } from "@/app/store/features/appSlice";
 import { Button } from "@/components/ui/button";
 import { RoleGuard } from "@/components/RoleGuard";
 import { Plus } from "lucide-react";
+
+const WORK_TABS = ["vacancies", "resumes", "orders", "contests"] as const;
+type WorkTab = (typeof WORK_TABS)[number];
+
+const isWorkTab = (value: string | null): value is WorkTab =>
+  WORK_TABS.includes(value as WorkTab);
+
+/**
+ * Открывает вкладку из `?tab=` (ссылки «Заказы»/«Резюме» в хлебных крошках).
+ * Вынесено в отдельный компонент под Suspense: useSearchParams без него
+ * ломает статическую сборку страницы.
+ */
+function TabFromQuery() {
+  const dispatch = useAppDispatch();
+  const searchParams = useSearchParams();
+  const tab = searchParams.get("tab");
+
+  useEffect(() => {
+    if (isWorkTab(tab)) dispatch(setActiveTab(tab));
+  }, [tab, dispatch]);
+
+  return null;
+}
 
 function MainPage() {
   const dispatch = useAppDispatch();
@@ -40,14 +64,16 @@ function MainPage() {
     }
   };
 
+  // У заказов и конкурсов нет фильтров на бэкенде — сайдбар не рисуем
   const renderFilters = () => {
     switch (activeTab) {
       case "vacancies":
         return <FiltersSidebar />;
-      case "orders":
-        return <OrderFiltersSidebar />;
       case "resumes":
         return <ResumeFiltersSidebar />;
+      case "orders":
+      case "contests":
+        return null;
       default:
         return <FiltersSidebar />;
     }
@@ -55,6 +81,9 @@ function MainPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      <Suspense fallback={null}>
+        <TabFromQuery />
+      </Suspense>
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         <div className="lg:col-span-3">
           <Tabs
@@ -128,6 +157,18 @@ function MainPage() {
                     <Button className="rounded-[40px] gap-2">
                       <Plus className="w-4 h-4" />
                       Создать резюме
+                    </Button>
+                  </Link>
+                </div>
+              </RoleGuard>
+            )}
+            {activeTab === "orders" && (
+              <RoleGuard role="company">
+                <div className="mb-4">
+                  <Link href="/work/order/create">
+                    <Button className="rounded-[40px] gap-2">
+                      <Plus className="w-4 h-4" />
+                      Создать заказ
                     </Button>
                   </Link>
                 </div>

@@ -12,9 +12,12 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, MapPin, Users, Eye, Award, Building2, CreditCard, Globe } from "lucide-react";
-import { RoleGuard } from "@/components/RoleGuard";
+import { Calendar, Users, Eye, ExternalLink } from "lucide-react";
 import RichContent from "@/components/content/RichContent";
+import { ModerationStatusBadge } from "@/components/ModerationStatusBadge";
+
+const asStringList = (value: unknown): string[] =>
+  Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [];
 
 export default function CompetitionDetailPage() {
   const params = useParams();
@@ -26,11 +29,13 @@ export default function CompetitionDetailPage() {
   );
   const [incrementViews] = useApiCompetitionsViewsCreateMutation();
 
+  // Считаем просмотр один раз на загруженный конкурс, а не на каждый рефетч.
+  const loadedId = currentCompetition?.id;
   useEffect(() => {
-    if (currentCompetition?.id) {
-      incrementViews({ id: currentCompetition.id });
+    if (loadedId !== undefined) {
+      incrementViews({ id: loadedId });
     }
-  }, [currentCompetition, incrementViews]);
+  }, [loadedId, incrementViews]);
 
   if (error) {
     return (
@@ -59,7 +64,11 @@ export default function CompetitionDetailPage() {
     });
   };
 
-  const evaluationCriteria = (currentCompetition.evaluationCriteria as string[]) || [];
+  const openFor = asStringList(currentCompetition.openFor);
+  const tasks = asStringList(currentCompetition.tasks);
+  const conditions = asStringList(currentCompetition.conditions);
+  const projectComposition = asStringList(currentCompetition.projectComposition);
+  const evaluationCriteria = asStringList(currentCompetition.evaluationCriteria);
 
   return (
     <section className="container mx-auto relative px-4 sm:px-6 py-8">
@@ -79,6 +88,23 @@ export default function CompetitionDetailPage() {
         <h1 className="text-2xl sm:text-3xl md:text-[40px] font-bold text-left mb-4">
           {currentCompetition.title}
         </h1>
+        {/* Неодобренный конкурс API отдаёт только автору и сотрудникам — пометка нужна обоим */}
+        {currentCompetition.moderationStatus !== "approved" && (
+          <div className="flex flex-wrap items-center gap-3 mb-4">
+            <ModerationStatusBadge status={currentCompetition.moderationStatus} />
+            {currentCompetition.moderationStatus === "pending" && (
+              <span className="text-sm text-[#666666]">
+                Сейчас конкурс видят только автор и модераторы. Для всех он появится после проверки.
+              </span>
+            )}
+            {currentCompetition.moderationStatus === "rejected" &&
+              currentCompetition.moderationComment && (
+                <span className="text-sm text-red-600">
+                  Причина: {currentCompetition.moderationComment}
+                </span>
+              )}
+          </div>
+        )}
         <div className="flex flex-wrap items-center gap-4 text-sm text-[#666666] mb-6">
           <div className="flex items-center gap-1">
             <Calendar className="w-4 h-4" />
@@ -100,17 +126,21 @@ export default function CompetitionDetailPage() {
       
       <Separator className="bg-[#333333] mb-6" />
 
-      {/* Кнопки действий */}
-      <div className="flex flex-col sm:flex-row gap-3 sm:gap-5 mb-10">
-        <RoleGuard role="specialist">
-          <Button size="lg" className="w-full sm:w-auto">
-            Подать заявку
+      {/* Заявки принимает организатор на своём сайте — ведём туда, если ссылка задана */}
+      {currentCompetition.organizerLink && (
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-5 mb-10">
+          <Button size="lg" className="w-full sm:w-auto" asChild>
+            <a
+              href={currentCompetition.organizerLink}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Подать заявку
+              <ExternalLink className="w-4 h-4" />
+            </a>
           </Button>
-        </RoleGuard>
-        <Button size="lg" variant="outline" className="w-full sm:w-auto">
-          Скачать PDF
-        </Button>
-      </div>
+        </div>
+      )}
 
       {/* Даты регистрации */}
       <div className="flex flex-col lg:flex-row gap-4 mb-6">
@@ -142,7 +172,7 @@ export default function CompetitionDetailPage() {
           <div>
             <div className="text-[#383838] text-sm mb-1">Открыт для</div>
             <div className="flex gap-2 flex-wrap">
-              {(currentCompetition.openFor as string[] || []).map((item: string) => (
+              {openFor.map((item) => (
                 <Badge key={item} variant="secondary">{item}</Badge>
               ))}
             </div>
@@ -214,35 +244,45 @@ export default function CompetitionDetailPage() {
           </div>
         </div>
 
-        {/* Задача конкурса */}
-        <h2 className="font-semibold mt-8 text-xl mb-4">Задача конкурса</h2>
-        <p className="mb-4 text-sm lg:text-base">Участникам предлагается разработать архитектурную концепцию, отражающую:</p>
-        <ul className="space-y-2 list-disc pl-5 text-sm lg:text-base mb-6">
-          {(currentCompetition.tasks as string[] || []).map((task: string, index: number) => (
-            <li key={index}>{task}</li>
-          ))}
-        </ul>
-
-        {/* Условия участия */}
-        <h2 className="font-semibold mt-8 text-xl mb-4">Условия участия</h2>
-        <ul className="space-y-2 list-disc pl-5 text-sm lg:text-base mb-6">
-          {(currentCompetition.conditions as string[] || []).map((condition: string, index: number) => (
-            <li key={index}>{condition}</li>
-          ))}
-        </ul>
-
-        {/* Состав конкурсного проекта */}
-        <h2 className="font-semibold mt-8 text-xl mb-4">Состав конкурсного проекта</h2>
-        <ul className="space-y-2 list-disc pl-5 text-sm lg:text-base mb-6">
-          <li>
-            Проект подаётся в цифровом формате и должен включать:
-            <ul className="space-y-2 list-disc pl-5 mt-2">
-              {(currentCompetition.projectComposition as string[] || []).map((item: string, index: number) => (
-                <li key={index}>{item}</li>
+        {/* Разделы со списками показываем только когда организатор их заполнил */}
+        {tasks.length > 0 && (
+          <>
+            <h2 className="font-semibold mt-8 text-xl mb-4">Задача конкурса</h2>
+            <p className="mb-4 text-sm lg:text-base">Участникам предлагается разработать архитектурную концепцию, отражающую:</p>
+            <ul className="space-y-2 list-disc pl-5 text-sm lg:text-base mb-6">
+              {tasks.map((task, index) => (
+                <li key={index}>{task}</li>
               ))}
             </ul>
-          </li>
-        </ul>
+          </>
+        )}
+
+        {conditions.length > 0 && (
+          <>
+            <h2 className="font-semibold mt-8 text-xl mb-4">Условия участия</h2>
+            <ul className="space-y-2 list-disc pl-5 text-sm lg:text-base mb-6">
+              {conditions.map((condition, index) => (
+                <li key={index}>{condition}</li>
+              ))}
+            </ul>
+          </>
+        )}
+
+        {projectComposition.length > 0 && (
+          <>
+            <h2 className="font-semibold mt-8 text-xl mb-4">Состав конкурсного проекта</h2>
+            <ul className="space-y-2 list-disc pl-5 text-sm lg:text-base mb-6">
+              <li>
+                Проект подаётся в цифровом формате и должен включать:
+                <ul className="space-y-2 list-disc pl-5 mt-2">
+                  {projectComposition.map((item, index) => (
+                    <li key={index}>{item}</li>
+                  ))}
+                </ul>
+              </li>
+            </ul>
+          </>
+        )}
 
         {/* Критерии оценки */}
         {evaluationCriteria.length > 0 && (
@@ -252,7 +292,7 @@ export default function CompetitionDetailPage() {
               <li>
                 Проекты оцениваются по следующим критериям:
                 <ul className="space-y-2 list-disc pl-5 mt-2">
-                  {evaluationCriteria.map((criteria: string, index: number) => (
+                  {evaluationCriteria.map((criteria, index) => (
                     <li key={index}>{criteria}</li>
                   ))}
                 </ul>

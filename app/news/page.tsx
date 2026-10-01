@@ -1,7 +1,6 @@
 // components/NewsWithLocalQuery.tsx
 "use client";
 
-import { Badge } from "@/components/ui/badge";
 import { stripHtml } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -11,7 +10,7 @@ import React from "react";
 import {
   QueryClient,
   QueryClientProvider,
-  useQuery,
+  useInfiniteQuery,
 } from "@tanstack/react-query";
 import axios from "axios";
 import { API_BASE_URL } from "@/lib/api";
@@ -32,18 +31,31 @@ interface ApiResponse {
   results: NewsType[];
 }
 
-const fetchNews = async (): Promise<NewsType[]> => {
-  const { data } = await axios.get<ApiResponse>(
+const fetchNews = async (page: number): Promise<ApiResponse> => {
+  const { data } = await axios.get<ApiResponse | NewsType[]>(
     `${API_BASE_URL}/api/news/`,
+    { params: { page } },
   );
 
   // Проверяем, является ли ответ пагинированным (есть поле results)
   if (data && typeof data === "object" && "results" in data) {
-    return data.results;
+    return data;
   }
 
-  // Если это просто массив
-  return data as NewsType[];
+  // Если это просто массив — страница одна
+  const results = data as NewsType[];
+  return { count: results.length, next: null, previous: null, results };
+};
+
+// Номер следующей страницы из ссылки `next`, которую отдаёт DRF
+const pageFromNext = (next: string | null): number | undefined => {
+  if (!next) return undefined;
+  try {
+    const page = Number(new URL(next, API_BASE_URL).searchParams.get("page"));
+    return Number.isInteger(page) && page > 1 ? page : undefined;
+  } catch {
+    return undefined;
+  }
 };
 
 // Создаем локальный queryClient
@@ -59,14 +71,20 @@ const queryClient = new QueryClient({
 // Основной компонент с логикой
 function NewsContent() {
   const {
-    data: news,
+    data,
     isLoading,
     error,
     refetch,
-  } = useQuery({
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
     queryKey: ["news"],
-    queryFn: fetchNews,
+    queryFn: ({ pageParam }) => fetchNews(pageParam),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => pageFromNext(lastPage.next),
   });
+  const news = data?.pages.flatMap((page) => page.results) ?? [];
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("ru-RU", {
@@ -74,11 +92,6 @@ function NewsContent() {
       month: "long",
       day: "numeric",
     });
-  };
-
-  const getCategory = (newsItem: NewsType) => {
-    const categories = ["События", "Новости", "Анонсы", "Объявления"];
-    return categories[newsItem.id % categories.length];
   };
 
   if (isLoading) {
@@ -118,62 +131,76 @@ function NewsContent() {
         </div>
       </div>
 
-      {!news || news.length === 0 ? (
+      {news.length === 0 ? (
         <div className="text-center py-12">
           <p className="text-gray-500 text-lg">Новости пока не добавлены</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-          {news.map((item) => (
-            <Card key={item.id} className="overflow-hidden flex flex-col">
-              <Link
-                href={`/news/${item.slug}`}
-                className="relative block aspect-video md:aspect-[2/5] overflow-hidden md:max-h-[320px] w-full bg-gray-100 group"
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+            {news.map((item) => (
+              <Card key={item.id} className="overflow-hidden flex flex-col">
+                <Link
+                  href={`/news/${item.slug}`}
+                  className="relative block aspect-video md:aspect-[2/5] overflow-hidden md:max-h-[320px] w-full bg-gray-100 group"
+                >
+                  {item.previewImage ? (
+                     <Image
+                      src={`${item.previewImage}`}
+                      alt={item.title}
+                      fill
+                      className="object-cover w-full transition-transform duration-300 group-hover:scale-105"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = "/placeholder-architect.png";
+                      }}
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                      <span className="text-gray-400">Нет изображения</span>
+                    </div>
+                  )}
+                </Link>
+
+                <div className="p-4 md:p-6 flex-1">
+                  <h2 className="text-lg sm:text-xl md:text-[32px] font-medium leading-tight mb-3 line-clamp-2">
+                    <Link href={`/news/${item.slug}`} className="hover:text-blue-600 hover:underline transition-colors">
+                      {item.title}
+                    </Link>
+                  </h2>
+
+                  <p className="text-sm md:text-[16px] text-[#6D6D6D] leading-relaxed line-clamp-3 md:line-clamp-4 mb-4">
+                    {stripHtml(item.shortDescription) || "Описание отсутствует"}
+                  </p>
+
+                  <p className="text-xs text-gray-400 mb-2">
+                    {formatDate(item.createdAt)}
+                  </p>
+                </div>
+
+                <Link
+                  href={`/news/${item.slug}`}
+                  className="block text-right px-4 md:px-6 pb-4 md:pb-6 font-medium text-[18px] text-blue-600 hover:text-blue-800 transition-colors"
+                >
+                  Читать далее →
+                </Link>
+              </Card>
+            ))}
+          </div>
+
+          {hasNextPage && (
+            <div className="flex justify-center mt-8">
+              <button
+                onClick={() => fetchNextPage()}
+                disabled={isFetchingNextPage}
+                className="px-6 py-2 border border-[#333333] rounded-[40px] text-[#333333] hover:bg-gray-100 transition-colors disabled:opacity-50"
               >
-                {item.previewImage ? (
-                   <Image
-                    src={`${item.previewImage}`}
-                    alt={item.title}
-                    fill
-                    className="object-cover w-full transition-transform duration-300 group-hover:scale-105"
-                    sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.src = "/placeholder-image.jpg";
-                    }}
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-gray-200">
-                    <span className="text-gray-400">Нет изображения</span>
-                  </div>
-                )}
-              </Link>
-
-              <div className="p-4 md:p-6 flex-1">
-                <h2 className="text-lg sm:text-xl md:text-[32px] font-medium leading-tight mb-3 line-clamp-2">
-                  <Link href={`/news/${item.slug}`} className="hover:text-blue-600 hover:underline transition-colors">
-                    {item.title}
-                  </Link>
-                </h2>
-
-                <p className="text-sm md:text-[16px] text-[#6D6D6D] leading-relaxed line-clamp-3 md:line-clamp-4 mb-4">
-                  {stripHtml(item.shortDescription) || "Описание отсутствует"}
-                </p>
-
-                <p className="text-xs text-gray-400 mb-2">
-                  {formatDate(item.createdAt)}
-                </p>
-              </div>
-
-              <Link
-                href={`/news/${item.slug}`}
-                className="block text-right px-4 md:px-6 pb-4 md:pb-6 font-medium text-[18px] text-blue-600 hover:text-blue-800 transition-colors"
-              >
-                Читать далее →
-              </Link>
-            </Card>
-          ))}
-        </div>
+                {isFetchingNextPage ? "Загрузка..." : "Показать ещё"}
+              </button>
+            </div>
+          )}
+        </>
       )}
     </section>
   );

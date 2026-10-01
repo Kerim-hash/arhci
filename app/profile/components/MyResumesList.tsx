@@ -1,13 +1,28 @@
 "use client";
 
 import { toast } from "sonner";
-import { useApiResumesListQuery } from "@/services/generatedApi";
+import {
+  useApiResumesDestroyMutation,
+  useApiResumesListQuery,
+} from "@/services/generatedApi";
+import { formatApiError } from "@/lib/formatApiError";
 import { MyContentRow } from "./MyContentRow";
 import { EmptyState } from "@/components/EmptyState";
 
 export function MyResumesList() {
-  const { data, isLoading } = useApiResumesListQuery({ mine: true });
+  const { data, isLoading, refetch } = useApiResumesListQuery({ mine: true });
+  const [destroyResume] = useApiResumesDestroyMutation();
   const resumes = data?.results || [];
+
+  const handleDelete = async (id: number) => {
+    try {
+      await destroyResume({ id }).unwrap();
+      toast.success("Резюме удалено");
+      refetch();
+    } catch (err) {
+      toast.error(formatApiError(err, "Не удалось удалить резюме"));
+    }
+  };
 
   if (isLoading) {
     return <div className="text-center py-8 text-gray-500">Загрузка...</div>;
@@ -32,7 +47,9 @@ export function MyResumesList() {
           title={resume.name}
           createdAt={resume.createdAt}
           status={resume.moderationStatus}
-          onDelete={() => { toast.error("Удаление резюме скоро будет доступно"); }}
+          moderationComment={resume.moderationComment}
+          href={`/work/resume/${resume.id}`}
+          onDelete={() => handleDelete(resume.id)}
         />
       ))}
     </div>

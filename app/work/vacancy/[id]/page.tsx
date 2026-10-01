@@ -24,5 +24,5 @@ export default function VacancyPage() {
     );
   if (!vacancy) return null;
 
-  return <VacancyDetailComponent vacancy={vacancy as any} />;
+  return <VacancyDetailComponent vacancy={vacancy} />;
 }

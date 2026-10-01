@@ -24,5 +24,5 @@ export default function ResumePage() {
     );
   if (!resume) return null;
 
-  return <ResumeDetailComponent resume={resume as any} />;
+  return <ResumeDetailComponent resume={resume} />;
 }

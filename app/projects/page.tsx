@@ -1,8 +1,14 @@
 // app/projects/page.tsx
 "use client";
 
-import { useState } from "react";
-import { useApiProjectsListQuery } from "@/services/generatedApi";
+import { Suspense, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import {
+  generatedApi,
+  useApiProjectsListQuery,
+  useApiProjectsSpecialistListQuery,
+  type ProjectListRead,
+} from "@/services/generatedApi";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import { Search, Plus } from "lucide-react";
@@ -16,6 +22,8 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { useRole } from "@/hooks/use-role";
+import { useDebounce } from "@/hooks/use-debounce";
+import { formatApiError } from "@/lib/formatApiError";
 import Link from "next/link";
 
 const sortOptions = [
@@ -25,19 +33,86 @@ const sortOptions = [
   { value: "-likes", label: "По оценкам" },
 ];
 
-export default function ProjectsPage() {
+const SEARCH_DEBOUNCE_MS = 300;
+
+/**
+ * Страницы после первой подгружаются кнопкой «Показать ещё» и копятся здесь.
+ * Ключ — параметры списка: стоит им измениться (поиск, сортировка, специалист),
+ * накопленное отбрасывается само, без эффектов и ручного сброса.
+ */
+interface ExtraPages {
+  key: string;
+  page: number;
+  items: ProjectListRead[];
+  next: string | null;
+}
+
+const NO_EXTRA_PAGES: ExtraPages = { key: "", page: 1, items: [], next: null };
+
+const parseSpecialistId = (raw: string | null): number | null => {
+  if (!raw) return null;
+  const id = Number(raw);
+  return Number.isInteger(id) && id > 0 ? id : null;
+};
+
+function ProjectsPageContent() {
+  const searchParams = useSearchParams();
+  const specialistId = parseSpecialistId(searchParams.get("specialist"));
+  const isSpecialistMode = specialistId !== null;
+
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("-created_at");
-  const [page] = useState(1);
+  const [extra, setExtra] = useState<ExtraPages>(NO_EXTRA_PAGES);
+  const [loadMoreError, setLoadMoreError] = useState<string | null>(null);
   const { isAuthenticated } = useRole();
 
-  const { data, isLoading, isError, refetch } = useApiProjectsListQuery({
-    search: searchTerm || undefined,
-    ordering: sortBy,
-    page,
-  });
+  const debouncedSearch = useDebounce(searchTerm.trim(), SEARCH_DEBOUNCE_MS);
+  const search = debouncedSearch || undefined;
+  const listKey = `${specialistId ?? ""}|${debouncedSearch}|${sortBy}`;
 
-  const results = data?.results || [];
+  const allProjects = useApiProjectsListQuery(
+    { search, ordering: sortBy, page: 1 },
+    { skip: isSpecialistMode },
+  );
+  const specialistProjects = useApiProjectsSpecialistListQuery(
+    { specialistId: specialistId ?? 0, search, ordering: sortBy, page: 1 },
+    { skip: !isSpecialistMode },
+  );
+  const { data, isLoading, isError, refetch } = isSpecialistMode
+    ? specialistProjects
+    : allProjects;
+
+  const [loadMoreAll, allMore] = generatedApi.endpoints.apiProjectsList.useLazyQuery();
+  const [loadMoreSpecialist, specialistMore] =
+    generatedApi.endpoints.apiProjectsSpecialistList.useLazyQuery();
+  const isLoadingMore = allMore.isFetching || specialistMore.isFetching;
+
+  const loaded = extra.key === listKey ? extra : NO_EXTRA_PAGES;
+  const results = [...(data?.results ?? []), ...loaded.items];
+  const nextUrl = loaded.page > 1 ? loaded.next : data?.next ?? null;
+
+  const handleLoadMore = async () => {
+    const nextPage = loaded.page + 1;
+    setLoadMoreError(null);
+    try {
+      const response = isSpecialistMode
+        ? await loadMoreSpecialist({
+            specialistId: specialistId ?? 0,
+            search,
+            ordering: sortBy,
+            page: nextPage,
+          }).unwrap()
+        : await loadMoreAll({ search, ordering: sortBy, page: nextPage }).unwrap();
+      setExtra({
+        key: listKey,
+        page: nextPage,
+        items: [...loaded.items, ...response.results],
+        next: response.next ?? null,
+      });
+    } catch (err) {
+      setLoadMoreError(formatApiError(err, "Не удалось загрузить проекты."));
+    }
+  };
 
   const renderResults = () => {
     if (isLoading) {
@@ -79,11 +154,28 @@ export default function ProjectsPage() {
     }
 
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {results.map((project) => (
-          <ProjectCard key={project.id} project={project} />
-        ))}
-      </div>
+      <>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {results.map((project) => (
+            <ProjectCard key={project.id} project={project} />
+          ))}
+        </div>
+        {loadMoreError && (
+          <p className="text-center text-sm text-red-500 mt-6">{loadMoreError}</p>
+        )}
+        {nextUrl && (
+          <div className="flex justify-center mt-8">
+            <Button
+              variant="outline"
+              className="rounded-[40px]"
+              onClick={handleLoadMore}
+              disabled={isLoadingMore}
+            >
+              {isLoadingMore ? "Загрузка..." : "Показать ещё"}
+            </Button>
+          </div>
+        )}
+      </>
     );
   };
 
@@ -92,7 +184,7 @@ export default function ProjectsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl sm:text-3xl md:text-[40px] font-bold text-left mb-2">
-            Все проекты
+            {isSpecialistMode ? "Проекты специалиста" : "Все проекты"}
           </h1>
           <p className="text-[#666666] text-sm sm:text-base">
             Портфолио работ наших архитекторов и дизайнеров
@@ -144,5 +236,22 @@ export default function ProjectsPage() {
 
       {renderResults()}
     </section>
+  );
+}
+
+// useSearchParams требует Suspense-границу, иначе страница не соберётся статически.
+export default function ProjectsPage() {
+  return (
+    <Suspense
+      fallback={
+        <section className="container mx-auto relative px-4 sm:px-6 py-8">
+          <div className="text-center py-12">
+            <p className="text-[#666666]">Загрузка проектов...</p>
+          </div>
+        </section>
+      }
+    >
+      <ProjectsPageContent />
+    </Suspense>
   );
 }

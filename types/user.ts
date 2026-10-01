@@ -13,6 +13,9 @@ export interface User {
   lastName?: string;
   role: UserRole;
   is_verified: boolean;
+  /** Регионы (например, ["Bishkek"]); API отдаёт camelCase, snake_case оставлен для совместимости. */
+  regionFrom?: string[];
+  region_from?: string[];
   specialistSlug?: string;
   specialistId?: number;
   phone?: string;

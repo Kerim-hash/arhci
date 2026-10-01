@@ -2,6 +2,7 @@
 
 "use client";
 
+import { useEffect } from "react";
 import { useParams } from "next/navigation";
 import Image from "next/image";
 import { Separator } from "@/components/ui/separator";
@@ -10,9 +11,16 @@ import { Mail, MapPin, User } from "lucide-react";
 import {
   useApiSpecialistsRetrieveQuery,
   useApiProjectsSpecialistListQuery,
+  useApiSpecialistsViewsCreateMutation,
 } from "@/services/generatedApi";
 import ProjectCard from "@/app/projects/components/ProjectCard";
 import LikeButton from "@/components/LikeButton";
+
+// regionFrom приходит списком регионов; собираем в одну строку
+const formatLocation = (regionFrom: unknown): string =>
+  Array.isArray(regionFrom)
+    ? regionFrom.filter((region): region is string => typeof region === "string" && region.trim() !== "").join(", ")
+    : "";
 
 export default function InteriorDesignerPage() {
   const params = useParams();
@@ -22,6 +30,15 @@ export default function InteriorDesignerPage() {
     { slug },
     { skip: !slug }
   );
+  const [incrementViews] = useApiSpecialistsViewsCreateMutation();
+
+  // Считаем просмотр один раз на загруженный профиль, а не на каждый рефетч
+  const loadedId = designer?.id;
+  useEffect(() => {
+    if (loadedId !== undefined) {
+      incrementViews({ id: loadedId });
+    }
+  }, [loadedId, incrementViews]);
 
   const { data: projectsData } = useApiProjectsSpecialistListQuery(
     { specialistId: designer?.id || 0 },
@@ -37,9 +54,10 @@ export default function InteriorDesignerPage() {
     );
   }
 
+  // Показываем только то, что специалист действительно указал — без выдуманных контактов
   const contacts = {
-    email: designer.email || `${designer.slug}@example.com`,
-    country: "Кыргызстан",
+    email: designer.email || "",
+    location: formatLocation(designer.regionFrom),
   };
 
   return (
@@ -84,13 +102,13 @@ export default function InteriorDesignerPage() {
                     {designer.categoryName || designer.category || ''}
                   </div>
                   <p>{designer.firm || ''}</p>
-                  {contacts && (
+                  {contacts.location && (
                     <div className="flex items-center gap-2 text-[#949494]">
                       <MapPin width={14} />
-                      <span>{contacts.country}</span>
+                      <span>{contacts.location}</span>
                     </div>
                   )}
-                  {contacts && (
+                  {contacts.email && (
                     <div className="flex items-center gap-2 text-[#949494]">
                       <Mail width={14} />
                       <span>{contacts.email}</span>

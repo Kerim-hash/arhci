@@ -5,14 +5,12 @@ import type {
   ResumeDetailRead,
 } from "@/services/generatedApi";
 
+// Только то, что умеет фильтровать бэкенд: specialization, experience,
+// region, salary_from (плюс search). Остальные поля формы не фильтруются.
 interface ResumesFilters {
   specializations: string[];
-  software: string[];
   experience: string;
-  employmentType: string[];
   incomeFrom: string;
-  incomeTo: string;
-  hasIncome: boolean;
   region: string;
 }
 
@@ -29,12 +27,8 @@ const initialState: ResumesState = {
   searchQuery: "",
   filters: {
     specializations: [],
-    software: [],
     experience: "",
-    employmentType: [],
     incomeFrom: "",
-    incomeTo: "",
-    hasIncome: false,
     region: "",
   },
   loading: false,
@@ -76,37 +70,3 @@ export {
 
 // Re-export типы
 export type { ResumeListRead, ResumeDetailRead };
-
-// Backward-compatible типы для компонентов, которые уже используют эти интерфейсы
-export interface WorkExperience {
-  company: string;
-  position?: string;
-  startDate: string;
-  endDate: string;
-  duties: string[];
-  achievement?: string;
-}
-
-export interface Resume {
-  id: number;
-  name: string;
-  salaryFrom: number;
-  salaryTo: number;
-  experience: string;
-  specialization: string[];
-  category: string;
-  description: string;
-  about: string;
-  software: string[];
-  employmentType: string[];
-  region: string;
-  avatar: string;
-  workPlace: string;
-  employment: string;
-  schedule: string;
-  phone: string;
-  email: string;
-  socialLinks: string[];
-  keySkills: string[];
-  workExperience: WorkExperience[];
-}

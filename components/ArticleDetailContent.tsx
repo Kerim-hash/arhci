@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo, useRef } from "react";
 import { GALLERY_SELECTOR } from "./content/gallery";
 import { useGalleryPortals } from "./content/useGalleryPortals";
 import { API_BASE_URL } from "@/lib/api";
+import { sanitizeHtml } from "@/lib/sanitizeHtml";
 
 const getYoutubeEmbedUrl = (url: string): string | null => {
   if (!url) return null;
@@ -339,7 +340,7 @@ export const ArticleContent = ({ article }: { article: any }) => {
   // Ссылка должна быть стабильной: React 19 сверяет dangerouslySetInnerHTML по
   // идентичности объекта и иначе перезаписывал бы innerHTML на каждом рендере,
   // стирая галереи, которые вставлены порталами.
-  const processedMarkup = useMemo(() => ({ __html: processedContent }), [processedContent]);
+  const processedMarkup = useMemo(() => ({ __html: sanitizeHtml(processedContent) }), [processedContent]);
 
   // Блочный редактор используем только когда блоки действительно есть.
   // Статьи из админки идут с contentMode="editor", но без блоков — их
@@ -444,7 +445,7 @@ export const ArticleContent = ({ article }: { article: any }) => {
                     <div
                       key={block.id}
                       className="mb-6"
-                      dangerouslySetInnerHTML={{ __html: block.content }}
+                      dangerouslySetInnerHTML={{ __html: sanitizeHtml(block.content) }}
                     />
                   );
                 case "image": {

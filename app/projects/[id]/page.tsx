@@ -45,7 +45,16 @@ export default function ProjectDetailPage() {
   const user = useAppSelector((state) => state.authSlice.user);
 
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
-  const [activeIndex, setActiveIndex] = useState(0);
+  // Индекс слайда привязан к id проекта: при переходе на другой проект
+  // (например, по ссылке из «Поделиться») галерея начинается с первой картинки.
+  const [gallery, setGallery] = useState({ projectId, index: 0 });
+  const activeIndex = gallery.projectId === projectId ? gallery.index : 0;
+  const setActiveIndex = (update: number | ((prev: number) => number)) => {
+    setGallery((prev) => {
+      const current = prev.projectId === projectId ? prev.index : 0;
+      return { projectId, index: typeof update === "function" ? update(current) : update };
+    });
+  };
   const [imageFit, setImageFit] = useState<"cover" | "contain">("cover");
   const [aspectRatio, setAspectRatio] = useState<"3/2" | "16/9" | "auto">("3/2");
 

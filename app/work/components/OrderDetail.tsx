@@ -2,7 +2,6 @@
 "use client";
 
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -13,44 +12,34 @@ import {
 import {
   useApiOrdersRespondCreateMutation,
   useApiOrdersListQuery,
+  type OrderDetailRead,
 } from "@/services/generatedApi";
-import { useState } from "react";
-import { toast } from "sonner";
 import { OrderCard } from "./OrderCard";
+import { RespondButton } from "./RespondButton";
 import Image from "next/image";
 import RichContent from "@/components/content/RichContent";
+import { asStringArray } from "../model/format";
+
+const SIMILAR_ORDERS_LIMIT = 3;
 
 interface OrderDetailProps {
-  order: any;
+  order: OrderDetailRead;
 }
 
 export function OrderDetailComponent({ order }: OrderDetailProps) {
   const [respondToOrder] = useApiOrdersRespondCreateMutation();
-  const [isResponding, setIsResponding] = useState(false);
 
   // Получаем список похожих заказов (в данном случае просто берем список)
   const { data: similarOrdersData } = useApiOrdersListQuery({ ordering: "-created_at" });
-  
-  // Исключаем текущий заказ из списка похожих
-  const similarOrders = similarOrdersData?.results?.filter(
-    (item: any) => item.id !== order.id
-  ).slice(0, 3) || [];
 
-  const handleRespond = async () => {
-    setIsResponding(true);
-    try {
-      await respondToOrder({ id: order.id }).unwrap();
-      toast.success("Отклик отправлен");
-    } catch (error: any) {
-      if (error?.status === 401) {
-        toast.error("Авторизуйтесь, чтобы откликнуться");
-      } else {
-        toast.error("Ошибка при отправке отклика");
-      }
-    } finally {
-      setIsResponding(false);
-    }
-  };
+  // Исключаем текущий заказ из списка похожих
+  const similarOrders =
+    similarOrdersData?.results
+      ?.filter((item) => item.id !== order.id)
+      .slice(0, SIMILAR_ORDERS_LIMIT) ?? [];
+
+  const tags = [...asStringArray(order.propertyType), ...asStringArray(order.software)];
+  const customerName = order.createdByName || "Имя не указано";
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -80,15 +69,21 @@ export function OrderDetailComponent({ order }: OrderDetailProps) {
                     </span>
                   </div>
                 </div>
+                {tags.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-3">
+                    {tags.map((tag) => (
+                      <span key={tag} className="text-xs bg-gray-100 px-2 py-1 rounded-full">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
 
-              <Button
-                className="w-fit rounded-[40px] px-8"
-                onClick={handleRespond}
-                disabled={isResponding}
-              >
-                {isResponding ? "Отправка..." : "Откликнуться"}
-              </Button>
+              <RespondButton
+                className="w-fit px-8"
+                onRespond={() => respondToOrder({ id: order.id }).unwrap()}
+              />
 
               <div className="pt-4 space-y-6">
                 <div>
@@ -98,7 +93,7 @@ export function OrderDetailComponent({ order }: OrderDetailProps) {
                     html={order.description || ""}
                   />
                 </div>
-                
+
                 {/* Если в будущем добавятся поля для файлов или локации, их можно вывести здесь */}
               </div>
             </CardContent>
@@ -109,7 +104,7 @@ export function OrderDetailComponent({ order }: OrderDetailProps) {
             <div className="pt-8">
               <h2 className="text-xl font-bold mb-6">Похожие заказы</h2>
               <div className="space-y-4">
-                {similarOrders.map((similarOrder: any) => (
+                {similarOrders.map((similarOrder) => (
                   <OrderCard key={similarOrder.id} order={similarOrder} />
                 ))}
               </div>
@@ -125,15 +120,13 @@ export function OrderDetailComponent({ order }: OrderDetailProps) {
                 <div className="relative w-12 h-12 rounded-full overflow-hidden bg-gray-100 flex-shrink-0">
                   <Image
                     src="/user.svg"
-                    alt={order.created_by_name || "Пользователь"}
+                    alt={customerName}
                     fill
                     className="object-cover"
                   />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-lg line-clamp-1">
-                    {order.created_by_name || "Имя не указано"}
-                  </h3>
+                  <h3 className="font-semibold text-lg line-clamp-1">{customerName}</h3>
                   <p className="text-gray-500 text-sm">Заказчик</p>
                 </div>
               </div>

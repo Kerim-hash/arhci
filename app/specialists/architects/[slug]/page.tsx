@@ -2,17 +2,26 @@
 
 "use client";
 
+import { useEffect } from "react";
 import { useParams } from "next/navigation";
 import Image from "next/image";
 import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
-import { Eye, Mail, MapPin, Plus, ThumbsUp, User } from "lucide-react";
+import { Mail, MapPin, Plus, User } from "lucide-react";
 import { useAppSelector } from "@/app/store/hooks";
-import { useApiProjectsSpecialistListQuery } from "@/services/generatedApi";
-import { useApiSpecialistsRetrieveQuery } from "@/services/generatedApi";
+import {
+  useApiProjectsSpecialistListQuery,
+  useApiSpecialistsRetrieveQuery,
+  useApiSpecialistsViewsCreateMutation,
+} from "@/services/generatedApi";
 import ProjectCard from "@/app/projects/components/ProjectCard";
-import { Button } from "@/components/ui/button";
 import LikeButton from "@/components/LikeButton";
+
+// regionFrom приходит списком регионов; собираем в одну строку
+const formatLocation = (regionFrom: unknown): string =>
+  Array.isArray(regionFrom)
+    ? regionFrom.filter((region): region is string => typeof region === "string" && region.trim() !== "").join(", ")
+    : "";
 
 export default function ArchitectPage() {
   const params = useParams();
@@ -23,6 +32,15 @@ export default function ArchitectPage() {
     { skip: !slug }
   );
   const user = useAppSelector((state) => state.authSlice.user);
+  const [incrementViews] = useApiSpecialistsViewsCreateMutation();
+
+  // Считаем просмотр один раз на загруженный профиль, а не на каждый рефетч
+  const loadedId = architect?.id;
+  useEffect(() => {
+    if (loadedId !== undefined) {
+      incrementViews({ id: loadedId });
+    }
+  }, [loadedId, incrementViews]);
 
   const { data: projectsData } = useApiProjectsSpecialistListQuery(
     { specialistId: architect?.id || 0 },
@@ -41,9 +59,10 @@ export default function ArchitectPage() {
     );
   }
 
+  // Показываем только то, что специалист действительно указал — без выдуманных контактов
   const contacts = {
-    email: architect.email || `${architect.slug}@example.com`,
-    country: "Кыргызстан",
+    email: architect.email || "",
+    location: formatLocation(architect.regionFrom),
   };
 
   return (
@@ -87,13 +106,13 @@ export default function ArchitectPage() {
                     {architect.categoryName || architect.category || ''}
                   </div>
                   <p>{architect.firm || ''}</p>
-                  {contacts && (
+                  {contacts.location && (
                     <div className="flex items-center gap-2 text-[#949494]">
                       <MapPin width={14} />
-                      <span>{contacts.country}</span>
+                      <span>{contacts.location}</span>
                     </div>
                   )}
-                  {contacts && (
+                  {contacts.email && (
                     <div
                       style={{
                         display: "flex",

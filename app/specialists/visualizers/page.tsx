@@ -2,7 +2,11 @@
 
 "use client";
 
-import { useApiSpecialistsListQuery } from "@/services/generatedApi";
+import {
+  generatedApi,
+  useApiSpecialistsListQuery,
+  type SpecialistListRead,
+} from "@/services/generatedApi";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,6 +20,7 @@ import {
 import { useState } from "react";
 import { Search, SlidersHorizontal } from "lucide-react";
 import SpecialistCard from "../components/SpecialistCard";
+import { formatApiError } from "@/lib/formatApiError";
 
 const sortOptions = [
   { value: "-rating", label: "По рейтингу (высший)" },
@@ -26,20 +31,65 @@ const sortOptions = [
   { value: "-name", label: "По имени (Я-А)" },
 ];
 
+const CATEGORY = "visualizers";
+
+// Страницы после первой копятся здесь; ключ — параметры списка,
+// при их смене накопленное отбрасывается само.
+interface ExtraPages {
+  key: string;
+  page: number;
+  items: SpecialistListRead[];
+  next: string | null;
+}
+
+const NO_EXTRA_PAGES: ExtraPages = { key: "", page: 1, items: [], next: null };
+
 export default function VisualizersPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("-rating");
+  const [extra, setExtra] = useState<ExtraPages>(NO_EXTRA_PAGES);
+  const [loadMoreError, setLoadMoreError] = useState<string | null>(null);
 
-  const { data } = useApiSpecialistsListQuery({
-    category: "visualizers",
-    search: searchTerm || undefined,
+  const search = searchTerm || undefined;
+  const listKey = `${searchTerm}|${sortBy}`;
+
+  const { data, isLoading } = useApiSpecialistsListQuery({
+    category: CATEGORY,
+    search,
     ordering: sortBy,
+    page: 1,
   });
-  const filteredAndSortedVisualizers = data?.results || [];
+  const [loadMore, { isFetching: isLoadingMore }] =
+    generatedApi.endpoints.apiSpecialistsList.useLazyQuery();
+
+  const loaded = extra.key === listKey ? extra : NO_EXTRA_PAGES;
+  const filteredAndSortedVisualizers = [...(data?.results || []), ...loaded.items];
+  const nextUrl = loaded.page > 1 ? loaded.next : data?.next ?? null;
 
   const resetSearch = () => {
     setSearchTerm("");
     setSortBy("-rating");
+  };
+
+  const handleLoadMore = async () => {
+    const nextPage = loaded.page + 1;
+    setLoadMoreError(null);
+    try {
+      const response = await loadMore({
+        category: CATEGORY,
+        search,
+        ordering: sortBy,
+        page: nextPage,
+      }).unwrap();
+      setExtra({
+        key: listKey,
+        page: nextPage,
+        items: [...loaded.items, ...response.results],
+        next: response.next ?? null,
+      });
+    } catch (err) {
+      setLoadMoreError(formatApiError(err, "Не удалось загрузить специалистов."));
+    }
   };
 
   return (
@@ -88,7 +138,7 @@ export default function VisualizersPage() {
       {/* Результаты */}
       <div className="mb-4 flex justify-between items-center">
         <p className="text-sm text-[#666666]">
-          Найдено: {filteredAndSortedVisualizers.length} визуализаторов
+          Найдено: {data?.count ?? 0} визуализаторов
         </p>
         {searchTerm && (
           <Button variant="ghost" size="sm" onClick={resetSearch}>
@@ -98,16 +148,35 @@ export default function VisualizersPage() {
       </div>
 
       {/* Grid карточек */}
-      {filteredAndSortedVisualizers.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
-          {filteredAndSortedVisualizers.map((visualizer) => (
-            <SpecialistCard
-              key={visualizer.id}
-              specialist={visualizer}
-              simplified={false}
-            />
-          ))}
-        </div>
+      {isLoading ? (
+        <div className="text-center py-12 text-[#666666]">Загрузка...</div>
+      ) : filteredAndSortedVisualizers.length > 0 ? (
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+            {filteredAndSortedVisualizers.map((visualizer) => (
+              <SpecialistCard
+                key={visualizer.id}
+                specialist={visualizer}
+                simplified={false}
+              />
+            ))}
+          </div>
+          {loadMoreError && (
+            <p className="text-center text-sm text-red-500 mt-6">{loadMoreError}</p>
+          )}
+          {nextUrl && (
+            <div className="flex justify-center mt-8">
+              <Button
+                variant="outline"
+                className="rounded-[40px]"
+                onClick={handleLoadMore}
+                disabled={isLoadingMore}
+              >
+                {isLoadingMore ? "Загрузка..." : "Показать ещё"}
+              </Button>
+            </div>
+          )}
+        </>
       ) : (
         <div className="text-center py-12">
           <div className="text-[#666666] mb-4">
