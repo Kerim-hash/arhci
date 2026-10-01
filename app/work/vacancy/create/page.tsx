@@ -14,6 +14,7 @@ import { useApiVacanciesCreateCreateMutation } from "@/services/generatedApi";
 import Link from "next/link";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
+import { SPECIALTIES, type SpecialtyId } from "@/lib/specialties";
 
 const EXPERIENCE_OPTIONS = [
   "Без опыта",
@@ -51,6 +52,7 @@ export default function CreateVacancyPage() {
 
   // States
   const [title, setTitle] = useState("");
+  const [specialization, setSpecialization] = useState<SpecialtyId | "">("");
   const [salaryFrom, setSalaryFrom] = useState("");
   const [salaryTo, setSalaryTo] = useState("");
   const [currency, setCurrency] = useState("сом");
@@ -118,6 +120,7 @@ export default function CreateVacancyPage() {
       await createVacancy({
         vacancyCreate: {
           title,
+          specialization: specialization || undefined,
           salaryFrom: Number(salaryFrom) || undefined,
           salaryTo: Number(salaryTo) || undefined,
           currency,
@@ -194,6 +197,26 @@ export default function CreateVacancyPage() {
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Ведущий архитектор (Lead Architect)"
             />
+          </div>
+          {/* По специализации вакансию находят через фильтр в разделе «Работа» */}
+          <div className="mt-4">
+            <label className="text-sm font-medium text-[#333] mb-2 block">
+              Специализация
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {SPECIALTIES.map((spec) => (
+                <Badge
+                  key={spec.id}
+                  variant={specialization === spec.id ? "default" : "outline"}
+                  className="cursor-pointer text-sm py-1.5 px-4"
+                  onClick={() =>
+                    setSpecialization(specialization === spec.id ? "" : spec.id)
+                  }
+                >
+                  {spec.plural}
+                </Badge>
+              ))}
+            </div>
           </div>
         </div>
 

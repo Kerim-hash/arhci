@@ -15,6 +15,7 @@ export function VacanciesList() {
 
   const { data, isLoading } = useApiVacanciesListQuery({
     search: searchQuery || undefined,
+    specialization: filters.specializations.join(",") || undefined,
     experience: filters.experience || undefined,
     region: filters.region && filters.region !== "all" ? filters.region : undefined,
     salaryFrom: filters.incomeFrom ? Number(filters.incomeFrom) : undefined,

@@ -225,6 +225,7 @@ const injectedRtkApi = api.injectEndpoints({
           region: queryArg.region,
           salary_from: queryArg.salaryFrom,
           search: queryArg.search,
+          specialization: queryArg.specialization,
           user: queryArg.user,
         },
       }),
@@ -644,6 +645,8 @@ export type ApiResumesListApiArg = {
   salaryFrom?: number;
   /** A search term. */
   search?: string;
+  /** Специализация: ключи или подписи через запятую */
+  specialization?: string;
   /** ID автора */
   user?: number;
 };

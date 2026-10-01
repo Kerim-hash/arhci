@@ -717,6 +717,11 @@ paths:
         schema:
           type: string
       - in: query
+        name: specialization
+        schema:
+          type: string
+        description: 'Специализация: ключи или подписи через запятую'
+      - in: query
         name: user
         schema:
           type: integer

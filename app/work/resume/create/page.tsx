@@ -15,14 +15,10 @@ import type { WorkExperience } from "@/app/store/features/resumesSlice";
 import Link from "next/link";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
+import { SPECIALTIES } from "@/lib/specialties";
 
-const SPECIALIZATION_OPTIONS = [
-  "Архитекторы",
-  "Инженеры",
-  "Конструкторы",
-  "Визуализаторы",
-  "Дизайнеры интерьер",
-];
+// В резюме специализации хранятся подписями — теми же, что в фильтре
+const SPECIALIZATION_OPTIONS = SPECIALTIES.map((spec) => spec.plural);
 
 const SOFTWARE_OPTIONS = [
   "ArchiCAD",

@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAppDispatch, useAppSelector } from "@/app/store/hooks";
+import { SPECIALTIES } from "@/lib/specialties";
 import {
   resetFilters,
   updateFilters,
@@ -21,13 +22,8 @@ export function ResumeFiltersSidebar() {
   const dispatch = useAppDispatch();
   const { filters } = useAppSelector((state) => state.resumes);
 
-  const specializations = [
-    "Архитекторы",
-    "Инженеры",
-    "Конструкторы",
-    "Дизайнеры интерьер",
-    "Визуализаторы",
-  ];
+  // В фильтре хранятся ключи категорий — их и ждёт бэкенд
+  const specializations = SPECIALTIES;
   const softwareList = [
     "ArchiCAD",
     "AutoCAD",
@@ -73,18 +69,18 @@ export function ResumeFiltersSidebar() {
           <AccordionTrigger>Специализация</AccordionTrigger>
           <AccordionContent className="space-y-2">
             {specializations.map((spec) => (
-              <div key={spec} className="flex items-center space-x-2">
+              <div key={spec.id} className="flex items-center space-x-2">
                 <Checkbox
-                  id={`resume-${spec}`}
-                  checked={filters.specializations.includes(spec)}
+                  id={`resume-${spec.id}`}
+                  checked={filters.specializations.includes(spec.id)}
                   onCheckedChange={(checked) => {
                     const newSpecs = checked
-                      ? [...filters.specializations, spec]
-                      : filters.specializations.filter((s) => s !== spec);
+                      ? [...filters.specializations, spec.id]
+                      : filters.specializations.filter((s) => s !== spec.id);
                     dispatch(updateFilters({ specializations: newSpecs }));
                   }}
                 />
-                <Label htmlFor={`resume-${spec}`}>{spec}</Label>
+                <Label htmlFor={`resume-${spec.id}`}>{spec.plural}</Label>
               </div>
             ))}
           </AccordionContent>

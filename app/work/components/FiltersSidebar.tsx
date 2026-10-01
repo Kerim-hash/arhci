@@ -19,19 +19,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useAppDispatch, useAppSelector } from "@/app/store/hooks";
+import { SPECIALTIES } from "@/lib/specialties";
 import { resetFilters, updateFilters } from "../model/vacanciesSlice";
 
 export function FiltersSidebar() {
   const dispatch = useAppDispatch();
   const { filters } = useAppSelector((state) => state.vacancies);
 
-  const specializations = [
-    "Архитекторы",
-    "Инженеры",
-    "Конструкторы",
-    "Дизайнеры интерьер",
-    "Визуализаторы",
-  ];
+  // В фильтре хранятся ключи категорий — их и ждёт бэкенд
+  const specializations = SPECIALTIES;
   const softwareList = [
     "ArchiCAD",
     "AutoCAD",
@@ -77,18 +73,18 @@ export function FiltersSidebar() {
           <AccordionTrigger>Специализация</AccordionTrigger>
           <AccordionContent className="space-y-2">
             {specializations.map((spec) => (
-              <div key={spec} className="flex items-center space-x-2">
+              <div key={spec.id} className="flex items-center space-x-2">
                 <Checkbox
-                  id={spec}
-                  checked={filters.specializations.includes(spec)}
+                  id={spec.id}
+                  checked={filters.specializations.includes(spec.id)}
                   onCheckedChange={(checked) => {
                     const newSpecs = checked
-                      ? [...filters.specializations, spec]
-                      : filters.specializations.filter((s) => s !== spec);
+                      ? [...filters.specializations, spec.id]
+                      : filters.specializations.filter((s) => s !== spec.id);
                     dispatch(updateFilters({ specializations: newSpecs }));
                   }}
                 />
-                <Label htmlFor={spec}>{spec}</Label>
+                <Label htmlFor={spec.id}>{spec.plural}</Label>
               </div>
             ))}
           </AccordionContent>

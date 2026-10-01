@@ -193,15 +193,18 @@ export default function CompetitionDetailPage() {
       {/* О конкурсе */}
       <div className="mt-10 lg:mt-20">
         <div className="flex flex-col lg:flex-row gap-6 lg:gap-10 mb-8">
-          <div className="w-full lg:w-auto mx-auto lg:mx-0">
-            <Image
-              src={currentCompetition.image || ''}
-              alt={currentCompetition.title}
-              width={328}
-              height={328}
-              className="w-full max-w-[328px] h-auto mx-auto lg:mx-0 rounded-lg"
-            />
-          </div>
+          {/* Без обложки блок не рисуем: пустой src у next/image — ошибка в консоли */}
+          {currentCompetition.image && (
+            <div className="w-full lg:w-auto mx-auto lg:mx-0">
+              <Image
+                src={currentCompetition.image}
+                alt={currentCompetition.title}
+                width={328}
+                height={328}
+                className="w-full max-w-[328px] h-auto mx-auto lg:mx-0 rounded-lg"
+              />
+            </div>
+          )}
           <div className="lg:flex-1">
             <h2 className="font-semibold mb-4 text-xl">О конкурсе</h2>
             <RichContent
