@@ -22,25 +22,9 @@ import {
   useCheckCodeMutation,
   useChangePasswordMutation,
 } from "@/app/store/features/authApi";
+import { formatApiError } from "@/lib/formatApiError";
 
 type Step = "email" | "code" | "password";
-
-function getApiErrorMessage(error: unknown, fallback: string): string {
-  const err = error as { data?: unknown; message?: string };
-  if (err?.data) {
-    if (typeof err.data === "string") return err.data;
-    const data = err.data as Record<string, unknown>;
-    if (typeof data.detail === "string") return data.detail;
-    if (typeof data.message === "string") return data.message;
-    const messages = Object.values(data).flat();
-    if (messages.length > 0 && typeof messages[0] === "string") {
-      return messages.join(", ");
-    }
-  }
-  if (typeof err?.message === "string") return err.message;
-  if (typeof error === "string") return error;
-  return fallback;
-}
 
 export default function RecoverPage() {
   const router = useRouter();
@@ -75,7 +59,7 @@ export default function RecoverPage() {
       setStep("code");
       toast.success("Код отправлен на email");
     } catch (error) {
-      toast.error(getApiErrorMessage(error, "Не удалось отправить код"));
+      toast.error(formatApiError(error, "Не удалось отправить код"));
     }
   };
 
@@ -84,7 +68,7 @@ export default function RecoverPage() {
       await requestReset({ email }).unwrap();
       toast.success("Код отправлен повторно");
     } catch (error) {
-      toast.error(getApiErrorMessage(error, "Не удалось отправить код"));
+      toast.error(formatApiError(error, "Не удалось отправить код"));
     }
   };
 
@@ -94,7 +78,7 @@ export default function RecoverPage() {
       setCode(data.code);
       setStep("password");
     } catch (error) {
-      toast.error(getApiErrorMessage(error, "Неверный код"));
+      toast.error(formatApiError(error, "Неверный код"));
     }
   };
 
@@ -104,7 +88,7 @@ export default function RecoverPage() {
       toast.success("Пароль успешно изменён");
       router.push("/auth/login");
     } catch (error) {
-      toast.error(getApiErrorMessage(error, "Не удалось изменить пароль"));
+      toast.error(formatApiError(error, "Не удалось изменить пароль"));
     }
   };
 

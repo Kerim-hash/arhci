@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { LoginSchema, TypeLoginSchema } from "@/schemas/login";
 import { useLoginMutation } from "@/app/store/features/authApi";
 import { useAuth } from "@/hooks/use-auth";
+import { formatApiError } from "@/lib/formatApiError";
 
 // Схема валидации формы
 
@@ -38,31 +39,8 @@ export default function LoginPage() {
       }).unwrap();
 
       loginSuccess(res);
-    } catch (error: any) {
-      console.error("Login error:", error);
-      let errorMessage = "Ошибка при входе в систему";
-
-      if (error?.data) {
-        if (typeof error.data === "string") {
-          errorMessage = error.data;
-        } else if (error.data.detail) {
-          errorMessage = error.data.detail;
-        } else if (error.data.message) {
-          errorMessage = error.data.message;
-        } else {
-          // Если бэкенд возвращает ошибки валидации полей, например: { non_field_errors: ["..."] }
-          const errors = Object.values(error.data).flat();
-          if (errors.length > 0 && typeof errors[0] === "string") {
-            errorMessage = errors.join(", ");
-          }
-        }
-      } else if (error?.message) {
-        errorMessage = error.message;
-      } else if (typeof error === "string") {
-        errorMessage = error;
-      }
-
-      toast.error(errorMessage);
+    } catch (error) {
+      toast.error(formatApiError(error, "Ошибка при входе в систему"));
     }
   };
 

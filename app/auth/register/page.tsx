@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -14,6 +13,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/use-auth";
 import { SPECIALTIES } from "@/lib/specialties";
+import { formatApiError } from "@/lib/formatApiError";
 
 type FormValues = {
   email: string;
@@ -74,31 +74,8 @@ export default function LoginPage() {
 
       loginSuccess(res);
       toast.success("Успешная регистрация!");
-    } catch (error: any) {
-      console.error("Registration error:", error);
-      let errorMessage = "Ошибка при регистрации";
-
-      if (error?.data) {
-        if (typeof error.data === "string") {
-          errorMessage = error.data;
-        } else if (error.data.detail) {
-          errorMessage = error.data.detail;
-        } else if (error.data.message) {
-          errorMessage = error.data.message;
-        } else {
-          // Если бэкенд возвращает ошибки валидации полей, например: { email: ["..."], role: ["..."] }
-          const errors = Object.values(error.data).flat();
-          if (errors.length > 0 && typeof errors[0] === "string") {
-            errorMessage = errors.join(", ");
-          }
-        }
-      } else if (error?.message) {
-        errorMessage = error.message;
-      } else if (typeof error === "string") {
-        errorMessage = error;
-      }
-
-      toast.error(errorMessage);
+    } catch (error) {
+      toast.error(formatApiError(error, "Ошибка при регистрации"));
     }
   };
 
