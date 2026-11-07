@@ -2,6 +2,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -22,6 +23,7 @@ import {
 import { toast } from "sonner";
 import RichContent from "@/components/content/RichContent";
 import { useRole } from "@/hooks/use-role";
+import { companyHref } from "@/app/companies/model/listParams";
 import { formatApiError } from "@/lib/formatApiError";
 import { asStringArray, formatSalaryRange } from "../model/format";
 import { RespondButton } from "./RespondButton";
@@ -255,7 +257,15 @@ export function VacancyDetailComponent({ vacancy }: VacancyDetailProps) {
           <Card>
             <CardContent className="p-0! space-y-2">
               <h3 className="font-semibold">Компания</h3>
-              <p className="text-gray-800 font-medium">{vacancy.companyName}</p>
+              <p className="text-gray-800 font-medium">
+                {vacancy.companySlug ? (
+                  <Link href={companyHref(vacancy.companySlug)} className="hover:underline">
+                    {vacancy.companyName}
+                  </Link>
+                ) : (
+                  vacancy.companyName
+                )}
+              </p>
               {vacancy.companyAddress && (
                 <p className="text-sm text-gray-500">{vacancy.companyAddress}</p>
               )}

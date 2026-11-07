@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { Suspense, useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,8 +25,27 @@ import { useAuth } from "@/hooks/use-auth";
 import { tokenStorage } from "@/hooks/storage";
 import { displayName } from "@/lib/displayName";
 import { formatApiError } from "@/lib/formatApiError";
+import { CompanyInfoForm } from "../components/CompanyInfoForm";
 
-type TabType = "personal" | "social" | "password";
+const TABS = ["personal", "company", "social", "password"] as const;
+type TabType = (typeof TABS)[number];
+
+const isTab = (value: string | null): value is TabType => TABS.includes(value as TabType);
+
+/**
+ * Открывает вкладку из `?tab=` (ссылка «Редактировать данные» со страницы компании).
+ * Вынесено в отдельный компонент под Suspense: useSearchParams без него
+ * ломает статическую сборку страницы.
+ */
+function TabFromQuery({ onTab }: { onTab: (tab: TabType) => void }) {
+  const tab = useSearchParams().get("tab");
+
+  useEffect(() => {
+    if (isTab(tab)) onTab(tab);
+  }, [tab, onTab]);
+
+  return null;
+}
 
 const ProfileSettings = () => {
   const router = useRouter();
@@ -61,10 +80,12 @@ const ProfileSettings = () => {
     }
   }, [isUnauthorized, router]);
 
-  const tabs = [
-    { id: "personal" as const, label: "Личная информация" },
-    { id: "social" as const, label: "Социальные сети" },
-    { id: "password" as const, label: "Пароль" },
+  const isCompany = user?.role === "company";
+  const tabs: { id: TabType; label: string }[] = [
+    { id: "personal", label: "Личная информация" },
+    ...(isCompany ? [{ id: "company" as const, label: "Данные компании" }] : []),
+    { id: "social", label: "Социальные сети" },
+    { id: "password", label: "Пароль" },
   ];
 
   if (isLoading) {
@@ -99,6 +120,9 @@ const ProfileSettings = () => {
             <ChangeEmail user={user} refetch={refetch} />
           </>
         );
+      case "company":
+        // Название компании видно и в аккаунте — после сохранения обновляем профиль
+        return isCompany ? <CompanyInfoForm onSaved={refetch} /> : null;
       case "social":
         return <SocialLinks user={user} refetch={refetch} />;
       case "password":
@@ -110,6 +134,9 @@ const ProfileSettings = () => {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
+      <Suspense fallback={null}>
+        <TabFromQuery onTab={setActiveTab} />
+      </Suspense>
       <Link
         href="/profile"
         className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-primary mb-6 transition-colors"
@@ -162,6 +189,9 @@ const ProfileSettings = () => {
               <p className="text-gray-500 text-sm">
                 {user?.position || (user?.role === "specialist" ? "Специалист" : "Компания")}
               </p>
+              {isCompany && (
+                <p className="text-xs text-gray-400 mt-2">Это фото — логотип компании</p>
+              )}
             </div>
 
             {/* Навигация */}
@@ -219,7 +249,6 @@ const PersonalInfo = ({ user, refetch }: { user?: User; refetch?: () => any }) =
       name: user?.name || (user?.first_name || user?.firstName ? `${user?.first_name || user?.firstName || ""} ${user?.last_name || user?.lastName || ""}`.trim() : ""),
       phone: user?.phone || "",
       position: user?.position || "",
-      company_name: user?.company_name || user?.companyName || user?.firm || "",
       bio: user?.bio || "",
       specialization: user?.specialization || "",
       experience_years: user?.experience_years || user?.experienceYears || undefined,
@@ -232,7 +261,6 @@ const PersonalInfo = ({ user, refetch }: { user?: User; refetch?: () => any }) =
         name: user.name || (user.first_name || user.firstName ? `${user.first_name || user.firstName || ""} ${user.last_name || user.lastName || ""}`.trim() : ""),
         phone: user.phone || "",
         position: user.position || "",
-        company_name: user.company_name || user.companyName || user.firm || "",
         bio: user.bio || "",
         specialization: user.specialization || "",
         experience_years: user.experience_years || user.experienceYears || undefined,
@@ -257,10 +285,6 @@ const PersonalInfo = ({ user, refetch }: { user?: User; refetch?: () => any }) =
       }
       if (payload.last_name) {
         (payload as any).lastName = payload.last_name;
-      }
-      if (payload.company_name) {
-        (payload as any).companyName = payload.company_name;
-        (payload as any).firm = payload.company_name;
       }
       if (payload.experience_years) {
         (payload as any).experienceYears = payload.experience_years;
@@ -333,19 +357,6 @@ const PersonalInfo = ({ user, refetch }: { user?: User; refetch?: () => any }) =
           />
           {errors.position && <p className="text-sm text-red-500 mt-1">{errors.position.message}</p>}
         </div>
-
-        {user?.role === "company" && (
-          <div>
-            <Label htmlFor="company_name">Компания / Бюро</Label>
-            <Input
-              id="company_name"
-              {...register("company_name")}
-              placeholder="Название компании"
-              className="mt-1.5"
-            />
-            {errors.company_name && <p className="text-sm text-red-500 mt-1">{errors.company_name.message}</p>}
-          </div>
-        )}
 
         <div>
           <Label htmlFor="bio">О себе</Label>

@@ -5,7 +5,11 @@ import Link from "next/link";
 import { Mail, MapPin, User as UserIcon } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
-import { useApiSpecialistsRetrieveQuery } from "@/services/generatedApi";
+import {
+  useApiCompaniesRetrieveQuery,
+  useApiSpecialistsRetrieveQuery,
+} from "@/services/generatedApi";
+import { companyHref } from "@/app/companies/model/listParams";
 import { User } from "@/types/user";
 import { displayName } from "@/lib/displayName";
 
@@ -13,6 +17,13 @@ export function ProfileSidebar({ user }: { user?: User }) {
   const { data: specialist } = useApiSpecialistsRetrieveQuery(
     { slug: user?.specialistSlug || "" },
     { skip: !user?.specialistSlug }
+  );
+  // У компании своя публичная страница — показываем её счётчики и ссылку
+  const isCompany = user?.role === "company";
+  const companySlug = isCompany ? user?.companySlug || "" : "";
+  const { data: company } = useApiCompaniesRetrieveQuery(
+    { slug: companySlug },
+    { skip: !companySlug }
   );
 
   const roleLabel =
@@ -56,19 +67,41 @@ export function ProfileSidebar({ user }: { user?: User }) {
       <Separator className="my-6 bg-[#333] h-[1px]" />
 
       <div className="space-y-3">
-        <div className="flex justify-between items-center text-sm">
-          <p>Просмотры проектов</p>
-          <p>{specialist?.views || 0}</p>
-        </div>
-        <div className="flex justify-between items-center text-sm">
-          <p>Оценки</p>
-          <p>{specialist?.likes || 0}</p>
-        </div>
+        {isCompany ? (
+          <>
+            <div className="flex justify-between items-center text-sm">
+              <p>Просмотры страницы</p>
+              <p>{company?.views ?? 0}</p>
+            </div>
+            <div className="flex justify-between items-center text-sm">
+              <p>Открытых вакансий</p>
+              <p>{company?.vacanciesCount ?? 0}</p>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="flex justify-between items-center text-sm">
+              <p>Просмотры проектов</p>
+              <p>{specialist?.views || 0}</p>
+            </div>
+            <div className="flex justify-between items-center text-sm">
+              <p>Оценки</p>
+              <p>{specialist?.likes || 0}</p>
+            </div>
+          </>
+        )}
       </div>
 
       <Link href="/profile/settings" className="block mt-6">
         <Button className="w-full rounded-[40px]">Изменить профиль</Button>
       </Link>
+      {companySlug && (
+        <Link href={companyHref(companySlug)} className="block mt-3">
+          <Button variant="outline" className="w-full rounded-[40px]">
+            Страница компании
+          </Button>
+        </Link>
+      )}
     </div>
   );
 }

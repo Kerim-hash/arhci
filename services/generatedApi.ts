@@ -42,6 +42,50 @@ const injectedRtkApi = api.injectEndpoints({
         body: queryArg.articleCreate,
       }),
     }),
+    apiCompaniesList: build.query<
+      ApiCompaniesListApiResponse,
+      ApiCompaniesListApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/companies/`,
+        params: {
+          ordering: queryArg.ordering,
+          page: queryArg.page,
+          search: queryArg.search,
+        },
+      }),
+    }),
+    apiCompaniesViewsCreate: build.mutation<
+      ApiCompaniesViewsCreateApiResponse,
+      ApiCompaniesViewsCreateApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/companies/${queryArg.id}/views/`,
+        method: "POST",
+      }),
+    }),
+    apiCompaniesRetrieve: build.query<
+      ApiCompaniesRetrieveApiResponse,
+      ApiCompaniesRetrieveApiArg
+    >({
+      query: (queryArg) => ({ url: `/api/companies/${queryArg.slug}/` }),
+    }),
+    apiCompaniesMeRetrieve: build.query<
+      ApiCompaniesMeRetrieveApiResponse,
+      ApiCompaniesMeRetrieveApiArg
+    >({
+      query: () => ({ url: `/api/companies/me/` }),
+    }),
+    apiCompaniesMePartialUpdate: build.mutation<
+      ApiCompaniesMePartialUpdateApiResponse,
+      ApiCompaniesMePartialUpdateApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/companies/me/`,
+        method: "PATCH",
+        body: queryArg.patchedCompanyProfile,
+      }),
+    }),
     apiCompetitionsList: build.query<
       ApiCompetitionsListApiResponse,
       ApiCompetitionsListApiArg
@@ -582,6 +626,33 @@ export type ApiArticlesCreateCreateApiResponse =
 export type ApiArticlesCreateCreateApiArg = {
   articleCreate: ArticleCreate;
 };
+export type ApiCompaniesListApiResponse =
+  /** status 200  */ PaginatedCompanyListListRead;
+export type ApiCompaniesListApiArg = {
+  /** Which field to use when ordering the results. */
+  ordering?: string;
+  /** A page number within the paginated result set. */
+  page?: number;
+  /** A search term. */
+  search?: string;
+};
+export type ApiCompaniesViewsCreateApiResponse = unknown;
+export type ApiCompaniesViewsCreateApiArg = {
+  id: number;
+};
+export type ApiCompaniesRetrieveApiResponse =
+  /** status 200  */ CompanyDetailRead;
+export type ApiCompaniesRetrieveApiArg = {
+  slug: string;
+};
+export type ApiCompaniesMeRetrieveApiResponse =
+  /** status 200  */ CompanyProfileRead;
+export type ApiCompaniesMeRetrieveApiArg = void;
+export type ApiCompaniesMePartialUpdateApiResponse =
+  /** status 200  */ CompanyProfileRead;
+export type ApiCompaniesMePartialUpdateApiArg = {
+  patchedCompanyProfile: PatchedCompanyProfile;
+};
 export type ApiCompetitionsListApiResponse =
   /** status 200  */ PaginatedCompetitionListListRead;
 export type ApiCompetitionsListApiArg = {
@@ -1012,6 +1083,100 @@ export type ArticleCreate = {
   isPublished?: boolean;
   biography?: string;
   contentMode?: ContentModeEnum;
+};
+export type CompanyList = {
+  slug: string;
+  address?: string;
+  website?: string;
+  views?: number;
+};
+export type CompanyListRead = {
+  id: number;
+  slug: string;
+  name: string;
+  logo: string;
+  address?: string;
+  website?: string;
+  views?: number;
+  vacanciesCount: number;
+};
+export type PaginatedCompanyListList = {
+  count: number;
+  next?: string | null;
+  previous?: string | null;
+  results: CompanyList[];
+};
+export type PaginatedCompanyListListRead = {
+  count: number;
+  next?: string | null;
+  previous?: string | null;
+  results: CompanyListRead[];
+};
+export type CompanyDetail = {
+  slug: string;
+  address?: string;
+  website?: string;
+  views?: number;
+  phone?: string;
+  email?: string;
+  description?: string;
+};
+export type CompanyDetailRead = {
+  id: number;
+  slug: string;
+  name: string;
+  logo: string;
+  address?: string;
+  website?: string;
+  views?: number;
+  vacanciesCount: number;
+  phone?: string;
+  email?: string;
+  description?: string;
+  userId: number;
+  isOwner: boolean;
+};
+export type CompanyProfile = {
+  name?: string;
+  logo?: string | null;
+  address?: string;
+  website?: string;
+  phone?: string;
+  email?: string;
+  description?: string;
+};
+export type CompanyProfileRead = {
+  id: number;
+  slug: string;
+  name?: string;
+  logo?: string | null;
+  address?: string;
+  website?: string;
+  phone?: string;
+  email?: string;
+  description?: string;
+  views: number;
+};
+export type PatchedCompanyProfile = {
+  name?: string;
+  logo?: string | null;
+  address?: string;
+  website?: string;
+  phone?: string;
+  email?: string;
+  description?: string;
+};
+export type PatchedCompanyProfileRead = {
+  id?: number;
+  slug?: string;
+  name?: string;
+  logo?: string | null;
+  address?: string;
+  website?: string;
+  phone?: string;
+  email?: string;
+  description?: string;
+  views?: number;
 };
 export type CompetitionList = {
   slug: string;
@@ -1736,6 +1901,7 @@ export type VacancyListRead = {
   companyType?: string;
   companyLogo?: string | null;
   companyAddress?: string;
+  companySlug: string | null;
   workPlace?: string;
   employment?: string;
   schedule?: string;
@@ -1745,7 +1911,7 @@ export type VacancyListRead = {
   payoutType?: string;
   viewsCount?: number;
   createdAt: string;
-  isSaved: string;
+  isSaved: boolean;
   responsesCount: number;
   moderationStatus: ModerationStatusEnum;
   /** Причина отклонения. Её видит автор материала. */
@@ -1830,6 +1996,7 @@ export type VacancyDetailRead = {
   companyPhone?: string;
   companyEmail?: string;
   companyDescription?: string;
+  companySlug: string | null;
   publisherName?: string;
   publisherPosition?: string;
   publisherPhone?: string;
@@ -1960,6 +2127,11 @@ export const {
   useApiArticlesRetrieveQuery,
   useApiArticlesDestroyMutation,
   useApiArticlesCreateCreateMutation,
+  useApiCompaniesListQuery,
+  useApiCompaniesViewsCreateMutation,
+  useApiCompaniesRetrieveQuery,
+  useApiCompaniesMeRetrieveQuery,
+  useApiCompaniesMePartialUpdateMutation,
   useApiCompetitionsListQuery,
   useApiCompetitionsRetrieveQuery,
   useApiCompetitionsDestroyMutation,

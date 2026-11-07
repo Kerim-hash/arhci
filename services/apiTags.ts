@@ -9,6 +9,11 @@ generatedApi.enhanceEndpoints({
     apiSpecialistsList: { providesTags: ["Specialists"] },
     apiSpecialistsTopList: { providesTags: ["Specialists"] },
     apiSpecialistsRetrieve: { providesTags: ["Specialists"] },
+    apiCompaniesList: { providesTags: ["Companies"] },
+    apiCompaniesRetrieve: { providesTags: ["Companies"] },
+    apiCompaniesMeRetrieve: { providesTags: ["Companies"] },
+    // Название компании и логотип видны в её вакансиях — обновляем и их
+    apiCompaniesMePartialUpdate: { invalidatesTags: ["Companies", "Vacancies"] },
     apiProjectsList: { providesTags: ["Projects"] },
     apiProjectsRetrieve: { providesTags: ["Projects"] },
     apiProjectsSpecialistList: { providesTags: ["Projects"] },

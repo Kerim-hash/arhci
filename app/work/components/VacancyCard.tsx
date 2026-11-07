@@ -7,6 +7,7 @@ import {
   useApiVacanciesRespondCreateMutation,
   type VacancyListRead,
 } from "@/services/generatedApi";
+import { companyHref } from "@/app/companies/model/listParams";
 import { formatSalaryRange } from "../model/format";
 import { RespondButton } from "./RespondButton";
 
@@ -22,7 +23,7 @@ export function VacancyCard({ vacancy }: VacancyCardProps) {
     <Card className="border border-[#F1EFEF] transition-shadow">
       <CardContent className="p-5">
         <div className="flex justify-between items-start gap-4">
-          {/* Левая часть: ссылка на вакансию — только заголовок и описание */}
+          {/* Левая часть: ссылка на вакансию — заголовок, зарплата и опыт */}
           <Link href={`/work/vacancy/${vacancy.id}`} className="flex-1 block">
             <h3 className="text-[24px] font-bold mb-2 text-primary">
               {vacancy.title}
@@ -43,22 +44,31 @@ export function VacancyCard({ vacancy }: VacancyCardProps) {
                 </div>
               )}
             </div>
-
-            {/* Компания */}
-            {vacancy.companyName && (
-              <div className="flex items-center gap-1 mb-2 text-primary">
-                <span className="text-sm font-medium">{vacancy.companyName}</span>
-              </div>
-            )}
-
-            {/* Адрес */}
-            {vacancy.companyAddress && (
-              <div className="flex items-center gap-1 text-[#949494]">
-                <span className="text-sm">{vacancy.companyAddress}</span>
-              </div>
-            )}
           </Link>
         </div>
+
+        {/* Компания — сосед ссылки на вакансию, а не её потомок: своя ссылка на страницу компании */}
+        {vacancy.companyName && (
+          <div className="flex items-center gap-1 mb-2 text-primary">
+            {vacancy.companySlug ? (
+              <Link
+                href={companyHref(vacancy.companySlug)}
+                className="text-sm font-medium hover:underline"
+              >
+                {vacancy.companyName}
+              </Link>
+            ) : (
+              <span className="text-sm font-medium">{vacancy.companyName}</span>
+            )}
+          </div>
+        )}
+
+        {/* Адрес */}
+        {vacancy.companyAddress && (
+          <div className="flex items-center gap-1 text-[#949494]">
+            <span className="text-sm">{vacancy.companyAddress}</span>
+          </div>
+        )}
 
         {/* Кнопка — сосед ссылки, а не её потомок, иначе <button> внутри <a> */}
         <RespondButton

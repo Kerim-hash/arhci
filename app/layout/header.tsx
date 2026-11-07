@@ -26,6 +26,7 @@ const Header: FC = () => {
     { label: "Главная", link: "" },
     { label: "Статьи", link: "articles" },
     { label: "Специалисты", link: "specialists" },
+    { label: "Компании", link: "companies" },
     { label: "Проекты", link: "projects" },
     { label: "Работа", link: "work" },
     { label: "Новости", link: "news" },

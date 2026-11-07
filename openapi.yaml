@@ -119,6 +119,114 @@ paths:
               schema:
                 $ref: '#/components/schemas/ArticleCreate'
           description: ''
+  /api/companies/:
+    get:
+      operationId: apiCompaniesList
+      description: 'GET /api/companies/ — Каталог компаний: поиск, сортировка, страницы.'
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - api
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCompanyListList'
+          description: ''
+  /api/companies/{id}/views/:
+    post:
+      operationId: apiCompaniesViewsCreate
+      description: POST /api/companies/:id/views/ — Засчитать просмотр страницы компании.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      security:
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/companies/{slug}/:
+    get:
+      operationId: apiCompaniesRetrieve
+      description: GET /api/companies/:slug/ — Страница компании.
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompanyDetail'
+          description: ''
+  /api/companies/me/:
+    get:
+      operationId: apiCompaniesMeRetrieve
+      description: GET/PATCH /api/companies/me/ — Данные своей компании (роль «компания»).
+      tags:
+      - api
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompanyProfile'
+          description: ''
+    patch:
+      operationId: apiCompaniesMePartialUpdate
+      description: GET/PATCH /api/companies/me/ — Данные своей компании (роль «компания»).
+      tags:
+      - api
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedCompanyProfile'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedCompanyProfile'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedCompanyProfile'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompanyProfile'
+          description: ''
   /api/competitions/:
     get:
       operationId: apiCompetitionsList
@@ -1598,6 +1706,166 @@ components:
       required:
       - id
       - image
+    CompanyDetail:
+      type: object
+      description: |-
+        Страница компании: контакты и описание.
+
+        Вакансии не вкладываются — их отдаёт /api/vacancies/?user=<userId> со
+        своей пагинацией и модерацией.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        slug:
+          type: string
+          title: Ссылка (slug)
+          maxLength: 50
+          pattern: ^[-a-zA-Z0-9_]+$
+        name:
+          type: string
+          readOnly: true
+        logo:
+          type: string
+          format: uri
+          readOnly: true
+        address:
+          type: string
+          title: Адрес
+          maxLength: 300
+        website:
+          type: string
+          format: uri
+          title: Сайт
+          maxLength: 200
+        views:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          title: Просмотры
+        vacanciesCount:
+          type: integer
+          readOnly: true
+        phone:
+          type: string
+          title: Телефон
+          maxLength: 30
+        email:
+          type: string
+          format: email
+          title: Email для связи
+          maxLength: 254
+        description:
+          type: string
+          title: Описание компании
+        userId:
+          type: integer
+          readOnly: true
+        isOwner:
+          type: boolean
+          readOnly: true
+      required:
+      - id
+      - isOwner
+      - logo
+      - name
+      - slug
+      - userId
+      - vacanciesCount
+    CompanyList:
+      type: object
+      description: Карточка компании в каталоге.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        slug:
+          type: string
+          title: Ссылка (slug)
+          maxLength: 50
+          pattern: ^[-a-zA-Z0-9_]+$
+        name:
+          type: string
+          readOnly: true
+        logo:
+          type: string
+          format: uri
+          readOnly: true
+        address:
+          type: string
+          title: Адрес
+          maxLength: 300
+        website:
+          type: string
+          format: uri
+          title: Сайт
+          maxLength: 200
+        views:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          title: Просмотры
+        vacanciesCount:
+          type: integer
+          readOnly: true
+      required:
+      - id
+      - logo
+      - name
+      - slug
+      - vacanciesCount
+    CompanyProfile:
+      type: object
+      description: |-
+        Свои данные компании — GET/PATCH /api/companies/me/.
+
+        Название и логотип записываются в аккаунт (см. Company), остальное — в
+        профиль компании.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        slug:
+          type: string
+          readOnly: true
+          title: Ссылка (slug)
+          pattern: ^[-a-zA-Z0-9_]+$
+        name:
+          type: string
+          maxLength: 200
+        logo:
+          type: string
+          format: uri
+          nullable: true
+        address:
+          type: string
+          title: Адрес
+          maxLength: 300
+        website:
+          type: string
+          format: uri
+          title: Сайт
+          maxLength: 200
+        phone:
+          type: string
+          title: Телефон
+          maxLength: 30
+        email:
+          type: string
+          format: email
+          title: Email для связи
+          maxLength: 254
+        description:
+          type: string
+          title: Описание компании
+        views:
+          type: integer
+          readOnly: true
+          title: Просмотры
+      required:
+      - id
+      - slug
+      - views
     CompetitionCreate:
       type: object
       description: Create competition serializer.
@@ -2263,6 +2531,29 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ArticleList'
+    PaginatedCompanyListList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/CompanyList'
     PaginatedCompetitionListList:
       type: object
       required:
@@ -2516,6 +2807,54 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/VacancyResponseDetail'
+    PatchedCompanyProfile:
+      type: object
+      description: |-
+        Свои данные компании — GET/PATCH /api/companies/me/.
+
+        Название и логотип записываются в аккаунт (см. Company), остальное — в
+        профиль компании.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        slug:
+          type: string
+          readOnly: true
+          title: Ссылка (slug)
+          pattern: ^[-a-zA-Z0-9_]+$
+        name:
+          type: string
+          maxLength: 200
+        logo:
+          type: string
+          format: uri
+          nullable: true
+        address:
+          type: string
+          title: Адрес
+          maxLength: 300
+        website:
+          type: string
+          format: uri
+          title: Сайт
+          maxLength: 200
+        phone:
+          type: string
+          title: Телефон
+          maxLength: 30
+        email:
+          type: string
+          format: email
+          title: Email для связи
+          maxLength: 254
+        description:
+          type: string
+          title: Описание компании
+        views:
+          type: integer
+          readOnly: true
+          title: Просмотры
     PatchedProjectUpdate:
       type: object
       description: |-
@@ -3511,6 +3850,10 @@ components:
         companyDescription:
           type: string
           title: Описание компании
+        companySlug:
+          type: string
+          nullable: true
+          readOnly: true
         publisherName:
           type: string
           title: Имя контактного лица
@@ -3556,6 +3899,7 @@ components:
           description: Причина отклонения. Её видит автор материала.
       required:
       - companyName
+      - companySlug
       - createdAt
       - id
       - isSaved
@@ -3616,6 +3960,10 @@ components:
           type: string
           title: Адрес компании
           maxLength: 300
+        companySlug:
+          type: string
+          nullable: true
+          readOnly: true
         workPlace:
           type: string
           title: Место работы (город/страна)
@@ -3654,7 +4002,7 @@ components:
           readOnly: true
           title: Создано в
         isSaved:
-          type: string
+          type: boolean
           readOnly: true
         responsesCount:
           type: integer
@@ -3671,6 +4019,7 @@ components:
           description: Причина отклонения. Её видит автор материала.
       required:
       - companyName
+      - companySlug
       - createdAt
       - id
       - isSaved

@@ -2,14 +2,19 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { Plus, X } from "lucide-react";
-import { useApiVacanciesCreateCreateMutation } from "@/services/generatedApi";
+import { Globe, Mail, MapPin, Phone, Plus, X } from "lucide-react";
+import {
+  useApiCompaniesMeRetrieveQuery,
+  useApiVacanciesCreateCreateMutation,
+  type CompanyProfileRead,
+} from "@/services/generatedApi";
 import Link from "next/link";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
@@ -52,6 +57,11 @@ export default function CreateVacancyPage() {
   const router = useRouter();
   const [createVacancy] = useApiVacanciesCreateCreateMutation();
   const { user, isAuthenticated } = useAuth();
+  // Данные компании берутся из профиля, а не вводятся в каждой вакансии заново
+  const isCompany = user?.role === "company";
+  const companyQuery = useApiCompaniesMeRetrieveQuery(undefined, { skip: !isCompany });
+  const company = companyQuery.data;
+  const companyName = company?.name?.trim() ?? "";
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [titleError, setTitleError] = useState<string | null>(null);
@@ -71,13 +81,6 @@ export default function CreateVacancyPage() {
   const [workFormat, setWorkFormat] = useState("");
   const [workingHours, setWorkingHours] = useState("");
 
-  const [company, setCompany] = useState("");
-  const [address, setAddress] = useState("");
-  const [companyWebsite, setCompanyWebsite] = useState("");
-  const [companyPhone, setCompanyPhone] = useState("");
-  const [companyEmail, setCompanyEmail] = useState("");
-  const [companyDescription, setCompanyDescription] = useState("");
-
   const [publisherName, setPublisherName] = useState("");
   const [publisherPosition, setPublisherPosition] = useState("");
   const [publisherPhone, setPublisherPhone] = useState("");
@@ -88,15 +91,14 @@ export default function CreateVacancyPage() {
   const [requirements, setRequirements] = useState<string[]>([""]);
   const [benefits, setBenefits] = useState<string[]>([""]);
 
-  // Предзаполняем компанию и контактное лицо, когда профиль загрузится.
-  // В профиле нет поля `name`, поэтому имя собирает displayName(); уже
-  // введённое вручную значение не перетираем.
+  // Предзаполняем контактное лицо, когда профиль загрузится. В профиле нет
+  // поля `name`, поэтому имя собирает displayName(); уже введённое вручную
+  // значение не перетираем.
   useEffect(() => {
     if (!user) return;
-    const name = displayName(user);
-    setCompany((prev) => prev || name);
-    setPublisherName((prev) => prev || name);
+    setPublisherName((prev) => prev || displayName(user));
     setPublisherEmail((prev) => prev || user.email || "");
+    setPublisherPhone((prev) => prev || user.phone || "");
   }, [user]);
 
   const toggleProgram = (value: string) => {
@@ -134,6 +136,11 @@ export default function CreateVacancyPage() {
       toast.error("Пожалуйста, войдите в систему, чтобы опубликовать вакансию.");
       return;
     }
+    // Без названия компании вакансии нечего показать в карточке
+    if (isCompany && !companyName) {
+      toast.error("Укажите название компании в настройках профиля.");
+      return;
+    }
     setIsSubmitting(true);
 
     try {
@@ -155,12 +162,12 @@ export default function CreateVacancyPage() {
           schedule,
           workingHours: workingHours,
           workFormat: workFormat,
-          companyName: company.trim() || displayName(user),
-          companyAddress: address,
-          companyWebsite: companyWebsite,
-          companyPhone: companyPhone,
-          companyEmail: companyEmail,
-          companyDescription: companyDescription,
+          companyName: companyName || displayName(user),
+          companyAddress: company?.address ?? "",
+          companyWebsite: company?.website ?? "",
+          companyPhone: company?.phone ?? "",
+          companyEmail: company?.email ?? "",
+          companyDescription: company?.description ?? "",
           publisherName: publisherName,
           publisherPosition: publisherPosition,
           publisherPhone: publisherPhone,
@@ -408,72 +415,26 @@ export default function CreateVacancyPage() {
         <div>
           <h2 className="text-lg font-semibold mb-4">Компания</h2>
           <Separator className="mb-4" />
-          <div className="space-y-4">
-            <div>
-              <label className="text-sm font-medium text-[#333] mb-2 block">
-                Название компании
-              </label>
-              <Input
-                value={company}
-                onChange={(e) => setCompany(e.target.value)}
-                placeholder="ООО «Архитектурное бюро»"
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium text-[#333] mb-2 block">
-                Адрес компании
-              </label>
-              <Input
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                placeholder="Бишкек, улица Акариба Банкова, 148/3"
-              />
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div>
-                <label className="text-sm font-medium text-[#333] mb-2 block">
-                  Сайт компании
-                </label>
-                <Input
-                  value={companyWebsite}
-                  onChange={(e) => setCompanyWebsite(e.target.value)}
-                  placeholder="https://example.com"
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-[#333] mb-2 block">
-                  Телефон компании
-                </label>
-                <Input
-                  value={companyPhone}
-                  onChange={(e) => setCompanyPhone(e.target.value)}
-                  placeholder="+996 XXX XXX XXX"
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-[#333] mb-2 block">
-                  Email компании
-                </label>
-                <Input
-                  value={companyEmail}
-                  type="email"
-                  onChange={(e) => setCompanyEmail(e.target.value)}
-                  placeholder="hr@example.com"
-                />
-              </div>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-[#333] mb-2 block">
-                Описание компании
-              </label>
-              <Textarea
-                value={companyDescription}
-                onChange={(e) => setCompanyDescription(e.target.value)}
-                placeholder="Расскажите немного о вашей компании, проектах и команде..."
-                rows={4}
-              />
-            </div>
-          </div>
+          {!isCompany ? (
+            <p className="text-sm text-[#949494]">
+              Вакансии публикуют аккаунты с ролью «компания».
+            </p>
+          ) : companyQuery.isLoading ? (
+            <p className="text-sm text-[#949494]">Загрузка данных компании...</p>
+          ) : company ? (
+            <CompanySummary company={company} />
+          ) : (
+            <p className="text-sm text-red-500">
+              Не удалось загрузить данные компании.{" "}
+              <button
+                type="button"
+                onClick={() => companyQuery.refetch()}
+                className="underline hover:text-red-700"
+              >
+                Повторить
+              </button>
+            </p>
+          )}
         </div>
 
         {/* ===== Контактное лицо ===== */}
@@ -660,5 +621,59 @@ export default function CreateVacancyPage() {
         </div>
       </div>
     </section>
+  );
+}
+
+/** Данные компании из профиля — так они попадут в вакансию. */
+function CompanySummary({ company }: { company: CompanyProfileRead }) {
+  const name = company.name?.trim();
+  const logo = company.logo || "";
+  const contacts = [
+    { icon: MapPin, value: company.address },
+    { icon: Phone, value: company.phone },
+    { icon: Mail, value: company.email },
+    { icon: Globe, value: company.website },
+  ].filter((contact) => Boolean(contact.value));
+
+  return (
+    <div className="space-y-3">
+      <div className="rounded-lg border border-[#F1EFEF] p-4 flex gap-4">
+        <div className="w-14 h-14 shrink-0 rounded-full overflow-hidden bg-[#F5F5F7]">
+          <Image
+            src={logo || "/user.svg"}
+            width={56}
+            height={56}
+            alt={name || "Логотип компании"}
+            className={`w-full h-full ${logo ? "object-cover" : "object-none"}`}
+          />
+        </div>
+        <div className="min-w-0 flex-1 text-sm">
+          <p className={`font-medium ${name ? "text-[#333]" : "text-red-500"}`}>
+            {name || "Название компании не указано"}
+          </p>
+          {contacts.map(({ icon: Icon, value }) => (
+            <p key={value} className="flex items-center gap-1.5 text-[#949494] mt-1 min-w-0">
+              <Icon width={14} className="shrink-0" />
+              <span className="truncate">{value}</span>
+            </p>
+          ))}
+          {company.description && (
+            <p className="text-[#666] mt-2 line-clamp-3 whitespace-pre-line">
+              {company.description}
+            </p>
+          )}
+          <Link
+            href="/profile/settings?tab=company"
+            className="inline-block mt-3 text-sm text-primary underline hover:no-underline"
+          >
+            Изменить данные компании
+          </Link>
+        </div>
+      </div>
+      <p className="text-xs text-[#949494]">
+        Данные берутся из профиля компании и показываются в вакансии. Чтобы изменить их,
+        отредактируйте профиль — вводить заново не нужно.
+      </p>
+    </div>
   );
 }

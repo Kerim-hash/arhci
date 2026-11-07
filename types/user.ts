@@ -18,6 +18,9 @@ export interface User {
   region_from?: string[];
   specialistSlug?: string;
   specialistId?: number;
+  /** Страница компании (/companies/{slug}) — только у аккаунтов с ролью company. */
+  companySlug?: string | null;
+  companyId?: number | null;
   phone?: string;
   bio?: string;
   position?: string;
