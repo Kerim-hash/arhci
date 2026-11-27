@@ -20,7 +20,37 @@ type FormValues = {
   password: string;
   userType: "specialist" | "company" | "";
   specialization: string;
+  companyName: string;
 };
+
+/** Как User.company_name на бэкенде. */
+const COMPANY_NAME_MAX_LENGTH = 200;
+/** Минимум MinimumLengthValidator на бэкенде — тот же, что при смене пароля. */
+const PASSWORD_MIN_LENGTH = 8;
+
+type StepOneField = "email" | "password";
+const STEP_ONE_FIELDS: readonly StepOneField[] = ["email", "password"];
+
+/**
+ * Ошибки полей первого шага (email занят, пароль слишком простой) сервер
+ * возвращает только при отправке — на последнем шаге. Достаём их из ответа
+ * DRF, чтобы вернуть пользователя к нужному полю.
+ */
+function stepOneErrors(error: unknown): Partial<Record<StepOneField, string>> {
+  const data = (error as { data?: unknown } | null)?.data;
+  if (!data || typeof data !== "object" || Array.isArray(data)) return {};
+  const result: Partial<Record<StepOneField, string>> = {};
+  for (const field of STEP_ONE_FIELDS) {
+    const value = (data as Record<string, unknown>)[field];
+    const message = Array.isArray(value)
+      ? value.map(String).join(" ")
+      : typeof value === "string"
+        ? value
+        : "";
+    if (message) result[field] = message;
+  }
+  return result;
+}
 
 export default function LoginPage() {
   const [step, setStep] = useState(1);
@@ -33,6 +63,7 @@ export default function LoginPage() {
     handleSubmit,
     control,
     setValue,
+    setError,
     formState: { errors },
   } = useForm<FormValues>({
     defaultValues: {
@@ -40,6 +71,7 @@ export default function LoginPage() {
       password: "",
       userType: "",
       specialization: "",
+      companyName: "",
     },
   });
 
@@ -54,12 +86,9 @@ export default function LoginPage() {
     }
   };
 
+  // Третий шаг у обеих ролей: специалист выбирает специальность, компания — пишет название
   const onSpecializationStep = () => {
-    if (userType === "specialist") {
-      setStep(3);
-    } else {
-      onFinalSubmit({ email, password, userType, specialization: "" });
-    }
+    if (userType) setStep(3);
   };
 
   const onFinalSubmit = async (data: FormValues) => {
@@ -69,12 +98,21 @@ export default function LoginPage() {
         password: data.password,
         region_from: ["Bishkek"],
         role: data.userType,
-        category: data.specialization || undefined,
+        category: data.userType === "specialist" ? data.specialization || undefined : undefined,
+        company_name: data.userType === "company" ? data.companyName.trim() : undefined,
       }).unwrap();
 
       loginSuccess(res);
       toast.success("Успешная регистрация!");
     } catch (error) {
+      const fieldErrors = Object.entries(stepOneErrors(error)) as [StepOneField, string][];
+      if (fieldErrors.length > 0) {
+        setStep(1);
+        for (const [field, message] of fieldErrors) {
+          setError(field, { type: "server", message });
+        }
+        return;
+      }
       toast.error(formatApiError(error, "Ошибка при регистрации"));
     }
   };
@@ -131,8 +169,8 @@ export default function LoginPage() {
                 {...register("password", {
                   required: "Пароль обязателен",
                   minLength: {
-                    value: 6,
-                    message: "Пароль должен быть не менее 6 символов",
+                    value: PASSWORD_MIN_LENGTH,
+                    message: `Пароль должен быть не менее ${PASSWORD_MIN_LENGTH} символов`,
                   },
                 })}
                 className="w-full"
@@ -228,7 +266,6 @@ export default function LoginPage() {
           </div>
 
           <div className="flex flex-col gap-4">
-            {/* Для компании этот шаг сразу отправляет регистрацию — блокируем повторный клик. */}
             <Button
               type="submit"
               size="lg"
@@ -236,6 +273,57 @@ export default function LoginPage() {
               disabled={!userType || isLoading}
             >
               {isLoading ? "Загрузка..." : "Продолжить"}
+            </Button>
+
+            <Button
+              type="button"
+              size="lg"
+              variant="outline"
+              onClick={handleBack}
+              className="w-full flex items-center justify-center rounded-[40px]"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Назад
+            </Button>
+          </div>
+        </form>
+      ) : userType === "company" ? (
+        // Шаг 3 компании: название — сразу подписывает её карточку в каталоге и на главной
+        <form
+          onSubmit={handleSubmit(onFinalSubmit)}
+          className="mt-8 space-y-8 w-full"
+        >
+          <div className="space-y-4">
+            <h2 className="text-lg font-medium text-center">
+              Как называется ваша компания?
+            </h2>
+            <div className="space-y-2">
+              <Input
+                {...register("companyName", {
+                  validate: (value) =>
+                    value.trim() !== "" || "Укажите название компании",
+                  maxLength: {
+                    value: COMPANY_NAME_MAX_LENGTH,
+                    message: `Не длиннее ${COMPANY_NAME_MAX_LENGTH} символов`,
+                  },
+                })}
+                placeholder="Например, Бюро «Ала-Тоо»"
+                aria-label="Название компании"
+                aria-invalid={Boolean(errors.companyName)}
+                autoFocus
+              />
+              {errors.companyName && (
+                <p className="text-sm text-red-500">{errors.companyName.message}</p>
+              )}
+              <p className="text-[12px] text-gray-500">
+                Логотип, адрес и контакты можно будет добавить в профиле.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-4">
+            <Button type="submit" size="lg" className="w-full" disabled={isLoading}>
+              {isLoading ? "Загрузка..." : "Зарегистрироваться"}
             </Button>
 
             <Button
