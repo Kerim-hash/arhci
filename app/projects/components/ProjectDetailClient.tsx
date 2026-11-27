@@ -12,13 +12,35 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { Eye, Calendar, Pencil, Share2 } from "lucide-react";
-import ShareModal from "./ShareModal";
+import { companyHref } from "@/app/companies/model/listParams";
+import ShareModal from "@/components/ShareModal";
 import RichContent from "@/components/content/RichContent";
 import LikeButton from "@/components/LikeButton";
 import { ModerationStatusBadge } from "@/components/ModerationStatusBadge";
 import { useAppSelector } from "@/app/store/hooks";
 import { formatShortDate } from "@/lib/formatDate";
 import { isNotFound } from "@/lib/isNotFound";
+import { findSpecialty } from "@/lib/specialties";
+
+interface ProjectAuthor {
+  /** Куда ведёт имя автора; нет — имя показывается без ссылки. */
+  href?: string;
+  /** Подпись над именем: «Компания» или специальность. */
+  label?: string;
+}
+
+/** Страница автора проекта: компания — /companies, специалист — его профиль. */
+function projectAuthor(project: ProjectDetailRead): ProjectAuthor {
+  if (project.companySlug) {
+    return { href: companyHref(project.companySlug), label: "Компания" };
+  }
+  const specialty = findSpecialty(project.specialistCategory);
+  if (!specialty || !project.specialistSlug) return {};
+  return {
+    href: `/specialists/${specialty.id}/${encodeURIComponent(project.specialistSlug)}`,
+    label: specialty.label,
+  };
+}
 
 function unavailableMessage(status: unknown): string {
   if (status === 404) {
@@ -119,6 +141,7 @@ export default function ProjectDetailClient({
   }
 
   const images = currentProject.images ?? [];
+  const author = projectAuthor(currentProject);
 
   const prevImage = () => {
     setActiveIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
@@ -157,13 +180,20 @@ export default function ProjectDetailClient({
           </nav>
         </div>
 
-        {/* Шапка с автором */}
+        {/* Шапка с автором: имя ведёт на страницу компании или профиль специалиста */}
         <div className="flex items-center justify-between mb-20 mt-6">
           <div className="flex items-center gap-4">
             {currentProject.specialistName && (
               <div>
+                {author.label && <p className="text-sm text-[#949494]">{author.label}</p>}
                 <h2 className="font-semibold text-lg">
-                  {currentProject.specialistName}
+                  {author.href ? (
+                    <Link href={author.href} className="hover:text-[#4677F3] transition-colors">
+                      {currentProject.specialistName}
+                    </Link>
+                  ) : (
+                    currentProject.specialistName
+                  )}
                 </h2>
               </div>
             )}
@@ -367,8 +397,11 @@ export default function ProjectDetailClient({
       <ShareModal
         isOpen={isShareModalOpen}
         onClose={() => setIsShareModalOpen(false)}
-        project={currentProject}
-        specialist={null}
+        title={currentProject.title}
+        subtitle={currentProject.specialistName}
+        image={currentProject.previewImage}
+        views={currentProject.views ?? 0}
+        likes={currentProject.likes ?? 0}
       />
     </>
   );

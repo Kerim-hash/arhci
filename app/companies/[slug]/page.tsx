@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { fetchApi } from "@/lib/serverApi";
 import type {
   CompanyDetailRead,
+  PaginatedProjectListListRead,
   PaginatedVacancyListListRead,
 } from "@/services/generatedApi";
 
@@ -31,7 +32,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const title = company.name;
   const description =
     (company.description || "").slice(0, DESCRIPTION_LENGTH) ||
-    `${title}: контакты и открытые вакансии`;
+    `${title}: проекты, контакты и открытые вакансии`;
   return {
     title,
     description,
@@ -46,17 +47,23 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function Page({ params }: PageProps) {
   const { slug } = await params;
   const initialCompany = await loadCompany(slug);
-  // Те же параметры, с которыми страница запрашивает вакансии на клиенте
-  const initialVacancies = initialCompany
-    ? await fetchApi<PaginatedVacancyListListRead>(
-        `/api/vacancies/?user=${initialCompany.userId}&page=1`,
-      )
-    : undefined;
+  // Те же параметры, с которыми страница запрашивает проекты и вакансии на клиенте
+  const [initialProjects, initialVacancies] = initialCompany
+    ? await Promise.all([
+        fetchApi<PaginatedProjectListListRead>(
+          `/api/projects/?user=${initialCompany.userId}&page=1`,
+        ),
+        fetchApi<PaginatedVacancyListListRead>(
+          `/api/vacancies/?user=${initialCompany.userId}&page=1`,
+        ),
+      ])
+    : [undefined, undefined];
 
   return (
     <CompanyProfilePage
       slug={slug}
       initialCompany={initialCompany}
+      initialProjects={initialProjects}
       initialVacancies={initialVacancies}
     />
   );

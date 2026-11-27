@@ -131,6 +131,13 @@ export const authApi = createApi({
         method: "POST",
       }),
     }),
+
+    toggleArticleLike: builder.mutation<ToggleLikeResponse, number>({
+      query: (id) => ({
+        url: `/api/articles/${id}/like/`,
+        method: "POST",
+      }),
+    }),
   }),
 });
 
@@ -147,4 +154,5 @@ export const {
   useRestoreAccountMutation,
   useToggleProjectLikeMutation,
   useToggleSpecialistLikeMutation,
+  useToggleArticleLikeMutation,
 } = authApi;

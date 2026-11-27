@@ -3,7 +3,7 @@
 import { useState, type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Eye } from "lucide-react";
+import { Eye, Heart } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { ModerationStatusBadge } from "@/components/ModerationStatusBadge";
@@ -44,6 +44,7 @@ interface FeedCardProps {
   badge?: string;
   description?: string;
   views?: number;
+  likes?: number;
   /** API отдаёт неодобренные материалы только автору и сотрудникам — им и нужна пометка. */
   moderationStatus?: ModerationStatusEnum;
   /** Первая карточка — самый крупный элемент первого экрана: её картинку грузим сразу. */
@@ -57,6 +58,7 @@ function FeedCard({
   badge,
   description,
   views,
+  likes,
   moderationStatus,
   priority = false,
 }: FeedCardProps) {
@@ -99,9 +101,17 @@ function FeedCard({
           <p className="text-sm md:text-[16px] text-[#6D6D6D] leading-relaxed line-clamp-3 md:line-clamp-4 mb-4">
             {description || "Описание отсутствует"}
           </p>
-          <div className="flex items-center gap-1 text-xs text-gray-400">
-            <Eye className="w-3.5 h-3.5" />
-            <span>{views || 0}</span>
+          <div className="flex items-center gap-3 text-xs text-gray-400">
+            <span className="flex items-center gap-1">
+              <Eye className="w-3.5 h-3.5" />
+              <span>{views || 0}</span>
+            </span>
+            {likes !== undefined && (
+              <span className="flex items-center gap-1">
+                <Heart className="w-3.5 h-3.5" />
+                <span>{likes}</span>
+              </span>
+            )}
           </div>
         </div>
       </Card>
@@ -189,6 +199,7 @@ export default function HomeFeedTabs({ initialArticles }: HomeFeedTabsProps) {
                 moderationStatus={item.moderationStatus}
                 description={stripHtml(item.shortDescription ?? "")}
                 views={item.views}
+                likes={item.likes ?? 0}
               />
             ))}
           </Panel>

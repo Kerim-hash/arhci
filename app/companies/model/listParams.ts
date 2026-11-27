@@ -11,5 +11,6 @@ export const COMPANY_SORT_OPTIONS = [
 
 export const COMPANY_PLURAL_FORMS = ["компания", "компании", "компаний"] as const;
 export const VACANCY_PLURAL_FORMS = ["вакансия", "вакансии", "вакансий"] as const;
+export const PROJECT_PLURAL_FORMS = ["проект", "проекта", "проектов"] as const;
 
 export const companyHref = (slug: string) => `/companies/${encodeURIComponent(slug)}`;

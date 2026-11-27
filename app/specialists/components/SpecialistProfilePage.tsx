@@ -3,8 +3,9 @@
 import { useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Mail, MapPin, Plus, User } from "lucide-react";
+import { Mail, MapPin, User } from "lucide-react";
 
+import CreateProjectCard from "@/app/projects/components/CreateProjectCard";
 import ProjectCard from "@/app/projects/components/ProjectCard";
 import { useAppSelector } from "@/app/store/hooks";
 import LikeButton from "@/components/LikeButton";
@@ -182,16 +183,7 @@ export default function SpecialistProfilePage({
               ))}
 
               {/* Карточка «Создать проект» — только в своём профиле */}
-              {isOwnProfile && (
-                <Link href="/projects/create" className="block">
-                  <div className="border-2 border-dashed border-[#E0E0E0] rounded-lg flex flex-col items-center justify-center min-h-[200px] hover:border-[#333] transition-colors cursor-pointer">
-                    <div className="w-10 h-10 rounded-full border border-[#333] flex items-center justify-center mb-3">
-                      <Plus className="w-5 h-5 text-[#333]" />
-                    </div>
-                    <span className="text-sm text-[#333] font-medium">Создать проект</span>
-                  </div>
-                </Link>
-              )}
+              {isOwnProfile && <CreateProjectCard />}
             </div>
           ) : (
             <div className="text-center py-12 bg-gray-50 rounded-lg">

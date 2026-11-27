@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { tokenStorage } from "@/hooks/storage";
 import { apiSlice } from "@/services/api";
 import {
+  useToggleArticleLikeMutation,
   useToggleProjectLikeMutation,
   useToggleSpecialistLikeMutation,
 } from "@/app/store/features/authApi";
@@ -20,8 +21,17 @@ function likesLabel(count: number): string {
   return "лайков";
 }
 
+type LikeTarget = "project" | "specialist" | "article";
+
+/** Кэш, где виден счётчик лайков цели: после лайка его нужно перезапросить. */
+const TARGET_TAGS = {
+  project: "Projects",
+  specialist: "Specialists",
+  article: "Articles",
+} as const satisfies Record<LikeTarget, string>;
+
 interface LikeButtonProps {
-  target: "project" | "specialist";
+  target: LikeTarget;
   targetId: number;
   initialLikes: number;
   initialIsLiked?: boolean;
@@ -36,18 +46,22 @@ export default function LikeButton({
   className,
 }: LikeButtonProps) {
   const dispatch = useDispatch();
-  const [toggleProjectLike, { isLoading: isProjectLoading }] =
-    useToggleProjectLikeMutation();
-  const [toggleSpecialistLike, { isLoading: isSpecialistLoading }] =
-    useToggleSpecialistLikeMutation();
+  const [toggleProjectLike, projectState] = useToggleProjectLikeMutation();
+  const [toggleSpecialistLike, specialistState] = useToggleSpecialistLikeMutation();
+  const [toggleArticleLike, articleState] = useToggleArticleLikeMutation();
   const [state, setState] = useState<{
     likes: number;
     isLiked: boolean;
   } | null>(null);
 
+  const toggles = {
+    project: toggleProjectLike,
+    specialist: toggleSpecialistLike,
+    article: toggleArticleLike,
+  };
   const likes = state?.likes ?? initialLikes;
   const isLiked = state?.isLiked ?? initialIsLiked;
-  const isLoading = isProjectLoading || isSpecialistLoading;
+  const isLoading = projectState.isLoading || specialistState.isLoading || articleState.isLoading;
 
   const handleClick = async () => {
     if (!tokenStorage.getAccessToken()) {
@@ -55,15 +69,9 @@ export default function LikeButton({
       return;
     }
     try {
-      const toggle =
-        target === "project" ? toggleProjectLike : toggleSpecialistLike;
-      const result = await toggle(targetId).unwrap();
+      const result = await toggles[target](targetId).unwrap();
       setState(result);
-      dispatch(
-        apiSlice.util.invalidateTags([
-          target === "project" ? "Projects" : "Specialists",
-        ]),
-      );
+      dispatch(apiSlice.util.invalidateTags([TARGET_TAGS[target]]));
     } catch (error) {
       const detail = (error as { data?: { detail?: string } }).data?.detail;
       toast.error(detail ?? "Не удалось поставить лайк");
@@ -76,7 +84,7 @@ export default function LikeButton({
       variant={isLiked ? "default" : "outline"}
       size="lg"
       disabled={isLoading}
-      className={`gap-2 ${isLiked ? "bg-red-500 hover:bg-red-600" : ""} ${className ?? ""}`}
+      className={`gap-2 ${isLiked ? "bg-red-500 hover:bg-red-600 text-white" : ""} ${className ?? ""}`}
     >
       <Heart className={`w-5 h-5 ${isLiked ? "fill-white" : ""}`} />
       {likes} {likesLabel(likes)}

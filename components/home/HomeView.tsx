@@ -10,6 +10,7 @@ import { formatDayMonth } from "@/lib/formatDate";
 import {
   useApiNewsListQuery,
   type PaginatedArticleListListRead,
+  type PaginatedCompanyListListRead,
   type PaginatedNewsListListRead,
   type SpecialistListRead,
 } from "@/services/generatedApi";
@@ -21,9 +22,15 @@ export interface HomeViewProps {
   initialNews?: PaginatedNewsListListRead;
   initialArticles?: PaginatedArticleListListRead;
   initialTop?: SpecialistListRead[];
+  initialCompanies?: PaginatedCompanyListListRead;
 }
 
-export default function HomeView({ initialNews, initialArticles, initialTop }: HomeViewProps) {
+export default function HomeView({
+  initialNews,
+  initialArticles,
+  initialTop,
+  initialCompanies,
+}: HomeViewProps) {
   const newsQuery = useApiNewsListQuery({ page: 1 });
   const newsData = newsQuery.data ?? initialNews;
   const news = newsData?.results?.slice(0, NEWS_LIMIT) || [];
@@ -75,9 +82,9 @@ export default function HomeView({ initialNews, initialArticles, initialTop }: H
           </div>
         </div>
 
-        {/* Архитектурные фирмы - скрывается на мобильных устройствах */}
+        {/* Архитектурные бюро и топ специалистов - скрывается на мобильных устройствах */}
         <div className="hidden lg:block lg:col-span-3">
-          <ArchitectureFirms initialTop={initialTop} />
+          <ArchitectureFirms initialCompanies={initialCompanies} initialTop={initialTop} />
         </div>
       </div>
     </section>

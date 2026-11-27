@@ -63,6 +63,21 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedArticleListList'
           description: ''
+  /api/articles/{id}/like/:
+    post:
+      operationId: apiArticlesLikeCreate
+      description: POST /api/articles/:id/like/ — Поставить или снять лайк (авторизованным).
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      responses:
+        '200':
+          description: No response body
   /api/articles/{slug}/:
     get:
       operationId: apiArticlesRetrieve
@@ -1605,6 +1620,14 @@ components:
           maximum: 2147483647
           minimum: 0
           title: Просмотры
+        likes:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          title: Лайки
+        isLiked:
+          type: boolean
+          readOnly: true
         createdAt:
           type: string
           format: date-time
@@ -1625,6 +1648,7 @@ components:
       - blocks
       - createdAt
       - id
+      - isLiked
       - moderationComment
       - moderationStatus
       - previewImage
@@ -1663,6 +1687,11 @@ components:
           maximum: 2147483647
           minimum: 0
           title: Просмотры
+        likes:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          title: Лайки
         createdAt:
           type: string
           format: date-time
@@ -1711,8 +1740,8 @@ components:
       description: |-
         Страница компании: контакты и описание.
 
-        Вакансии не вкладываются — их отдаёт /api/vacancies/?user=<userId> со
-        своей пагинацией и модерацией.
+        Вакансии и проекты не вкладываются — их отдают /api/vacancies/?user=<userId>
+        и /api/projects/?user=<userId> со своей пагинацией и модерацией.
       properties:
         id:
           type: integer
@@ -1746,6 +1775,9 @@ components:
         vacanciesCount:
           type: integer
           readOnly: true
+        projectsCount:
+          type: integer
+          readOnly: true
         phone:
           type: string
           title: Телефон
@@ -1769,6 +1801,7 @@ components:
       - isOwner
       - logo
       - name
+      - projectsCount
       - slug
       - userId
       - vacanciesCount
@@ -1808,10 +1841,14 @@ components:
         vacanciesCount:
           type: integer
           readOnly: true
+        projectsCount:
+          type: integer
+          readOnly: true
       required:
       - id
       - logo
       - name
+      - projectsCount
       - slug
       - vacanciesCount
     CompanyProfile:
@@ -2969,6 +3006,15 @@ components:
         specialistSlug:
           type: string
           readOnly: true
+        specialistCategory:
+          type: string
+          readOnly: true
+        companySlug:
+          type: string
+          nullable: true
+          description: 'Страница компании-автора; у специалиста — null: ссылка ведёт
+            в его профиль.'
+          readOnly: true
         images:
           type: array
           items:
@@ -3008,6 +3054,7 @@ components:
           title: Комментарий модератора
           description: Причина отклонения. Её видит автор материала.
       required:
+      - companySlug
       - createdAt
       - description
       - id
@@ -3016,6 +3063,7 @@ components:
       - moderationComment
       - moderationStatus
       - previewImage
+      - specialistCategory
       - specialistId
       - specialistName
       - specialistSlug

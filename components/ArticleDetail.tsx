@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { isNotFound } from "@/lib/isNotFound";
 import { useApiArticlesRetrieveQuery, type ArticleDetailRead } from "@/services/generatedApi";
+import LikeButton from "@/components/LikeButton";
 import { ModerationStatusBadge } from "@/components/ModerationStatusBadge";
 import { ArticleContent } from "./ArticleDetailContent";
 
@@ -112,6 +113,18 @@ export default function ArticleDetail({ slug, initialArticle }: ArticleDetailPro
       )}
 
       <ArticleContent article={article} />
+
+      {/* Лайкнуть можно только опубликованную статью — до проверки её видят автор и модераторы */}
+      {!isUnderModeration && (
+        <div className="flex justify-center">
+          <LikeButton
+            target="article"
+            targetId={article.id}
+            initialLikes={article.likes ?? 0}
+            initialIsLiked={article.isLiked}
+          />
+        </div>
+      )}
     </section>
   );
 }

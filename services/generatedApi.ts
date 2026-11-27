@@ -17,6 +17,15 @@ const injectedRtkApi = api.injectEndpoints({
         },
       }),
     }),
+    apiArticlesLikeCreate: build.mutation<
+      ApiArticlesLikeCreateApiResponse,
+      ApiArticlesLikeCreateApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/articles/${queryArg.id}/like/`,
+        method: "POST",
+      }),
+    }),
     apiArticlesRetrieve: build.query<
       ApiArticlesRetrieveApiResponse,
       ApiArticlesRetrieveApiArg
@@ -612,6 +621,10 @@ export type ApiArticlesListApiArg = {
   /** ID автора */
   user?: number;
 };
+export type ApiArticlesLikeCreateApiResponse = unknown;
+export type ApiArticlesLikeCreateApiArg = {
+  id: number;
+};
 export type ApiArticlesRetrieveApiResponse =
   /** status 200  */ ArticleDetailRead;
 export type ApiArticlesRetrieveApiArg = {
@@ -994,6 +1007,7 @@ export type ArticleList = {
   contentMode?: ContentModeEnum;
   shortDescription?: string;
   views?: number;
+  likes?: number;
 };
 export type ModerationStatusEnum = "pending" | "approved" | "rejected";
 export type ArticleListRead = {
@@ -1005,6 +1019,7 @@ export type ArticleListRead = {
   shortDescription?: string;
   authorName: string;
   views?: number;
+  likes?: number;
   createdAt: string;
   moderationStatus: ModerationStatusEnum;
   /** Причина отклонения. Её видит автор материала. */
@@ -1032,6 +1047,7 @@ export type ArticleDetail = {
   contentHtml?: string;
   isPublished?: boolean;
   views?: number;
+  likes?: number;
 };
 export type TypeEnum = "text" | "image" | "video" | "gallery";
 export type ArticleBlock = {
@@ -1070,6 +1086,8 @@ export type ArticleDetailRead = {
   isPublished?: boolean;
   authorName: string;
   views?: number;
+  likes?: number;
+  isLiked: boolean;
   createdAt: string;
   moderationStatus: ModerationStatusEnum;
   /** Причина отклонения. Её видит автор материала. */
@@ -1099,6 +1117,7 @@ export type CompanyListRead = {
   website?: string;
   views?: number;
   vacanciesCount: number;
+  projectsCount: number;
 };
 export type PaginatedCompanyListList = {
   count: number;
@@ -1130,6 +1149,7 @@ export type CompanyDetailRead = {
   website?: string;
   views?: number;
   vacanciesCount: number;
+  projectsCount: number;
   phone?: string;
   email?: string;
   description?: string;
@@ -1573,6 +1593,9 @@ export type ProjectDetailRead = {
   specialistId: number;
   specialistName: string;
   specialistSlug: string;
+  specialistCategory: string;
+  /** Страница компании-автора; у специалиста — null: ссылка ведёт в его профиль. */
+  companySlug: string | null;
   images: ProjectImageRead[];
   views?: number;
   likes?: number;
@@ -2124,6 +2147,7 @@ export type PaginatedMyVacancyResponseListRead = {
 };
 export const {
   useApiArticlesListQuery,
+  useApiArticlesLikeCreateMutation,
   useApiArticlesRetrieveQuery,
   useApiArticlesDestroyMutation,
   useApiArticlesCreateCreateMutation,

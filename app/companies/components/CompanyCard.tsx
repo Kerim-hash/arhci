@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Briefcase, Eye, MapPin } from "lucide-react";
+import { Briefcase, Eye, FolderOpen, MapPin } from "lucide-react";
 
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -46,13 +46,22 @@ export default function CompanyCard({ company }: CompanyCardProps) {
         <div className="flex justify-between">
           <div className="flex flex-1 flex-col justify-center items-center">
             <p className="text-[#666666] text-xs sm:text-sm lg:text-[13px] leading-tight mt-2">
+              Проектов
+            </p>
+            <p className="flex items-center gap-1 text-[#333333] text-xs leading-tight mt-1">
+              <FolderOpen width={12} /> {company.projectsCount}
+            </p>
+          </div>
+          <Separator orientation="vertical" className="mx-2" />
+          <div className="flex flex-1 flex-col justify-center items-center">
+            <p className="text-[#666666] text-xs sm:text-sm lg:text-[13px] leading-tight mt-2">
               Вакансий
             </p>
             <p className="flex items-center gap-1 text-[#333333] text-xs leading-tight mt-1">
               <Briefcase width={12} /> {company.vacanciesCount}
             </p>
           </div>
-          <Separator orientation="vertical" className="mx-4" />
+          <Separator orientation="vertical" className="mx-2" />
           <div className="flex flex-1 flex-col justify-center items-center">
             <p className="text-[#666666] text-xs sm:text-sm lg:text-[13px] leading-tight mt-2">
               Просмотров

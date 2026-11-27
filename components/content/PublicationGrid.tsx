@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Eye } from "lucide-react";
+import { Eye, Heart } from "lucide-react";
 
 import { ModerationStatusBadge } from "@/components/ModerationStatusBadge";
 import { Card } from "@/components/ui/card";
@@ -15,6 +15,8 @@ export interface Publication {
   previewImage?: string | null;
   shortDescription?: string;
   views?: number;
+  /** Есть только у статей. */
+  likes?: number;
   createdAt: string;
   /** Есть только у статей: неодобренные API отдаёт автору и сотрудникам. */
   moderationStatus?: ModerationStatusEnum;
@@ -78,9 +80,17 @@ export function PublicationGrid({ items, basePath, showViews = false }: Publicat
               <div className="flex items-center justify-between gap-3 mb-2">
                 <p className="text-xs text-gray-400">{formatLongDate(item.createdAt)}</p>
                 {showViews && (
-                  <div className="flex items-center gap-1 text-xs text-gray-400">
-                    <Eye className="w-3.5 h-3.5" />
-                    <span>{item.views || 0}</span>
+                  <div className="flex items-center gap-3 text-xs text-gray-400">
+                    <span className="flex items-center gap-1">
+                      <Eye className="w-3.5 h-3.5" />
+                      <span>{item.views || 0}</span>
+                    </span>
+                    {item.likes !== undefined && (
+                      <span className="flex items-center gap-1">
+                        <Heart className="w-3.5 h-3.5" />
+                        <span>{item.likes}</span>
+                      </span>
+                    )}
                   </div>
                 )}
               </div>
